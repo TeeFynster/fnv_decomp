@@ -1293,7 +1293,7 @@ extern "C" __declspec(dllimport) void __stdcall fnv_Import_LeaveCriticalSection(
 class GameLockA {
 public:
     bool FUN_0078d200();
-    void FUN_0040fbf0(int a);
+    void Wait(int a);
 };
 class GameLockB {
 public:
@@ -4852,7 +4852,7 @@ struct E70Owner : UpdateOwner
 struct Bound47250 {
     struct XYZ { unsigned int m_00, m_04, m_08; } m_00;
     float m_0c;
-    void FUN_00a7f3f0(const Bound47250*);
+    void Merge(const Bound47250*);
 };
 extern Bound47250 DAT_011f4288;
 struct Provider47250 {

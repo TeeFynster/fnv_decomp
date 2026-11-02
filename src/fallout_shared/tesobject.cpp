@@ -1883,7 +1883,7 @@ struct ModelReference
 {
     bool FUN_00444ed0();
     ModelBaseType* FUN_007af430();
-    float FUN_00567400();
+    float GetScale();
 };
 struct CachedModel
 {
@@ -1900,7 +1900,7 @@ struct CachedModelPointer
 struct ModelCache
 {
     void FUN_004472a0(const char*, CachedModelPointer*);
-    NiNode* FUN_00447080(const char*, unsigned int, bool, bool, bool, bool);
+    NiNode* LoadModel(const char*, unsigned int, bool, bool, bool, bool);
 };
 extern ModelCache* DAT_011c3b3c;
 extern unsigned int DAT_011c90ac;
@@ -1927,7 +1927,7 @@ NiNode* ModelOwner::GetModelNode(ModelReference* reference)
     else
     {
         unsigned int flags = FUN_0045c6b0(this);
-        if (reference && reference->FUN_00567400() != 1.0)
+        if (reference && reference->GetScale() != 1.0)
         {
             char scaledName[260];
             FormatScaledName(reference, scaledName);
@@ -1941,7 +1941,7 @@ NiNode* ModelOwner::GetModelNode(ModelReference* reference)
             }
         }
         if (!pNode)
-            pNode = DAT_011c3b3c->FUN_00447080(pModelName, flags, true, false, false, false);
+            pNode = DAT_011c3b3c->LoadModel(pModelName, flags, true, false, false, false);
     }
     return pNode;
 }
@@ -2398,7 +2398,7 @@ struct RefOps
     bool FUN_00444ed0();
     TESBoundObject* FUN_007af430();
     void FUN_00693ef0(bool);
-    float FUN_00567400();
+    float GetScale();
     const char* FUN_0055d520();
 };
 struct ObjectOps
@@ -2652,7 +2652,7 @@ NiAVObject* CloneObject17::FUN_0050ee50(TESObjectREFR* reference, bool forceClon
                 canReuse = false;
             if (canReuse)
             {
-                if (!reference || ((RefOps*)reference)->FUN_00567400() == ((NodeOps*)h)->GetFloatAt64())
+                if (!reference || ((RefOps*)reference)->GetScale() == ((NodeOps*)h)->GetFloatAt64())
                     p = h;
             }
         }
@@ -2660,7 +2660,7 @@ NiAVObject* CloneObject17::FUN_0050ee50(TESObjectREFR* reference, bool forceClon
         {
             float scale = 1.0f;
             if (reference)
-                scale = ((RefOps*)reference)->FUN_00567400();
+                scale = ((RefOps*)reference)->GetScale();
             if (scale == ((NodeOps*)h)->GetFloatAt64())
                 scale = 1.0f;
             if (scale == 0.0)
@@ -2710,7 +2710,7 @@ NiAVObject* CloneObject17::FUN_0050ee50(TESObjectREFR* reference, bool forceClon
                 {
                     if (((ModelPointerOps*)&model)->FUN_00559450()->FUN_0043b230() &&
                         ((NodeOps*)((ModelPointerOps*)&model)->FUN_00559450()->FUN_0043b230())->GetFloatAt64() ==
-                            ((RefOps*)reference)->FUN_00567400())
+                            ((RefOps*)reference)->GetScale())
                     {
                         NiAVObject* replacement = _CreateNiNode(reference, forceClone);
                         return replacement;

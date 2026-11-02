@@ -3265,7 +3265,7 @@ extern char DAT_011f4a20;
 ImpCamera* FUN_00524c90();
 bool FUN_00525420();
 bool __cdecl FUN_004b61d0(ImpPoint kPosOut, ImpCamera* apCamera, float afRadius);
-void __cdecl FUN_005ac750(void* apOwner, ImpExtraList* apExtra, int aiFlags);
+void __cdecl MarkBaseExtraListScriptEvent(void* apOwner, ImpExtraList* apExtra, int aiFlags);
 float __cdecl FUN_00476b70(float afMin, float afMax);
 ImpDecal* __cdecl FUN_00622a70(float afSize, int aiFlags);
 float __cdecl FUN_004a4240();
@@ -3398,9 +3398,9 @@ void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* 
     {
         if (apTarget)
         {
-            FUN_005ac750(this, apTarget->FUN_005d43c0(), 0x80);
+            MarkBaseExtraListScriptEvent(this, apTarget->FUN_005d43c0(), 0x80);
             if (pImpacts)
-                FUN_005ac750(pImpacts, apTarget->FUN_005d43c0(), 0x100);
+                MarkBaseExtraListScriptEvent(pImpacts, apTarget->FUN_005d43c0(), 0x100);
         }
         int iMaterial = aiMaterial;
         ImpImpact* pImpactTmp = pImpacts ? pImpacts->FUN_00522ba0(iMaterial) : 0;

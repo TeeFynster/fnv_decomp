@@ -246,7 +246,7 @@ BSExtraData* __cdecl FUN_0040f9e0(BaseExtraList* apList, int aeType)
 
 struct FUN_0040fbf0_shell : public RecursiveSpinLock
 {
-    void FUN_0040fbf0(char*);
+    void Wait(char*);
 };
 
 unsigned int __cdecl gm_GetCurrentThreadId(void);
@@ -259,7 +259,7 @@ struct Interface
 };
 
 // @fnv 0x0040fbf0
-void FUN_0040fbf0_shell::FUN_0040fbf0(char* apName)
+void FUN_0040fbf0_shell::Wait(char* apName)
 {
     __declspec(align(32)) unsigned int uicurrentThread = gm_GetCurrentThreadId();
     if (m_uiOwningThreadID == uicurrentThread)
@@ -6281,7 +6281,7 @@ FUN_004338b0::FUN_004338b0() : BE(0x53), vtbl(DAT_01015ce4)
 namespace fnv_0040ff60 {
 struct FUN_0040ff60_shell : public BaseExtraList
 {
-    BSExtraData* FUN_0040ff60(BSExtraData*);
+    BSExtraData* AddExtraData(BSExtraData*);
 };
 
 struct RecursiveSpinLock
@@ -6308,7 +6308,7 @@ struct TESObjectREFR_Flags
 };
 bool __cdecl FUN_0040f980(int);
 // @fnv 0x0040ff60
-BSExtraData* FUN_0040ff60_shell::FUN_0040ff60(BSExtraData* apExtra)
+BSExtraData* FUN_0040ff60_shell::AddExtraData(BSExtraData* apExtra)
 {
     BSExtraData* work;
     g_011c3920.Lock("BaseExtraList::AddExtra()");
@@ -9981,11 +9981,11 @@ extern "C" void __cdecl _Deallocate(void*);
 struct FUN_00418d20_class
 {
     void __thiscall FUN_0048fb50();
-    void* __thiscall FUN_00418d20(unsigned int flags);
+    void* __thiscall Destroy(unsigned int flags);
 };
 // Calls FUN_0048fb50, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x00418d20
-void* __thiscall FUN_00418d20_class::FUN_00418d20(unsigned int flags)
+void* __thiscall FUN_00418d20_class::Destroy(unsigned int flags)
 {
     FUN_0048fb50();
     if (flags & 1)
@@ -9999,11 +9999,11 @@ extern "C" void __cdecl _Deallocate(void*);
 struct FUN_004aae50_shell
 {
     void FUN_004aae50();
-    void* FUN_00418e00(unsigned int flags);
+    void* Destroy(unsigned int flags);
 };
 // Calls FUN_004aae50, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x00418e00
-void* FUN_004aae50_shell::FUN_00418e00(unsigned int flags)
+void* FUN_004aae50_shell::Destroy(unsigned int flags)
 {
     FUN_004aae50();
     if (flags & 1)
@@ -15980,7 +15980,7 @@ int FUN_00420bc0_cls::FUN_00420bc0(int aiIndex)
 }
 
 extern char DAT_010151f0;
-void __cdecl FUN_00401030(void* pointer);
+void __cdecl FormHeap_Free(void* pointer);
 
 struct FUN_00421160_shell
 {
@@ -15997,7 +15997,7 @@ void FUN_00421160_shell::FUN_00421160()
 {
     m_vftable = &DAT_010151f0;
     void* changes = m_pChangesMap;
-    FUN_00401030(changes);
+    FormHeap_Free(changes);
     FUN_0040ecb0();
 }
 
@@ -16700,8 +16700,8 @@ struct ExtraCopyList : ExtraDataList
 };
 struct ExtraCopyLock
 {
-    void FUN_0040fbf0(const char*);
-    void FUN_0040fba0();
+    void Wait(const char*);
+    void Leave();
 };
 struct ScriptCopyHelper
 {
@@ -16712,7 +16712,7 @@ struct ScriptCopyHelper
 // @fnv 0x00412490
 void ExtraCopyList::FUN_00412490(ExtraCopyList* source, bool transfer)
 {
-    ((ExtraCopyLock*)&DAT_011c3920)->FUN_0040fbf0("ExtraDataList::CopyListForReference()");
+    ((ExtraCopyLock*)&DAT_011c3920)->Wait("ExtraDataList::CopyListForReference()");
     BSExtraData* extra = source->pHead;
     bool advance = true;
     while (extra)
@@ -16762,7 +16762,7 @@ void ExtraCopyList::FUN_00412490(ExtraCopyList* source, bool transfer)
         if (extra && advance)
             extra = ((ExtraCopyData*)extra)->FUN_0044ddc0();
     }
-    ((ExtraCopyLock*)&DAT_011c3920)->FUN_0040fba0();
+    ((ExtraCopyLock*)&DAT_011c3920)->Leave();
 }
 
 namespace ExtraSave {
@@ -17003,8 +17003,8 @@ struct Extra
 };
 struct Lock
 {
-    void FUN_0040fbf0(const char*);
-    void FUN_0040fba0();
+    void Wait(const char*);
+    void Leave();
 };
 extern Lock DAT_011c3920;
 bool __cdecl FUN_00401500();
@@ -17028,7 +17028,7 @@ struct ExtraList
 // @fnv 0x00412970
 void ExtraList::WriteToSave()
 {
-    DAT_011c3920.FUN_0040fbf0(0);
+    DAT_011c3920.Wait(0);
     Extra* extra = head;
     while (extra)
     {
@@ -17536,7 +17536,7 @@ void ExtraList::WriteToSave()
         }
         extra = extra->FUN_0044ddc0();
     }
-    DAT_011c3920.FUN_0040fba0();
+    DAT_011c3920.Leave();
 }
 }
 
@@ -17547,9 +17547,9 @@ void __cdecl operator delete[](void*);
 namespace loader {
 struct File
 {
-    int FUN_004726b0();
+    int GetNextChunk();
     bool ReadChunkInt(void*);
-    bool FUN_00472890(void*, unsigned int);
+    bool GetChunkData(void*, unsigned int);
     bool FUN_00401680();
     unsigned int GetField25C();
     bool FUN_004726f0();
@@ -18001,7 +18001,7 @@ struct List
     void SetIgnoredBySandbox(bool);
     Ammo* GetExtraAmmo();
     void* FUN_00410220(unsigned char);
-    void* FUN_0040ff60(void*);
+    void* AddExtraData(void*);
     void SetRadioData(Radio*);
     Teleport* FUN_00418460();
     void FUN_00419120(Teleport*);
@@ -18039,7 +18039,7 @@ struct List
 // @fnv 0x004144a0
 void loader::List::LoadExtraData(File* file, void* owner)
 {
-    switch (file->FUN_004726b0())
+    switch (file->GetNextChunk())
     {
     case 0x54434158: {
         int value = 0;
@@ -18127,11 +18127,11 @@ void loader::List::LoadExtraData(File* file, void* owner)
         {
             data = new PathingActorState;
             extra = new LockExtra(data);
-            FUN_0040ff60(extra);
+            AddExtraData(extra);
         }
         else
             data = extra->data;
-        file->FUN_00472890(data, 0x14);
+        file->GetChunkData(data, 0x14);
         if (file->FUN_00401680())
             data->FUN_0060ce80();
         data->FUN_00430a90(true);
@@ -18139,7 +18139,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x4f445258: {
         Radio data;
-        file->FUN_00472890(&data, 0x10);
+        file->GetChunkData(&data, 0x10);
         if (file->FUN_00401680())
             data.FUN_00414220();
         SetRadioData(&data);
@@ -18194,7 +18194,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
             value = (unsigned char)oldValue;
         }
         else
-            file->FUN_00472890(&value, 1);
+            file->GetChunkData(&value, 1);
         FUN_0041ac30(value);
         break;
     }
@@ -18209,7 +18209,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
         RegionList* m_pRegions = new RegionList(0);
         Region* pRegion = 0;
         unsigned int* pRegions = new unsigned int[count];
-        file->FUN_00472890(pRegions, size);
+        file->GetChunkData(pRegions, size);
         for (unsigned int index = 0; index < count; ++index)
         {
             if (file->FUN_00401680())
@@ -18226,7 +18226,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     break;
     case 0x544d4358: {
         unsigned char value = 0;
-        file->FUN_00472890(&value, 1);
+        file->GetChunkData(&value, 1);
         break;
     }
     case 0x4f4d4358: {
@@ -18237,7 +18237,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x54454358: {
         unsigned char value = 0;
-        file->FUN_00472890(&value, 1);
+        file->GetChunkData(&value, 1);
         break;
     }
     case 0x53414358: {
@@ -18267,7 +18267,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x4c535058: {
         LinkedData data;
         memset(&data, 0, 0x14);
-        file->FUN_00472890(&data, 0x14);
+        file->GetChunkData(&data, 0x14);
         if (file->FUN_00401680())
             data.FUN_00414220();
         FUN_0041ad00(data.ref, 0, &data.posX, data.heading);
@@ -18283,7 +18283,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
         {
             extra = new RagdollExtra;
             extra->data = new RagdollData;
-            FUN_0040ff60(extra);
+            AddExtraData(extra);
             ragdollData = extra->data;
         }
         if (!ragdollData->LoadRagdollChunk(file))
@@ -18295,7 +18295,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x444f4c58: {
         Point data(0.0f, 0.0f, 0.97f);
-        file->FUN_00472890(&data, 12);
+        file->GetChunkData(&data, 12);
         if (file->FUN_00401680())
         {
             endian(&data.x, EndianTag());
@@ -18308,7 +18308,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x50534558: {
         ParentData data;
         memset(&data, 0, 8);
-        file->FUN_00472890(&data, 8);
+        file->GetChunkData(&data, 8);
         if (file->FUN_00401680())
             data.FUN_00503210();
         FUN_0041da40(data.ref);
@@ -18332,7 +18332,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
         if (!extra)
         {
             extra = new ExtraPackage;
-            FUN_0040ff60(extra);
+            AddExtraData(extra);
         }
         if (file->GetField25C() == 4)
         {
@@ -18341,7 +18341,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
             extra->flags = (unsigned char)value;
         }
         else
-            file->FUN_00472890(&extra->flags, 1);
+            file->GetChunkData(&extra->flags, 1);
         break;
     }
     case 0x4f544158: {
@@ -18349,13 +18349,13 @@ void loader::List::LoadExtraData(File* file, void* owner)
         if (!extra)
         {
             extra = new ExtraPackage;
-            FUN_0040ff60(extra);
+            AddExtraData(extra);
         }
         int size = file->GetField25C();
         if (size > 1)
         {
             char* data = new char[size];
-            file->FUN_00472890(data, size);
+            file->GetChunkData(data, size);
             SetTextOverride(data);
             delete[] data;
         }
@@ -18366,10 +18366,10 @@ void loader::List::LoadExtraData(File* file, void* owner)
         if (!extra)
         {
             extra = new ExtraPackage;
-            FUN_0040ff60(extra);
+            AddExtraData(extra);
         }
         PackageRef* pData = new PackageRef;
-        file->FUN_00472890(pData, 8);
+        file->GetChunkData(pData, 8);
         if (file->FUN_00401680())
             pData->FUN_00462230();
         extra->list.FUN_005ae3d0(pData);
@@ -18380,11 +18380,11 @@ void loader::List::LoadExtraData(File* file, void* owner)
         if (!pExtra)
         {
             pExtra = new ExtraPackage;
-            FUN_0040ff60(pExtra);
+            AddExtraData(pExtra);
         }
         PackageCombat value;
         memset(&value, 0, 12);
-        file->FUN_00472890(&value, 12);
+        file->GetChunkData(&value, 12);
         if (file->FUN_00401680())
         {
             endian(&value.ref, EndianTag());
@@ -18400,7 +18400,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x52434458: {
         TeleportLoad data;
         memset(&data, 0, 28);
-        file->FUN_00472890(&data, 28);
+        file->GetChunkData(&data, 28);
         if (file->FUN_00401680())
         {
             endian(&data.ref, EndianTag());
@@ -18464,14 +18464,14 @@ void loader::List::LoadExtraData(File* file, void* owner)
         NavDoor pData;
         unsigned int size = file->GetField25C();
         char* buffer = new char[size];
-        file->FUN_00472890(buffer, size);
+        file->GetChunkData(buffer, size);
         pData.LoadFormRef(owner, file, buffer);
         delete[] buffer;
         break;
     }
     case 0x50444e58: {
         NavPortal pData;
-        file->FUN_00472890(&pData, 8);
+        file->GetChunkData(&pData, 8);
         if (file->FUN_00401680())
             pData.FUN_004141e0();
         PortalExtra extra(pData);
@@ -18496,7 +18496,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
             break;
         Power pData;
         memset(&pData, 0, 8);
-        file->FUN_00472890(&pData, 8);
+        file->GetChunkData(&pData, 8);
         if (file->FUN_00401680())
         {
             endian(&pData.ref, EndianTag());
@@ -18520,7 +18520,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x4d525058: {
         Primitive data;
         memset(&data, 0, 32);
-        file->FUN_00472890(&data, 32);
+        file->GetChunkData(&data, 32);
         if (file->FUN_00401680())
             data.FUN_00414290();
         void* primitive = FUN_004a4e90(data.type, &data, &data.r);
@@ -18531,7 +18531,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x50434f58: {
         OcclusionLoad data;
         memset(&data, 0, 36);
-        file->FUN_00472890(&data, 36);
+        file->GetChunkData(&data, 36);
         if (file->FUN_00401680())
             data.FUN_004140f0();
         Plane* pData = new Plane;
@@ -18546,7 +18546,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x4c545058: {
         OcclusionLoad data;
         memset(&data, 0, 36);
-        file->FUN_00472890(&data, 36);
+        file->GetChunkData(&data, 36);
         if (file->FUN_00401680())
             data.FUN_004140f0();
         break;
@@ -18555,7 +18555,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
         break;
     case 0x44525058: {
         PatrolValue value;
-        file->FUN_00472890(&value, 4);
+        file->GetChunkData(&value, 4);
         if (file->FUN_00401680())
             value.FUN_00503210();
         PatrolData* data = new PatrolData(&value);
@@ -18564,7 +18564,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x44524f58: {
         ActionData* data = new ActionData;
-        file->FUN_00472890(data, 16);
+        file->GetChunkData(data, 16);
         if (file->FUN_00401680())
             data->ProcessAllElements();
         FUN_0041fec0(data);
@@ -18572,7 +18572,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x444f5058: {
         DroppedData* data = new DroppedData;
-        file->FUN_00472890(data, 8);
+        file->GetChunkData(data, 8);
         if (file->FUN_00401680())
             data->FUN_00462230();
         FUN_00420210(data);
@@ -18597,7 +18597,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     }
     case 0x49525458: {
         TriData* data = new TriData;
-        file->FUN_00472890(data, 4);
+        file->GetChunkData(data, 4);
         if (file->FUN_00401680())
             data->FUN_00503210();
         FUN_00420fd0(data);
@@ -18616,7 +18616,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x46525358: {
         RefExtra* extra = (RefExtra*)FUN_00410220(0x92);
         if (!extra)
-            extra = (RefExtra*)FUN_0040ff60(new RefExtra);
+            extra = (RefExtra*)AddExtraData(new RefExtra);
         int value = 0;
         file->ReadChunkInt(&value);
         extra->FUN_0041fd00(value);
@@ -18625,7 +18625,7 @@ void loader::List::LoadExtraData(File* file, void* owner)
     case 0x44525358: {
         RefExtra* extra = (RefExtra*)FUN_00410220(0x92);
         if (!extra)
-            extra = (RefExtra*)FUN_0040ff60(new RefExtra);
+            extra = (RefExtra*)AddExtraData(new RefExtra);
         float value = 0.0f;
         file->ReadChunkInt(&value);
         extra->value = value;
@@ -18935,7 +18935,7 @@ struct RunOnceOwner
 };
 
 signed char __fastcall FUN_0086a460(DurationData* sched);
-void __cdecl FUN_00401030(RunOnceItem* item);
+void __cdecl FormHeap_Free(RunOnceItem* item);
 
 struct FUN_00410220_shell
 {
@@ -18971,7 +18971,7 @@ void FUN_0041d7b0_cls::RemoveRunOnceItems(char abKeepFlag)
             {
                 reinterpret_cast<ContNode*>(owner->pRunOnceList)->FUN_00905330(&item);
                 RunOnceItem* doomed = item;
-                FUN_00401030(doomed);
+                FormHeap_Free(doomed);
                 cur = owner->pRunOnceList;
             }
             else
@@ -19310,7 +19310,7 @@ struct LoadRef
     LoadRefScriptLocals* FUN_00418830();
     void FUN_005a9d00();
     void FUN_0041cda0();
-    void FUN_00410140(int aiFlag);
+    void RemoveExtraType(int aiFlag);
     void* FUN_00418460();
     void RemoveExtraType43();
     void FUN_00422920();
@@ -19344,13 +19344,13 @@ void LoadRef::FUN_004267d0(unsigned int auiFlags, LoadRefForm* apForm)
     if ((auiFlags & kLoadRefChange_Unused) && bTargetIsActor)
         FUN_0041cda0();
     if ((auiFlags & kLoadRefChange_Unused) && !bTargetIsActor)
-        FUN_00410140(0x12);
+        RemoveExtraType(0x12);
     if (auiFlags & kLoadRefChange_Unused)
-        FUN_00410140(0x2e);
+        RemoveExtraType(0x2e);
     if ((auiFlags & kLoadRefChange_Unused) && !bTargetIsActor)
     {
-        FUN_00410140(0x32);
-        FUN_00410140(0x33);
+        RemoveExtraType(0x32);
+        RemoveExtraType(0x33);
     }
     if ((auiFlags & kLoadRefChange_00020000) && !bTargetIsActor)
     {
@@ -19363,9 +19363,9 @@ void LoadRef::FUN_004267d0(unsigned int auiFlags, LoadRefForm* apForm)
     if ((auiFlags & kLoadRefChange_Unused) && bTargetIsActor)
         FUN_0041cda0();
     if ((auiFlags & kLoadRefChange_Unused) && !bTargetIsActor)
-        FUN_00410140(0x12);
+        RemoveExtraType(0x12);
     if (auiFlags & kLoadRefChange_Unused)
-        FUN_00410140(0x2e);
+        RemoveExtraType(0x2e);
 
     if (g_pLoadRefSaveLoadGame->FUN_0055f5b0())
     {
@@ -19376,7 +19376,7 @@ void LoadRef::FUN_004267d0(unsigned int auiFlags, LoadRefForm* apForm)
             RemoveExtraType0x18();
             FUN_00422720();
             RemoveExtra045();
-            FUN_00410140(0x3a);
+            RemoveExtraType(0x3a);
             FUN_00419dc0(0);
             RemoveExtra0x1F();
             FUN_0042e040();
@@ -19891,7 +19891,7 @@ struct FUN_004280f0_shell : public ExtraDataList
 
 struct FUN_00410140_shell : public ExtraDataList
 {
-    void FUN_00410140(int);
+    void RemoveExtraType(int);
 };
 
 struct FUN_0042ce30_shell : public ExtraDataList
@@ -19913,7 +19913,7 @@ void FUN_0042dd90_cls::FUN_0042dd90(FUN_0042ce30_shell* pExtraList)
     ((FUN_00422920_shell*)this)->FUN_00422920();
     if (pExtraList->FUN_0042ce30(&flags, 0x80000000)->FUN_004280f0())
     {
-        ((FUN_00410140_shell*)this)->FUN_00410140(0x12);
+        ((FUN_00410140_shell*)this)->RemoveExtraType(0x12);
     }
 }
 
@@ -20361,7 +20361,7 @@ struct Extras
     void FUN_0041d700(TESPackage*, unsigned char);
     void FUN_0041ad00(TESWorldSpace*, TESObjectCELL*, NiPoint3*, float);
     void FUN_00422480(unsigned int);
-    void FUN_0040ff60(void*);
+    void AddExtraData(void*);
     void FUN_00419120(FUN_0043a160*);
     void FUN_00419d10(unsigned int);
     void FUN_00422850(char*);
@@ -20743,7 +20743,7 @@ void Extras::FUN_00424960(unsigned int auiChangeFlags, unsigned int unused, TESO
                 FUN_00825ad0* qoPB = new FUN_00825ad0(qtOMjSX);
                 qoPB->data.SetA(qbfQdhM);
                 qoPB->data.SetB(qidnYUK);
-                FUN_0040ff60(qoPB);
+                AddExtraData(qoPB);
             }
             break;
         }
@@ -20754,7 +20754,7 @@ void Extras::FUN_00424960(unsigned int auiChangeFlags, unsigned int unused, TESO
                 DAT_011de45c->FUN_00857aa0(&qidnYUK, 4);
                 FUN_00825fd0* qbfQdhM = new FUN_00825fd0(qidnYUK);
                 FUN_00805d40(qbfQdhM->data.Get(), 0);
-                FUN_0040ff60(qbfQdhM);
+                AddExtraData(qbfQdhM);
             }
             break;
         }
@@ -21888,7 +21888,7 @@ struct Target42
     Map42* FUN_00418490();
     void FUN_0041eff0(float);
     Script42* FUN_00418830();
-    void FUN_00410140(unsigned char);
+    void RemoveExtraType(unsigned char);
     void FUN_0042dae0(Buf42*);
 };
 // @fnv 0x0042dae0
@@ -21938,7 +21938,7 @@ void Target42::FUN_0042dae0(Buf42* pBuffer)
             }
         }
         if (remove)
-            FUN_00410140((unsigned char)i3);
+            RemoveExtraType((unsigned char)i3);
     }
 }
 }  // namespace fnv_0042dae0
@@ -22582,8 +22582,8 @@ struct SaveRecQ
 class ProfQ
 {
   public:
-    void FUN_0040fbf0(int);
-    void FUN_0040fba0();
+    void Wait(int);
+    void Leave();
 };
 class GameQ
 {
@@ -22633,7 +22633,7 @@ class ExtraDataListQ
 // @fnv 0x00422c40
 unsigned short ExtraDataListQ::FUN_00422c40(unsigned int aiFlags, ObjQ* apObj)
 {
-    DAT_011c3920.FUN_0040fbf0(0);
+    DAT_011c3920.Wait(0);
     ExtQ* p_gslscu;
     unsigned short size = 0;
     unsigned short start = size;
@@ -22933,7 +22933,7 @@ unsigned short ExtraDataListQ::FUN_00422c40(unsigned int aiFlags, ObjQ* apObj)
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\ExtraDataList.cpp");
         }
     }
-    DAT_011c3920.FUN_0040fba0();
+    DAT_011c3920.Leave();
     return size;
 }
 }  // namespace fnv_00422c40
@@ -23039,7 +23039,7 @@ struct Node
 struct S0041d950
 {
     Node* __thiscall FUN_00410220(unsigned char);
-    void __thiscall FUN_0040ff60(Node*);
+    void __thiscall AddExtraData(Node*);
     void __thiscall FUN_0041d950(Vec3* pIn);
 };
 // Gets or creates a Node, then copies the input Vec3 into its pos field.
@@ -23050,7 +23050,7 @@ void S0041d950::FUN_0041d950(Vec3* pIn)
     if (p == 0)
     {
         p = new Node();
-        FUN_0040ff60(p);
+        AddExtraData(p);
     }
     p->pos = *pIn;
 }
@@ -23080,7 +23080,7 @@ struct ListEntry
 struct Owner
 {
     ListEntry* FUN_00410220(int iType);
-    void FUN_0040ff60(ListEntry* pkEntry);
+    void AddExtraData(ListEntry* pkEntry);
     void FUN_0041dcd0(Form* pkForm);
 };
 
@@ -23094,7 +23094,7 @@ void Owner::FUN_0041dcd0(Form* pkForm)
         if (!pkEntry)
         {
             pkEntry = new ListEntry;
-            FUN_0040ff60(pkEntry);
+            AddExtraData(pkEntry);
         }
         if (!pkEntry->m_kForms.FUN_005f65d0(pkForm))
             pkEntry->m_kForms.FUN_005ae3d0(pkForm);
@@ -23127,7 +23127,7 @@ struct SetEntry
 struct Owner
 {
     SetEntry* FUN_00410220(int iType);
-    void FUN_0040ff60(SetEntry* pkEntry);
+    void AddExtraData(SetEntry* pkEntry);
     void FUN_0041e530(Form* pkForm);
 };
 
@@ -23141,7 +23141,7 @@ void Owner::FUN_0041e530(Form* pkForm)
         if (!pkEntry)
         {
             pkEntry = new SetEntry;
-            FUN_0040ff60(pkEntry);
+            AddExtraData(pkEntry);
         }
         if (!pkEntry->m_kForms.FUN_005f65d0(pkForm))
             pkEntry->m_kForms.FUN_005ae3d0(pkForm);
@@ -23181,14 +23181,14 @@ struct E4Extra
 struct E4List
 {
     E4Extra* FUN_00410220(int type);
-    void FUN_0040ff60(E4Extra* extra);
-    void FUN_00410140(int type);
+    void AddExtraData(E4Extra* extra);
+    void RemoveExtraType(int type);
     void FUN_00421940(E4Object* object);
 };
 }
 using namespace extra421;
 
-// For nonnull object, replaces or creates the type-5 entry and assigns pObject; for null, calls FUN_00410140(5).
+// For nonnull object, replaces or creates the type-5 entry and assigns pObject; for null, calls RemoveExtraType(5).
 // @fnv 0x00421940
 void E4List::FUN_00421940(E4Object* object)
 {
@@ -23207,12 +23207,12 @@ void E4List::FUN_00421940(E4Object* object)
         {
             pExtra = new E4Extra();
             pExtra->pObject = object;
-            FUN_0040ff60(pExtra);
+            AddExtraData(pExtra);
         }
     }
     else
     {
-        FUN_00410140(5);
+        RemoveExtraType(5);
     }
 }
 
@@ -24220,7 +24220,7 @@ void ResolveExtraOwner::FUN_00416be0(TESForm* owner)
 
 struct RemoveExtraList : public BaseExtraList
 {
-    void FUN_00410140(unsigned char);
+    void RemoveExtraType(unsigned char);
 };
 
 struct XD
@@ -24254,7 +24254,7 @@ class BSSpinLockUnlock
 };
 // Removes the first extra data entry of the given type from the list, updating the head or previous link and calling FUN_0040f7d0.
 // @fnv 0x00410140
-void RemoveExtraList::FUN_00410140(unsigned char etype)
+void RemoveExtraList::RemoveExtraType(unsigned char etype)
 {
     g_011c3920.Lock("BaseExtraList::RemoveExtra()");
     XD* pprev = 0;

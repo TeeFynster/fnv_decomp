@@ -1989,7 +1989,7 @@ struct NodeChildren
 };
 struct Context
 {
-    float FUN_00567400();
+    float GetScale();
     int FUN_008d6f30(int value);
 };
 struct Receiver
@@ -2013,7 +2013,7 @@ int Walk::WalkTree(Node* node, Receiver* receiver, unsigned int mode, Context* c
         Node* typed = node;
         if (typed->FUN_00c455a0((unsigned char)mode))
         {
-            receiver->FUN_004fa6f0(context->FUN_008d6f30(typed->FUN_0045bb80(extra, context->FUN_00567400())));
+            receiver->FUN_004fa6f0(context->FUN_008d6f30(typed->FUN_0045bb80(extra, context->GetScale())));
             count++;
         }
     }
@@ -2383,7 +2383,7 @@ void ManagedSceneHolder::EnsureCurrentEntry()
         current = new ManagedSceneEntry;
 }
 
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 
 struct SpawnedItem_b10003
 {
@@ -2398,7 +2398,7 @@ struct SpawnedItem_b10003
     SpawnedItem_b10003();
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
 };
 
@@ -5045,14 +5045,14 @@ struct FUN_004726b0_class
     int unk254;
     int unk258;
 
-    int __thiscall FUN_004726b0();
+    int __thiscall GetNextChunk();
 };
 
 unsigned char __fastcall ReadChunkHeader(TESFile* file);
 
 // If unk258 is zero, calls ReadChunkHeader and returns 0 if that fails; otherwise returns unk258.
 // @fnv 0x004726b0
-int FUN_004726b0_class::FUN_004726b0()
+int FUN_004726b0_class::GetNextChunk()
 {
     if (this->unk258 == 0 && !ReadChunkHeader(reinterpret_cast<TESFile*>(this)))
     {

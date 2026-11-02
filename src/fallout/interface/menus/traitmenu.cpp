@@ -1139,7 +1139,7 @@ struct ScrollTile
 {
     bool IsTraitNonZero(int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
 };
 struct SelectionList
@@ -1205,7 +1205,7 @@ bool ProgressMenu::HandleKey(int key, int unused)
             ScrollTile* trait = scroll;
             int iValueId = FUN_00a01860("_current_value");
             int tile = (int)trait->FUN_00a011b0(iValueId);
-            trait->FUN_00a012d0(iValueId, (float)(tile + step), false);
+            trait->SetFloat(iValueId, (float)(tile + step), false);
             if (tile != trait->FUN_00a011b0(iValueId))
             {
                 trait->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
@@ -1225,7 +1225,7 @@ struct S_007e7670_Player
 };
 struct S_007e7670_Dest
 {
-    void FUN_00a012d0(int a, float b, int c);
+    void SetFloat(int a, float b, int c);
 };
 struct S_007e7670_Ref
 {
@@ -1243,7 +1243,7 @@ void FUN_007e7670(S_007e7670_Dest* pDest, S_007e7670_Player* pPlayer)
         fValue = DAT_01023cd8;
     else
         fValue = DAT_0101e704;
-    pDest->FUN_00a012d0(DAT_011daf70, fValue, 1);
+    pDest->SetFloat(DAT_011daf70, fValue, 1);
 }
 
 struct EffectSetting
@@ -1382,7 +1382,7 @@ struct TileView
     TileView* ReadFile();
     TraitView* GetMenu();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void Set(int, const char*, bool);
 };
 struct ResourceProvider
@@ -1495,7 +1495,7 @@ TileView* __cdecl FUN_007e6990()
             return 0;
         }
         if (manager->FUN_00a011b0(4007) == 6006.0 || manager->FUN_00a011b0(4007) == 102.0)
-            manager->FUN_00a012d0(4013, FUN_00a01530(1));
+            manager->SetFloat(4013, FUN_00a01530(1));
         int count = *DAT_011d2f94.Int();
         ((TraitView*)DAT_011daf74)->selected = 0;
         ((TraitView*)DAT_011daf74)->count = count;
@@ -1605,7 +1605,7 @@ void TraitMenu_7e6ea0::UpdatePerkTile(int id, Tile* tile)
         FUN_00706f30(4);
         ScrollTile* scroll2 = this->tile48;
         int traitVal = FUN_00a01860("_current_value");
-        scroll2->FUN_00a012d0(traitVal, 0.0f, false);
+        scroll2->SetFloat(traitVal, 0.0f, false);
         scroll2->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         break;
     }

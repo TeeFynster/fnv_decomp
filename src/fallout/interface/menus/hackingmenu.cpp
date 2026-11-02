@@ -550,7 +550,7 @@ struct FUN_007021b0_cls
 
 extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (FUN_007021b0_cls::*callback)());
 
-extern "C" void __cdecl FUN_00401030(void* apMemory);
+extern "C" void __cdecl FormHeap_Free(void* apMemory);
 
 // Destroys the object's elements and optionally frees the allocation, returning the object or its base pointer depending on flags.
 // @fnv 0x007021b0
@@ -562,7 +562,7 @@ void* FUN_007021b0_cls::DestroyOrFree(unsigned int flags)
 
         if (flags & 1)
         {
-            FUN_00401030(reinterpret_cast<char*>(this) - 4);
+            FormHeap_Free(reinterpret_cast<char*>(this) - 4);
         }
 
         return reinterpret_cast<char*>(this) - 4;
@@ -572,7 +572,7 @@ void* FUN_007021b0_cls::DestroyOrFree(unsigned int flags)
 
     if (flags & 1)
     {
-        FUN_00401030(this);
+        FormHeap_Free(this);
     }
 
     return this;
@@ -656,7 +656,7 @@ extern int DAT_010729c8;
 struct ValueRow
 {
     float __thiscall FUN_00a011b0(unsigned int key, unsigned int mode);
-    void __thiscall FUN_00a012d0(unsigned int key, float value);
+    void __thiscall SetFloat(unsigned int key, float value);
     void __thiscall FUN_00715c60(unsigned int key, unsigned int value);
     void __thiscall FUN_00a01350(unsigned int key, unsigned int value, unsigned int mode);
 };
@@ -681,7 +681,7 @@ void __thiscall FUN_00767ef0_shell::AddValueRows(unsigned int count, const unsig
         while (iterator != 0)
         {
             item = *(((EntryListNode*)((char*)this + 0x168))->FUN_0057cbe0(&iterator));
-            item->FUN_00a012d0(0xfac, item->FUN_00a011b0(0xfac, 1) + float(count));
+            item->SetFloat(0xfac, item->FUN_00a011b0(0xfac, 1) + float(count));
         }
     }
     for (unsigned int index = 0; index < count; ++index)
@@ -1534,7 +1534,7 @@ struct SubM
     int f1c;
     int f20;
     int f24;
-    void FUN_004ed900();
+    void RemoveAll();
     ~SubM();
 };
 struct SettingValue
@@ -1555,7 +1555,7 @@ struct Menu_007a8b10
     virtual ~Menu_007a8b10();
 };
 unsigned int __cdecl gm_GetTickCount();
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 extern SettingColl DAT_011d0b90;
 extern unsigned int DAT_011d95c0;
 extern char DAT_011d9674;
@@ -1604,11 +1604,11 @@ FUN_007658e0::~FUN_007658e0()
         obj2 = head4;
         obj2 ? obj2->Call0(1) : 0;
     }
-    m188.FUN_004ed900();
+    m188.RemoveAll();
     DAT_011d95c0 = gm_GetTickCount() + DAT_011d0b90.FUN_0043d4d0()->v;
     m180.FreeAll();
     void* ptrTmp = ptr1B0;
-    FUN_00401030(ptrTmp);
+    FormHeap_Free(ptrTmp);
     DAT_011d95b8 = 0;
     for (i8 = 0; i8 < 5; i8++)
     {
@@ -1769,7 +1769,7 @@ void HackMenu::RemoveRandomWord()
         positions[index] = positions[index + 1];
     positions[index] = 0x198;
     char* deleted = *word->Get();
-    FUN_00401030(deleted);
+    FormHeap_Free(deleted);
     words.Remove(word->Get());
     --count;
 }
@@ -2285,7 +2285,7 @@ extern Setting83 DAT_011d2e20, DAT_011d33cc, DAT_011d430c;
 struct Tile83
 {
     float FUN_00a011b0(int, int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     int FUN_00a00f30(int);
     void FUN_00715c60(int, int);
     float GetTotalFloat();
@@ -2409,8 +2409,8 @@ void Hack83::BuildHackingPasswordFile()
     entries[0] = new Entry83(DAT_011d33cc.FUN_004c69f0(), tile110, "hacking_intro_template", unk1b4, 0);
     entries[1] = new Entry83(DAT_011d430c.FUN_004c69f0(), tile110, "hacking_intro_template", unk1b4 + unk1b8, 0);
     entries[2] = new Entry83(text24x17.FUN_00559450(), tile110, "hacking_intro_template", unk1b4 + unk1b8 * 3, 0);
-    tile110->FUN_00a012d0(4101, entries[2]->tile->FUN_00a011b0(4001, 1) + text24x17.FUN_004048e0() * 17);
-    tile110->FUN_00a012d0(4102, entries[2]->tile->FUN_00a011b0(4002, 1));
+    tile110->SetFloat(4101, entries[2]->tile->FUN_00a011b0(4001, 1) + text24x17.FUN_004048e0() * 17);
+    tile110->SetFloat(4102, entries[2]->tile->FUN_00a011b0(4002, 1));
     entries[3] = new Entry83;
     entries[3]->FUN_006ffe80(0, tile110->FUN_00a00f30(4100));
     int entryIndex7x39 = 4;
@@ -4155,7 +4155,7 @@ struct Tile84
     Tile84* FUN_00a01b00();
     Menu84* FUN_00a03c90();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
     void FUN_00a01350(int, const char*, int);
     void FUN_00700320(int, int);
     int FindTraitValue(int);
@@ -4335,7 +4335,7 @@ Tile84* FUN_00765b80(Ref84* reference)
             return 0;
         }
         if (tile4->FUN_00a011b0(4007) == 6006.0 || tile4->FUN_00a011b0(4007) == 102.0)
-            tile4->FUN_00a012d0(4013, screen13, 1);
+            tile4->SetFloat(4013, screen13, 1);
         DAT_011d95b8->tile124->FUN_00a01350(4036, DAT_011d31bc.FUN_00403df0(), 1);
         DAT_011d95b8->tile128->FUN_00a01350(4036, DAT_011d30e4.FUN_00403df0(), 1);
         Base84* base14 = reference ? reference->FUN_007af430() : 0;

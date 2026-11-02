@@ -474,7 +474,7 @@ class RegionPoint
 };
 int FUN_0096a820(int);
 extern int* DAT_011a3ff0[];
-void FUN_005ac750(TESForm*, ExtraDataList*, unsigned int);
+void MarkBaseExtraListScriptEvent(TESForm*, ExtraDataList*, unsigned int);
 class DialogueItem
 {
   public:

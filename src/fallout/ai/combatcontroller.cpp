@@ -5735,7 +5735,7 @@ struct OffsetActor
     virtual void Slot120();
     virtual OffsetAnimation* Animation();
     unsigned short FUN_00897910(int, int, int, int);
-    float FUN_00567400();
+    float GetScale();
 };
 bool FUN_005f2670(unsigned short);
 // Looks up the actor's slot id, and if valid, computes the shape's bounds extent scaled by the actor's value into output; returns whether it succeeded.
@@ -5755,7 +5755,7 @@ bool GetActorSlotExtent(OffsetActor* actor, int slot, OffsetVector& output)
         {
             OffsetBounds* bounds = object5->GetShape(-1)->FUN_0048f7f0();
             OffsetVector extent4 = bounds->GetVec().ApplyScaled(bounds->FUN_005f3780(2) - bounds->FUN_005f3780(0));
-            output = extent4.ApplyScaled(actor->FUN_00567400());
+            output = extent4.ApplyScaled(actor->GetScale());
             result2 = true;
         }
     }
@@ -5764,7 +5764,7 @@ bool GetActorSlotExtent(OffsetActor* actor, int slot, OffsetVector& output)
 
 struct Owner97ff
 {
-    float FUN_00567400();
+    float GetScale();
 };
 struct Setting97ff
 {
@@ -5793,7 +5793,7 @@ void Target97ff::UpdateActorValues()
         float actorValue = GetPointY(value);
         if (enabled && actorValue > 0.0)
         {
-            actorValues[i] = GetFieldBC()->FUN_00567400() * actorValue;
+            actorValues[i] = GetFieldBC()->GetScale() * actorValue;
             hasValues = true;
         }
         else
@@ -6054,7 +6054,7 @@ struct Manager80830
     void FUN_00983970(Target80830*, int, int, bool);
 };
 extern void* DAT_011f1708;
-bool __cdecl FUN_005ac750(void*, void*, unsigned int);
+bool __cdecl MarkBaseExtraListScriptEvent(void*, void*, unsigned int);
 struct Target80830
 {
     int unk00;
@@ -6148,7 +6148,7 @@ void Target80830::FUN_00980830(void* target)
         {
             if (unk80->GetResultForArg(target) > 0)
             {
-                FUN_005ac750(unkc0, unkbc->FUN_005d43c0(), 0x8000);
+                MarkBaseExtraListScriptEvent(unkc0, unkbc->FUN_005d43c0(), 0x8000);
                 ((Manager80830*)DAT_011f1708)->FUN_00983970(this, 4, 4, true);
             }
         }

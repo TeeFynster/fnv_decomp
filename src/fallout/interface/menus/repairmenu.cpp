@@ -400,7 +400,7 @@ struct RepairForm
 };
 struct RepairTile
 {
-    void FUN_00a012d0(int id, float value, int flag);
+    void SetFloat(int id, float value, int flag);
     void FUN_00700320(int id, int value);
     void FUN_00a01350(int id, const char* text);
     void FUN_00a01350(int id, const char* text, int flag);
@@ -472,7 +472,7 @@ void __cdecl FUN_007b7020(int target)
             DAT_011da760 = reinterpret_cast<RepairInventory*>(target);
         }
         float percent = DAT_011da760->FUN_004bcdb0(1) / DAT_01017a40;
-        reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->FUN_00a012d0(0x1004, percent, 1);
+        reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->SetFloat(0x1004, percent, 1);
         reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->FUN_00700320(0xfa3, 1);
         RepairForm* form = DAT_011da760->FUN_0044ddc0();
         int type = form->FUN_00401170();

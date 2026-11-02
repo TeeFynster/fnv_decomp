@@ -3110,7 +3110,7 @@ struct WData
 
 struct WMap
 {
-    bool FUN_00853130(void*, WData*&);
+    bool Lookup(void*, WData*&);
     void FUN_00844700(void*, WData*);
     void RemoveKey(void*);
 };
@@ -3332,7 +3332,7 @@ void WSys::FUN_004e8a00()
                             Pt3 refPos = ref->GetPos();
                             refPos.z = group->plane.FUN_0084d030();
                             WData* ea = 0;
-                            if (!map.FUN_00853130(ref, ea))
+                            if (!map.Lookup(ref, ea))
                             {
                                 ea = new WData;
                                 ea->m5 = refPos;
@@ -3353,7 +3353,7 @@ void WSys::FUN_004e8a00()
                         else
                         {
                             WData* old = 0;
-                            if (map.FUN_00853130(ref, old))
+                            if (map.Lookup(ref, old))
                                 map.RemoveKey(ref);
                         }
                     }
@@ -8919,7 +8919,7 @@ struct RefCam
 struct NList
 {
     int a, b, c;
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_0076b660(RenderBase* const&);
 };
 struct IterList
@@ -8930,7 +8930,7 @@ struct IterList
 };
 struct Map
 {
-    bool FUN_00853130(RefActor*, RefActor**);
+    bool Lookup(RefActor*, RefActor**);
     void FUN_00844700(RefActor*, RefActor*);
 };
 struct State
@@ -9041,8 +9041,8 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                     c = false;
                     e = false;
                     b = false;
-                    state->nodes.FUN_004ed900();
-                    state->more.FUN_004ed900();
+                    state->nodes.RemoveAll();
+                    state->more.RemoveAll();
                     iter = state->refs.FUN_00559450();
                     while (iter)
                     {
@@ -9126,7 +9126,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                                         if (list->FUN_006815c0()->flags & 1)
                                         {
                                             RefActor* item = list->FUN_006815c0()->ref;
-                                            if (item->v1d0() && !map.FUN_00853130(item, &item) &&
+                                            if (item->v1d0() && !map.Lookup(item, &item) &&
                                                 (DAT_011dea10->FUN_005f36f0() ||
                                                  (!DAT_011dea10->FUN_005f36f0() && !item->FUN_00564e60())))
                                             {
@@ -9143,7 +9143,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                                     while (list && !list->FUN_008256d0())
                                     {
                                         RefActor* item = list->FUN_006815c0();
-                                        if (item && item->v1d0() && !map.FUN_00853130(item, &item) &&
+                                        if (item && item->v1d0() && !map.Lookup(item, &item) &&
                                             !item->FUN_00564e60())
                                         {
                                             state->nodes.FUN_0076b660(item->v1d0());
@@ -9163,7 +9163,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                         if (iter)
                         {
                             RefActor* item = DAT_011c7b8c.AddEight(iter);
-                            if (item->v1d0() && !map.FUN_00853130(item, &item))
+                            if (item->v1d0() && !map.Lookup(item, &item))
                             {
                                 state->more.FUN_0076b660(item->v1d0());
                                 map.FUN_00844700(item, item);
@@ -9502,7 +9502,7 @@ struct Node60
 };
 struct List60
 {
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_0076b660(Node60* const&);
 };
 struct Weather60
@@ -9751,8 +9751,8 @@ void Main60::FUN_004eaa00(void* target)
         Color60 color(ambientColor.r * tint.r, ambientColor.g * tint.g, ambientColor.b * tint.b, 1.0f);
         DAT_011c7cb8.FUN_00559450()->FUN_004ea880(color);
     }
-    DAT_011c7ce4.FUN_004ed900();
-    DAT_011c7b80.FUN_004ed900();
+    DAT_011c7ce4.RemoveAll();
+    DAT_011c7b80.RemoveAll();
     if (*DAT_011c7c00.FUN_00408d60())
     {
         if (!DAT_011dea3c->FUN_004eaf60())
@@ -11259,7 +11259,7 @@ struct Array074
 struct Map074
 {
     int unk00, unk04, unk08, unk0c;
-    bool FUN_00853130(Ref074*, Ref074*&);
+    bool Lookup(Ref074*, Ref074*&);
     void FUN_00844700(Ref074*, Ref074*);
 };
 struct Property074
@@ -11531,7 +11531,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                         Ref074* actor = state->actors.AddEight(nextActor);
                                         if ((actor != (Ref074*)DAT_011dea3c ||
                                              (actor == (Ref074*)DAT_011dea3c && DAT_011dea3c->FUN_004eaf60())) &&
-                                            actor->Get3D() && !seen.FUN_00853130(actor, actor))
+                                            actor->Get3D() && !seen.Lookup(actor, actor))
                                         {
                                             state->actorNodes.FUN_0076b660(actor->Get3D());
                                             seen.FUN_00844700(actor, actor);
@@ -11545,7 +11545,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     if ((*link->FUN_006815c0())->flags & 2)
                                     {
                                         Ref074* linked = (*link->FUN_006815c0())->ref;
-                                        if (linked->Get3D() && !seen.FUN_00853130(linked, linked))
+                                        if (linked->Get3D() && !seen.Lookup(linked, linked))
                                         {
                                             state->nodes.FUN_0076b660(linked->Get3D());
                                             seen.FUN_00844700(linked, linked);
@@ -11563,7 +11563,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     if (otherNext)
                                     {
                                         Ref074* other = state->otherRefs.AddEight(otherNext);
-                                        if (other->Get3D() && !seen.FUN_00853130(other, other))
+                                        if (other->Get3D() && !seen.Lookup(other, other))
                                         {
                                             state->actorNodes.FUN_0076b660(other->Get3D());
                                             seen.FUN_00844700(other, other);
@@ -11577,7 +11577,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     while (special && !special->FUN_008256d0())
                                     {
                                         Ref074* entry = (Ref074*)*special->FUN_006815c0();
-                                        if (entry && entry->Get3D() && !seen.FUN_00853130(entry, entry))
+                                        if (entry && entry->Get3D() && !seen.Lookup(entry, entry))
                                         {
                                             state->nodes.FUN_0076b660(entry->Get3D());
                                             seen.FUN_00844700(entry, entry);
@@ -12382,7 +12382,7 @@ struct Cell
 
 struct ReferenceIntegerMap
 {
-    bool FUN_00853130(Ref* pkRef, int* piValue);
+    bool Lookup(Ref* pkRef, int* piValue);
     void RemoveKey(Ref* pkRef);
 };
 
@@ -12463,7 +12463,7 @@ void Owner::RemoveReferenceFromCell(Ref* pkRef, Cell* pkCell)
         {
             pkCell->m_kActors.FUN_0049f590(pkMatch);
             int iValue = 0;
-            if (m_kActorMap.FUN_00853130(pkRef, &iValue))
+            if (m_kActorMap.Lookup(pkRef, &iValue))
                 m_kActorMap.RemoveKey(pkRef);
         }
         else

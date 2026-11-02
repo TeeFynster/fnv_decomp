@@ -27033,7 +27033,7 @@ extern FUN_00970a20_lists DAT_011e0e80;
 
 struct FUN_005ac750_extra;
 FUN_005ac750_extra* __fastcall FUN_005d43c0(FUN_008b01c0_shell* apRef);
-bool __cdecl FUN_005ac750(FUN_008b01c0_ref* apForm, FUN_005ac750_extra* apExtra, unsigned int auiFlags);
+bool __cdecl MarkBaseExtraListScriptEvent(FUN_008b01c0_ref* apForm, FUN_005ac750_extra* apExtra, unsigned int auiFlags);
 
 struct FUN_008b01c0_shell
 {
@@ -27361,7 +27361,7 @@ void FUN_008b01c0_shell::FUN_008b01c0()
                     pTarget = DAT_011e0e80.FUN_00970b30(pFaction, 0, 0);
                 }
             }
-            FUN_005ac750(pRefC0, FUN_005d43c0(this), 0x20);
+            MarkBaseExtraListScriptEvent(pRefC0, FUN_005d43c0(this), 0x20);
             if (pTarget && pRefC0)
                 pTarget->FUN_008c0460(pRefC0, 0, true);
             bFlagC4 = false;
@@ -27379,7 +27379,7 @@ void FUN_008b01c0_shell::FUN_008b01c0()
         if (pBase)
             pBase->kData.FUN_0047ead0(0);
     }
-    FUN_005ac750(pRefC0, FUN_005d43c0(this), 0x10);
+    MarkBaseExtraListScriptEvent(pRefC0, FUN_005d43c0(this), 0x10);
     if (FUN_008d8520())
     {
         FUN_008d8520()->v301(3.402823466e+38F);
@@ -30654,7 +30654,7 @@ struct Obj120
     Obj120* FUN_00568e50();
     Obj120* FUN_00559450();
     V120& FUN_00717e50();
-    void FUN_00573170(Obj120*, int, int, int);
+    void Activate(Obj120*, int, int, int);
     bool FUN_008b3690(const V120&, Obj120*, Obj120*, float, int);
     void UpdatePackageExecution(Obj120*);
 };
@@ -30889,7 +30889,7 @@ void Obj120::UpdatePackageExecution(Obj120* actor)
             {
                 v394(actor);
                 package38->FUN_00500a20(0);
-                destination12->FUN_00573170(actor, 0, 0, 1);
+                destination12->Activate(actor, 0, 0, 1);
                 retryTimer = 20.f;
             }
             else if (handle32)
@@ -43071,7 +43071,7 @@ struct P157Object
     P157Object* FUN_008d6f30();
     bool FUN_00425fd0();
     P157Object* FUN_0041c8d0();
-    void* FUN_0055d310();
+    void* GetContainer();
     void FUN_00892e90(int, P157Object*, P157Object*, void*, P157Object*);
     P157Object* FUN_007af430();
     void* FUN_007b3fa0(int);
@@ -43176,7 +43176,7 @@ bool P157Target::FUN_008f2610(P157Object* actor, int unused)
                 P157Object* objectBase = k->FUN_0055b980()->FUN_0067f390();
                 if (!objectBase)
                     objectBase = (P157Object*)m_pReference40;
-                if (objectBase && objectBase->FUN_0055d310())
+                if (objectBase && objectBase->GetContainer())
                 {
                     actor->FUN_00892e90(e->FUN_0044ddc0(), object, objectBase, k->FUN_00672930(), location);
                     m_bDialogueFlag = false;
@@ -43210,7 +43210,7 @@ bool P157Target::FUN_008f2610(P157Object* actor, int unused)
                         e = actor->FUN_00576260(((P157Entry*)m_pDetectionData60)->data, 0);
                         delete m_pDetectionData60;
                         m_pDetectionData60 = 0;
-                        if (objectBase && objectBase->FUN_0055d310())
+                        if (objectBase && objectBase->GetContainer())
                             actor->FUN_00892e90(e->FUN_0044ddc0(), object, objectBase, k->FUN_00672930(), location);
                         else
                         {
@@ -44145,7 +44145,7 @@ struct Actor104
     void* FUN_008d6f30();
     void FUN_008b3690(const FUN_006815c0&, void*, int);
     int FUN_00931850();
-    void FUN_00573170(Actor104*, int, int, int);
+    void Activate(Actor104*, int, int, int);
     bool FUN_0094df60();
     void FUN_005c1a00(int, bool);
 };
@@ -44668,7 +44668,7 @@ bool Proc104::FUN_008f3940(Actor104* actor, int unused)
                 v4ec(true);
                 if (item)
                 {
-                    target->FUN_00573170(actor, 1, item->value, item->option);
+                    target->Activate(actor, 1, item->value, item->option);
                     --remaining;
                     {
                         Item104* pOldItem = item;
@@ -44688,7 +44688,7 @@ bool Proc104::FUN_008f3940(Actor104* actor, int unused)
                 }
                 else
                 {
-                    target->FUN_00573170(actor, 0, 0, 1);
+                    target->Activate(actor, 0, 0, 1);
                     v288(actor, 1);
                     return true;
                 }
@@ -44706,7 +44706,7 @@ bool Proc104::FUN_008f3940(Actor104* actor, int unused)
                 {
                     if (target->v22c(false) || item->flag8)
                     {
-                        target->FUN_00573170(actor, 1, item->value, item->option);
+                        target->Activate(actor, 1, item->value, item->option);
                         --remaining;
                         {
                             Item104* old227 = item;
@@ -46829,7 +46829,7 @@ struct Actor
     Ref* FUN_00569b80();
     int FUN_008a7570();
     bool FUN_008b3bb0();
-    void FUN_0088c650(Form*, int, int, int, int, int);
+    void EquipItem(Form*, int, int, int, int, int);
 };
 struct FloatSetting
 {
@@ -47818,7 +47818,7 @@ bool Process::FUN_008f9320(Actor* actor)
             if (usedForm && repetitionsSlot23 > 0 && count >= repetitionsSlot23 && actor->FUN_008a7570() == -1 &&
                 actor->Animation()->FUN_004985f0())
             {
-                actor->FUN_0088c650(usedForm, 1, 0, 1, 0, 1);
+                actor->EquipItem(usedForm, 1, 0, 1, 0, 1);
                 Finish(actor, 2);
                 FUN_0092bf20(actor);
                 ResetAction(actor);
@@ -47866,7 +47866,7 @@ bool Process::FUN_008f9320(Actor* actor)
             if (animation->FUN_004985f0())
             {
                 if (usedForm)
-                    actor->FUN_0088c650(usedForm, 1, 0, 1, 0, 1);
+                    actor->EquipItem(usedForm, 1, 0, 1, 0, 1);
                 if (packageSlot2->FUN_00670f90() && !packageSlot2->FUN_0041d8a0()->FUN_00726070() &&
                     animation->FUN_004985f0())
                 {
@@ -48077,7 +48077,7 @@ extern char DAT_01015440;
 extern char DAT_01088358;
 Sound* __cdecl FUN_004839c0(void* a);
 int __cdecl FUN_005b5e40(const char* s1, ...);
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 struct This
 {
     int f000;
@@ -57173,7 +57173,7 @@ struct Q67T
     virtual void fvq123();
     virtual void fvq124();
     virtual int v1f4();
-    int FUN_0055d310();
+    int GetContainer();
     int FUN_007af430();
 };
 struct P28T
@@ -58429,7 +58429,7 @@ void HostT::FUN_008dfa10(RefrT* apRefr)
                     cntLocal36 = (void*)((Q980T*)p18Local4->FUN_0055b980())->FUN_0067f390();
                     if (cntLocal36 == 0)
                         cntLocal36 = m_44;
-                    if (cntLocal36 != 0 && ((Q67T*)cntLocal36)->FUN_0055d310() != 0)
+                    if (cntLocal36 != 0 && ((Q67T*)cntLocal36)->GetContainer() != 0)
                     {
                         if (!m_375)
                         {
@@ -58484,7 +58484,7 @@ void HostT::FUN_008dfa10(RefrT* apRefr)
                             v84Local15 = apRefr->FUN_00576260(m_64->f04, 0);
                             delete m_64;
                             m_64 = 0;
-                            if (cntLocal36 != 0 && ((Q67T*)cntLocal36)->FUN_0055d310() != 0)
+                            if (cntLocal36 != 0 && ((Q67T*)cntLocal36)->GetContainer() != 0)
                             {
                                 apRefr->FUN_00892e90(
                                     v84Local15->FUN_0044ddc0(v7c, cntLocal36, p18Local4->FUN_00672930(), v74Local9));
@@ -59066,7 +59066,7 @@ extern "C"
     TESWorldSpace* __fastcall FUN_00575d70(TESObjectREFR*);
     TESBoundObject* __fastcall FUN_004216f0(ExtraDataList*);
     int __cdecl FUN_0048e8a0(TESBoundObject*);
-    bool __cdecl FUN_005ac750(TESForm*, ExtraDataList*, unsigned int);
+    bool __cdecl MarkBaseExtraListScriptEvent(TESForm*, ExtraDataList*, unsigned int);
 }
 
 extern SettingT_GameSettingCollection_ g_011cde98;
@@ -59199,7 +59199,7 @@ void HighProcessEx::FUN_008e59c0(Actor* apActor)
                     ->FUN_00419700(ref28);
                 ExtraDataList* extra4 = 0;
                 extra4 = ((ObjectstoAcquireStandIn*)this->m_pDetectionData60)->extraList;
-                FUN_005ac750(ref24, extra4, 0x4000);
+                MarkBaseExtraListScriptEvent(ref24, extra4, 0x4000);
                 ((ObjectstoAcquireStandIn*)this->m_pDetectionData60)
                     ->object->Activate(apActor, 0, ((ObjectstoAcquireStandIn*)this->m_pDetectionData60)->boundObj, 1);
             }
@@ -59208,7 +59208,7 @@ void HighProcessEx::FUN_008e59c0(Actor* apActor)
                 ref24 = this->pTarget;
                 ExtraDataList* extra5 = 0;
                 extra5 = ((ObjectstoAcquireStandIn*)this->m_pDetectionData60)->extraList;
-                FUN_005ac750(ref24, extra5, 0x4000);
+                MarkBaseExtraListScriptEvent(ref24, extra5, 0x4000);
                 ((REFRCaller*)ref24)
                     ->Call17c(((ObjectstoAcquireStandIn*)this->m_pDetectionData60)->boundObj, 0, 1, 0, 0, apActor, 0, 0,
                               1, 0);
@@ -59611,7 +59611,7 @@ struct WalkActor
     WalkForm* FUN_007af430();
     const WalkVector& FUN_00430830();
     void FUN_008bb5c0(float, bool);
-    void FUN_0088c790(void*, void*, int, int, int, bool);
+    void UnequipItem(void*, void*, int, int, int, bool);
     unsigned char FUN_008b3bd0();
 };
 struct WalkPackage
@@ -60674,10 +60674,10 @@ void WalkProcess::ProcessPackageMovement(WalkActor* subject, bool force, bool up
                 unequipped = true;
                 WalkItem* weapon3 = GetLoadedForm();
                 if (weapon3)
-                    subject->FUN_0088c790(weapon3->FUN_0044ddc0(), (void*)1, 0, 0, 0, true);
+                    subject->UnequipItem(weapon3->FUN_0044ddc0(), (void*)1, 0, 0, 0, true);
                 WalkItem* ammo12 = GetAmmo();
                 if (ammo12)
-                    subject->FUN_0088c790(ammo12->FUN_0044ddc0(), ammo12->FUN_00726070(), 0, 0, 0, true);
+                    subject->UnequipItem(ammo12->FUN_0044ddc0(), ammo12->FUN_00726070(), 0, 0, 0, true);
             }
         }
         if (!FUN_00915ef0(subject) || !force)
@@ -61854,7 +61854,7 @@ struct Arg8ee
     void FUN_00884f80();
     bool FUN_004938e0();
     bool FUN_008b3c30();
-    bool FUN_00573170(Arg8ee* aA, bool aB, int a1, int a2);
+    bool Activate(Arg8ee* aA, bool aB, int a1, int a2);
     bool FUN_008c13d0();
     Obj38* FUN_009344a0();
     unsigned char FUN_008b3bd0();
@@ -62484,7 +62484,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                             }
                             if (f334 <= 0.0)
                             {
-                                f64->ref->FUN_00573170(aArg, true, f64->unk4, f64->unkC);
+                                f64->ref->Activate(aArg, true, f64->unk4, f64->unkC);
                                 f58--;
                                 f375 = false;
                                 vfn_644(1);
@@ -62515,9 +62515,9 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                         {
                             vfn_288(aArg, 1);
                             if (f64 != 0)
-                                f40->FUN_00573170(aArg, true, f64->unk4, f64->unkC);
+                                f40->Activate(aArg, true, f64->unk4, f64->unkC);
                             else
-                                f40->FUN_00573170(aArg, true, 0, 1);
+                                f40->Activate(aArg, true, 0, 1);
                             vfn_4ec(1);
                             if (DAT_011a3ff0[pPackage->FUN_009611e0()][vfn_23c()] == 0x36)
                                 vfn_118(1);
@@ -62568,7 +62568,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                                 }
                                 if (!pPackage->FUN_00674d40() && f40->vfn_22c(1) && f64 == 0)
                                     pPackage->FUN_00674e70(f40, 1);
-                                f40->FUN_00573170(aArg, true, 0, 1);
+                                f40->Activate(aArg, true, 0, 1);
                             }
                             else
                             {
@@ -62579,7 +62579,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                         }
                         else
                         {
-                            f40->FUN_00573170(aArg, false, 0, 1);
+                            f40->Activate(aArg, false, 0, 1);
                         }
                         return true;
                     }
@@ -62609,7 +62609,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                             }
                             else if ((p164 == 0 || p164->FUN_004985f0()) && f64 != 0)
                             {
-                                if (!f40->FUN_00573170(aArg, false, f64->unk4, f64->unkC))
+                                if (!f40->Activate(aArg, false, f64->unk4, f64->unkC))
                                     vfn_12c(0);
                                 else
                                 {
@@ -62719,7 +62719,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                         }
                         else if (p170 == 0 || p170->FUN_004985f0())
                         {
-                            if (!f40->FUN_00573170(aArg, false, f64->unk4, f64->unkC))
+                            if (!f40->Activate(aArg, false, f64->unk4, f64->unkC))
                                 vfn_12c(0);
                             else
                             {
@@ -62744,7 +62744,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                         if (f40->vfn_218())
                         {
                             if (f40->vfn_214() == 0 || f40->vfn_214() == 4 || f40->vfn_214() == 9)
-                                f40->FUN_00573170(aArg, false, 0, 1);
+                                f40->Activate(aArg, false, 0, 1);
                         }
                         else
                         {
@@ -62760,7 +62760,7 @@ bool This8e9::FUN_008e9640(Arg8ee* aArg, bool aB)
                             else if (p174 != 0 && p174->FUN_004985f0())
                             {
                                 vfn_644(1);
-                                f40->FUN_00573170(aArg, false, 0, 1);
+                                f40->Activate(aArg, false, 0, 1);
                                 f375 = false;
                             }
                         }
@@ -64655,7 +64655,7 @@ struct Obj1208ee
 {
     ~Obj1208ee();
 };
-void __cdecl FUN_005ac750(void* a1, void* a2, int a3);
+void __cdecl MarkBaseExtraListScriptEvent(void* a1, void* a2, int a3);
 struct D8Obj8ee
 {
     void FUN_00498910(int a1, int a2);
@@ -66631,7 +66631,7 @@ void This8ee::FUN_008eeec0(Arg8ee* aArg)
                                 f378 = 0.0f;
                             if (!vfn_5a4() && !after7e->FUN_00674d40() && after7e->FUN_00678610())
                             {
-                                FUN_005ac750(after7e, pActorY->FUN_005d43c0(), 0x400);
+                                MarkBaseExtraListScriptEvent(after7e, pActorY->FUN_005d43c0(), 0x400);
                                 vfn_5a0(pActorY, after7e);
                                 vfn_5a8(1);
                             }
@@ -70567,7 +70567,7 @@ struct NiBSBoneLODController
 };
 struct ActorScale : Actor
 {
-    float FUN_00567400();
+    float GetScale();
 };
 struct FadeNodeOps : NiAVObject
 {
@@ -70601,7 +70601,7 @@ bool __cdecl FUN_0045bad0(const void*, NiNode*);
 void HighProcess::FUN_008e5730(Actor* actor)
 {
     NiPoint3 delta = static_cast<const PointOps&>(*actor->vfn_1f4() - FUN_0045c670()->FUN_00558310()->FUN_0043c490())
-                         .FUN_0053d280(static_cast<ActorScale*>(actor)->FUN_00567400());
+                         .FUN_0053d280(static_cast<ActorScale*>(actor)->GetScale());
     int lod = (int)(12.0 * std::abs(static_cast<const PointOps&>(delta).Length()) *
                     FUN_0045c670()->GetAnimationData()->FUN_00508070() / (*g_011ccf88.Int() * FUN_007d1d00(3)));
     if (lod >= m_pBoneLODController->GetField38())
@@ -70650,7 +70650,7 @@ struct ProcessEatRefView : TESObjectREFR
     unsigned int GetVtbl20Result();
     void ForwardToVtSlot(unsigned int);
     void FUN_008c1de0(TESBoundObject*, ExtraDataList*, bool);
-    void FUN_0088c650(TESBoundObject*, int, ExtraDataList*, bool, bool, bool);
+    void EquipItem(TESBoundObject*, int, ExtraDataList*, bool, bool, bool);
     ProcessEatPackageView* FUN_00891d30();
     char* FUN_0055d520();
 };
@@ -71760,7 +71760,7 @@ void ProcessEatProcess008e3140::FUN_008e3140(Actor* actor, TESObjectREFR* prefer
                 if (aProcess)
                 {
                     m_pCurrentWeapon = aProcess->FUN_0044ddc0();
-                    ((ProcessEatRefView*)actor)->FUN_0088c650(aProcess->FUN_0044ddc0(), 1, 0, true, false, true);
+                    ((ProcessEatRefView*)actor)->EquipItem(aProcess->FUN_0044ddc0(), 1, 0, true, false, true);
                 }
                 ((ProcessEatProcessDispatch*)this)->setReady(true);
                 ((ProcessEatListView*)&m_kSecondaryReferenceList)->FUN_00470470();

@@ -2045,7 +2045,7 @@ class FUN_007d6350
     FUN_007d6350(char*, char*, int, ...);
 };
 void __cdecl ClearStartMenuEntries();
-void* __cdecl FUN_00401000(int size);
+void* __cdecl FormHeap_Allocate(int size);
 extern char DAT_007d0440[];
 extern char DAT_007d0490[];
 extern char DAT_007d04d0[];

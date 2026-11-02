@@ -2325,7 +2325,7 @@ struct FUN_004a0490_cls
 };
 struct FUN_004ed900_cls
 {
-    void __thiscall FUN_004ed900();
+    void __thiscall RemoveAll();
 };
 
 // @fnv 0x004a42a0
@@ -2355,7 +2355,7 @@ void __cdecl FUN_004a42a0()
             r = 0;
         }
     }
-    ((FUN_004ed900_cls*)kObj)->FUN_004ed900();
+    ((FUN_004ed900_cls*)kObj)->RemoveAll();
 }
 
 struct FUN_004a4650_ListBase;
@@ -2772,7 +2772,7 @@ struct FUN_00658930_cls
     unsigned int GetShortAtOffsetA();
 };
 
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 
 struct Guard_b9135
 {
@@ -2802,7 +2802,7 @@ FUN_004b0480_cls::~FUN_004b0480_cls()
     {
         void* p = ((FUN_004b07e0_Class*)((char*)this + 8))->PopElement();
         void* q = p;
-        FUN_00401030(q);
+        FormHeap_Free(q);
     }
 }
 

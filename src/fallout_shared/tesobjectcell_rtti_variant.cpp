@@ -25,7 +25,7 @@ struct FUN_0040f410 : BSExtraData
 };
 struct ExtraListAccess548 : ExtraDataList
 {
-    BSExtraData* FUN_0040ff60(BSExtraData*);
+    BSExtraData* AddExtraData(BSExtraData*);
     bool FUN_00410020(BSExtraData*, bool);
 };
 class BaseProcess;
@@ -266,7 +266,7 @@ extern CellSaveLoad* DAT_011de45c;
 class CellModelLoader
 {
   public:
-    void FUN_00444850(RefView* pkRef, int iCell);
+    void QueueReference(RefView* pkRef, int iCell);
 };
 extern CellModelLoader* DAT_011c3b3c;
 class CellProcessLists
@@ -475,7 +475,7 @@ void CellView::FUN_00548230(RefView* pkRef, bool bArg)
                         else
                             pkRef->Unk_24c();
                     }
-                    DAT_011c3b3c->FUN_00444850(pkRef, DAT_011dea10->FUN_00458be0(this, 0, 0));
+                    DAT_011c3b3c->QueueReference(pkRef, DAT_011dea10->FUN_00458be0(this, 0, 0));
                 }
             }
             if (!bQueue && pkRef->IsActor())
@@ -974,7 +974,7 @@ void Cell548::FUN_00551480(bool RetainReference)
     if (!extra && RetainReference)
     {
         extra = new FUN_0040f410;
-        static_cast<ExtraListAccess548*>(&extraDataList)->FUN_0040ff60(extra);
+        static_cast<ExtraListAccess548*>(&extraDataList)->AddExtraData(extra);
         CellRefLockEnter();
         RefList548* position = FUN_009604f0();
         while (position && position->FUN_006815c0())

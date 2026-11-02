@@ -563,7 +563,7 @@ struct FUN_006665c0_Entry
     int unk00;
     FUN_006665c0_Item* m_item;
 };
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 void __cdecl FUN_0044e360(void* p);
 struct FUN_006665c0_cls
 {

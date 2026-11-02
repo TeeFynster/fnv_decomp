@@ -126,9 +126,9 @@ extern "C" void* __cdecl _alloca(unsigned int uiSize);
 struct FloraFile
 {
     unsigned int GetField25C();
-    int FUN_004726b0();
+    int GetNextChunk();
     bool FUN_004726f0();
-    void FUN_00472890(void* pvBuffer, unsigned int uiSize);
+    void GetChunkData(void* pvBuffer, unsigned int uiSize);
     void ReadChunkInt(unsigned int* puiFormID);
     unsigned short FUN_00403570();
 };
@@ -266,13 +266,13 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
     FloraFormBase::CallWithThis(pkFile);
     FloraFormBase::FUN_00484ab0(0);
     int iChunk;
-    while ((iChunk = pkFile->FUN_004726b0()) != 0)
+    while ((iChunk = pkFile->GetNextChunk()) != 0)
     {
         switch (iChunk)
         {
         case 0x44494445: {
             char* pcEditorID = (char*)_alloca(pkFile->GetField25C());
-            pkFile->FUN_00472890(pcEditorID, 0x200);
+            pkFile->GetChunkData(pcEditorID, 0x200);
             SetEditorID(pcEditorID);
             break;
         }
@@ -291,7 +291,7 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
         case 0x53444f4d: {
             unsigned int uiSizeX = pkFile->GetField25C();
             char* pcDataZ = (char*)_alloca(uiSizeX);
-            pkFile->FUN_00472890(pcDataZ, uiSizeX);
+            pkFile->GetChunkData(pcDataZ, uiSizeX);
             FloraModel::LoadTextureSwapList(pcDataZ, uiSizeX, pkFile->FUN_00403570());
             break;
         }
@@ -310,7 +310,7 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
         }
         case 0x43504650: {
             int m_ucSortOrder;
-            pkFile->FUN_00472890(&m_ucSortOrder, 4);
+            pkFile->GetChunkData(&m_ucSortOrder, 4);
             FloraProduce::CopyFromSource(&m_ucSortOrder);
             break;
         }

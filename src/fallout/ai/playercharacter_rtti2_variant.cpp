@@ -804,7 +804,7 @@ extern int DAT_01017874, DAT_005764f0, DAT_00577450, DAT_00577ca0, DAT_0045c680;
 extern float DAT_01012054, DAT_01017868, DAT_0101786c, DAT_01013974, DAT_01017870;
 extern unsigned int DAT_011c3c00;
 extern void *DAT_01202d98, *DAT_011c3b3c, *DAT_01202df4, *DAT_011c3f2c, *DAT_011de45c;
-extern void* __cdecl FUN_00401000(unsigned int);
+extern void* __cdecl FormHeap_Allocate(unsigned int);
 extern void* __cdecl FUN_00aa13e0(unsigned int);
 extern void __cdecl FUN_00403d30(void*, unsigned int, unsigned int);
 extern void __cdecl FUN_00450430(int);
@@ -1097,7 +1097,7 @@ struct StubCallees
     void* FUN_00500940();
     void* FUN_005d43c0(int a, int b);
     int FUN_00418830();
-    void FUN_005ac1e0(void* a, int b);
+    void Execute(void* a, int b);
     void MarkAsRefusal();
     bool FUN_0061aef0();
     void LoadRecord(void* a);
@@ -5346,7 +5346,7 @@ struct ExtObj
 };
 void __cdecl FUN_005b5e40(const char* msg);
 void __cdecl FUN_00868d70(int arg);
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 struct FUN_0093bea0_cls
 {
     int unk00;
@@ -12204,8 +12204,8 @@ class FUN_00620850
 };
 struct Lock950
 {
-    void FUN_0040fbf0(char* pcName);
-    void FUN_0040fba0();
+    void Wait(char* pcName);
+    void Leave();
 };
 extern Lock950 DAT_011f11a0;
 struct Queue950
@@ -13003,11 +13003,11 @@ struct PlayerOps
 {
     void FUN_00952d60(void*, void*, int);
 };
-TESContainer* __fastcall FUN_0055d310(TESObjectREFR*);
+TESContainer* __fastcall GetContainer(TESObjectREFR*);
 struct FUN_00952c30_shell : PlayerCharacter
 {
     void FUN_00952c30(TESObjectREFR* apMovingRef);
-    BSSimpleList<TESQuestTargetX*>* FUN_00952ba0();
+    BSSimpleList<TESQuestTargetX*>* GetCurrentQuestTargets();
 };
 struct _Mem_2064
 {
@@ -17365,7 +17365,7 @@ struct GObj
 struct PlayerShell
 {
     int GetAtIfValid(int value);
-    void FUN_0088c650(TESBoundObject* obj, int value, ExtraDataList* extra, bool b1, bool b2, bool b3);
+    void EquipItem(TESBoundObject* obj, int value, ExtraDataList* extra, bool b1, bool b2, bool b3);
     unsigned short FUN_00897910(int value, int a2, int a3, Animation* anim);
     void FUN_008a73e0(int value, BSAnimGroupSequence* seq);
 };
@@ -21022,7 +21022,7 @@ struct FUN_00963bf0_glob
     float FUN_0084d030();
 };
 extern double DAT_01012060;
-void FUN_00401030(void* p);
+void FormHeap_Free(void* p);
 struct FUN_00963bf0_cls
 {
     unsigned int unk00;
@@ -28647,7 +28647,7 @@ struct InputReference
     virtual void r185();
     virtual bool Busy();
     bool FUN_00568680();
-    bool FUN_00573170(InputPlayer*, int, int, int);
+    bool Activate(InputPlayer*, int, int, int);
     InputProcess* FUN_008d8520();
 };
 struct InputCharacter : InputReference

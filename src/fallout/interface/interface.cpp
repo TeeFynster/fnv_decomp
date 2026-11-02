@@ -1764,7 +1764,7 @@ bool QueueMessage(const char*, const char*, const char*, int, void*, int, int, c
                   float, float, float);
 // Shows a warning message via QueueMessage when the interface manager's modifier key is held, returning the result; otherwise returns false.
 // @fnv 0x00703e80
-bool FUN_00703e80(const char* aText, const char* apcIconFilename, const char* apcTitle, void* afpResult,
+bool ShowMessageBox(const char* aText, const char* apcIconFilename, const char* apcTitle, void* afpResult,
                   int aiFirstButtonResult, int aiWarningContext, float afBackgroundTextureOpacityOverride,
                   float afMenuWidthOverride, const char* axFirst, ...)
 {
@@ -2488,14 +2488,14 @@ class Modifier
     unsigned char GetKey();
 };
 
-void FUN_00784c80();
+void ShowLevelUpMenu();
 
-// If FUN_004b7210 returns a Modifier whose GetKey is nonzero, calls FUN_00784c80.
+// If FUN_004b7210 returns a Modifier whose GetKey is nonzero, calls ShowLevelUpMenu.
 // @fnv 0x00706270
 void FUN_00706270()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
-        FUN_00784c80();
+        ShowLevelUpMenu();
 }
 }  // namespace fnv_00706270
 
@@ -5523,7 +5523,7 @@ class Model
 };
 struct Loader_S
 {
-    NiNode* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    NiNode* LoadModel(const char*, int, bool, bool, bool, bool);
 };
 extern bool DAT_011d8908;
 class FileFinder
@@ -5543,7 +5543,7 @@ NiNode* FUN_00707660(const char* path, bool* flag)
     if (g_modelLoader && !DAT_011d8908)
     {
         *flag = true;
-        return ((Loader_S*)g_modelLoader)->FUN_00447080(path, 0, true, false, false, false);
+        return ((Loader_S*)g_modelLoader)->LoadModel(path, 0, true, false, false, false);
     }
     else if (FileFinder::Exist(path, 0, 0, -1))
     {
@@ -6548,9 +6548,9 @@ struct Tile30
 {
     unsigned int FUN_0056c7f0();
     void FUN_007a1400(int);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
 };
 
 // small local-object stand-ins (methods invoked with ecx = local)
@@ -6805,7 +6805,7 @@ struct MapMenuR6
 
 int __cdecl FUN_00556870(V3Maker*);
 // free helpers; conventions read from add esp evidence
-extern "C" void* __cdecl FUN_00401000(unsigned int);
+extern "C" void* __cdecl FormHeap_Allocate(unsigned int);
 extern "C" void __stdcall FUN_00401050(void*, unsigned int, unsigned int, void*);
 extern "C" void* __cdecl FUN_00aa1070(unsigned int);
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
@@ -7179,15 +7179,15 @@ void __cdecl FUN_0079ffb0(char param_1)
     if (cMenuOk4 == '\0')
         pMenu25->FUN_00450f90(0);
 
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_00a07530(0x108);
+    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->SetChangeFlag(0x108);
     static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_00700320(0xfcd, size27 * gridSize13);
     static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_00700320(0xfce, size27 * gridSize13);
     static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->FUN_00a012d0(0xfb2, objB83.c.r * DBL_0101e568, 1);
+        ->SetFloat(0xfb2, objB83.c.r * DBL_0101e568, 1);
     static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->FUN_00a012d0(0xfb3, objB83.c.g * DBL_0101e568, 1);
+        ->SetFloat(0xfb3, objB83.c.g * DBL_0101e568, 1);
     static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->FUN_00a012d0(0xfb4, objB83.c.b * DBL_0101e568, 1);
+        ->SetFloat(0xfb4, objB83.c.b * DBL_0101e568, 1);
     mk8c26.FUN_0043d410(0.0f, 0, 0);
     static_cast<ChainObj*>(
         reinterpret_cast<void*>(
@@ -7397,8 +7397,8 @@ namespace s7094f0 {
 
 struct Lock
 {
-    void FUN_0040fbf0(int iArg);
-    void FUN_0040fba0();
+    void Wait(int iArg);
+    void Leave();
 };
 
 struct InterfaceManagerView
@@ -7784,7 +7784,7 @@ static const char s_szPlayerNameEntryMenu[] = "Player Name Entry Menu";
 // @fnv 0x007094f0
 void FUN_007094f0()
 {
-    DAT_011d89c0.FUN_0040fbf0(0);
+    DAT_011d89c0.Wait(0);
     if (DAT_011d8950 && (!FUN_004b7210()->m_iModalCount || DAT_011d8950 == 6 || DAT_011d8950 == 7))
     {
         bool bPickResultFound = false;
@@ -7847,7 +7847,7 @@ void FUN_007094f0()
             DAT_011d899c = 0;
         }
     }
-    DAT_011d89c0.FUN_0040fba0();
+    DAT_011d89c0.Leave();
 }
 
 }
@@ -7874,7 +7874,7 @@ struct DisplayTile
     int unk00;
     DisplayList children;
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
 };
@@ -8455,9 +8455,9 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
             DisplayTile* position = FUN_00a08b20(root, DAT_0106ed0c);
             DisplayTile* reference8 = FUN_00a08b20(root, DAT_0106ecfc);
 
-            position->FUN_00a012d0(0xfb0, reference8->FUN_00a011b0(0xfb0), true);
+            position->SetFloat(0xfb0, reference8->FUN_00a011b0(0xfb0), true);
 
-            position->FUN_00a012d0(0xfa2, reference8->FUN_00a011b0(0xfa2), true);
+            position->SetFloat(0xfa2, reference8->FUN_00a011b0(0xfa2), true);
 
             bool modified3 = item->FUN_004bd820();
 
@@ -8544,7 +8544,7 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                     FUN_00406d00(weaponBuf4, 128, DAT_01020764, (int)FUN_004bd510(damage3, 1.0f));
 
                 tiles3[11]->FUN_00a01350(text3, weaponBuf4, true);
-                tiles3[4]->FUN_00a012d0(value, FUN_0040ebd0(conditionB, 1.0f), true);
+                tiles3[4]->SetFloat(value, FUN_0040ebd0(conditionB, 1.0f), true);
 
                 float reduction = 0.0f;
                 FUN_005e58f0(0x35, reinterpret_cast<DisplayPlayer*>(g_thePlayer), weapon, &reduction);
@@ -8645,7 +8645,7 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                     }
                 }
 
-                tiles3[4]->FUN_00a012d0(
+                tiles3[4]->SetFloat(
                     value,
                     FUN_0040ebd0(1.0f,
                                  item->FUN_004bcdb0(false) /
@@ -8830,17 +8830,17 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
             if (tiles3[10])
             {
                 tiles3[10]->FUN_00700320(0xfa3, (maskB & 0x400) != 0);
-                tiles3[10]->FUN_00a012d0(0xfa9, 255.0f, true);
+                tiles3[10]->SetFloat(0xfa9, 255.0f, true);
             }
 
             width = root->FUN_00a011b0(0xfb0) / 2.0 - 20.0;
             if ((maskB & 0x10) || (maskB & 0x20))
                 width *= 2.0f;
 
-            tiles3[6]->FUN_00a012d0(0xfa2, width, true);
-            tiles3[7]->FUN_00a012d0(0xfa2, width, true);
-            tiles3[8]->FUN_00a012d0(0xfa2, width + modY4, true);
-            tiles3[9]->FUN_00a012d0(0xfa2, width + aModZ, true);
+            tiles3[6]->SetFloat(0xfa2, width, true);
+            tiles3[7]->SetFloat(0xfa2, width, true);
+            tiles3[8]->SetFloat(0xfa2, width + modY4, true);
+            tiles3[9]->SetFloat(0xfa2, width + aModZ, true);
         }
     }
 }

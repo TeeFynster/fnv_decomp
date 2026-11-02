@@ -3793,7 +3793,7 @@ struct FUN_00410360
     void* FUN_00410220(int);
     void FUN_00410020(void*, int);
     void FUN_004121e0(FUN_00410360*, int);
-    void FUN_0040ff60(void*);
+    void AddExtraData(void*);
 };
 typedef FUN_00410360 Extra;
 struct ExtraNode
@@ -3917,7 +3917,7 @@ void Inventory::FUN_004cd9c0(void* source, void* destination)
                                 extraASlot11->FUN_004121e0(*nodeA->FUN_006815c0(), 1);
                                 copySlot14->FUN_00559450()->FUN_00905820(&extraASlot11);
                                 if (removedASlot21)
-                                    (*nodeA->FUN_006815c0())->FUN_0040ff60(removedASlot21);
+                                    (*nodeA->FUN_006815c0())->AddExtraData(removedASlot21);
                                 nodeA = nodeA->FUN_00726070();
                             }
                         }
@@ -3978,7 +3978,7 @@ void Inventory::FUN_004cd9c0(void* source, void* destination)
                             extraCSlot22->FUN_004121e0(*nodeC->FUN_006815c0(), 1);
                             copySlot14->FUN_00559450()->FUN_00905820(&extraCSlot22);
                             if (removedCSlot8)
-                                (*nodeC->FUN_006815c0())->FUN_0040ff60(removedCSlot8);
+                                (*nodeC->FUN_006815c0())->AddExtraData(removedCSlot8);
                             nodeC = nodeC->FUN_00726070();
                         }
                     }
@@ -4887,7 +4887,7 @@ struct CleanupReferenceExtra
 };
 struct CleanupReference
 {
-    void* FUN_0055d310();
+    void* GetContainer();
     CleanupReferenceExtra* FUN_005d43c0();
 };
 struct CleanupInventory
@@ -6648,7 +6648,7 @@ struct Transfer4c37Node84
 unsigned char __cdecl FUN_00481f10(int a);
 unsigned char __cdecl FUN_00702680(int a, int b);
 int __fastcall FUN_00401170(int a);
-void* __cdecl FUN_00401000(int a);
+void* __cdecl FormHeap_Allocate(int a);
 struct Transfer4c37Obj96
 {
     void* item;
@@ -6749,7 +6749,7 @@ struct Transfer4c37T70Obj
 {
     int GetWorldModel(int a);
 };
-void __cdecl FUN_005ac750(void* a, void* b, int c);
+void __cdecl MarkBaseExtraListScriptEvent(void* a, void* b, int c);
 struct Transfer4c37ItemObj
 {
     int FUN_0040fe20();
@@ -7487,7 +7487,7 @@ struct Sh00418800
 };
 struct Sh005ac1e0
 {
-    bool FUN_005ac1e0(void* a, void* b, void* c, bool d);
+    bool Execute(void* a, void* b, void* c, bool d);
 };
 struct Sh0087ce80
 {

@@ -1343,7 +1343,7 @@ struct NiBound
     NiPoint3 center;
     float radius;
     void ComputeBoundingSphere(unsigned int vertexCount, const NiPoint3* vertices);
-    void FUN_00a7f3f0(const NiBound* other);
+    void Merge(const NiBound* other);
 };
 
 struct MorphTarget
@@ -1410,7 +1410,7 @@ void MorpherController::UpdateGeometryBound()
             NiBound targetBound;
             data = GetMorphData();
             targetBound.ComputeBoundingSphere(data->vertexCount, data->GetTarget(i)->vertices);
-            morphBound.FUN_00a7f3f0(&targetBound);
+            morphBound.Merge(&targetBound);
         }
     }
     else

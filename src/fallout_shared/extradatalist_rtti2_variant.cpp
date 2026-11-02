@@ -237,8 +237,8 @@ struct DebugFlag
 };
 struct SaveLock
 {
-    void FUN_0040fbf0(int a);
-    void FUN_0040fba0();
+    void Wait(int a);
+    void Leave();
 };
 struct PackageMgr
 {
@@ -395,7 +395,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
         blkA4 = DAT_011de45c->FUN_00825c00();
         DAT_011de45c->FUN_008579b0(&zero, 2);
     }
-    DAT_011c3920.FUN_0040fbf0(0);
+    DAT_011c3920.Wait(0);
     count9 = 0;
     cnt = DAT_011de45c->FUN_00825c00();
     DAT_011de45c->FUN_008579b0(&count9, 2);
@@ -841,7 +841,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
         }
         *(short*)blkA4 = (short)(_end - blk);
     }
-    DAT_011c3920.FUN_0040fba0();
+    DAT_011c3920.Leave();
 }
 
 }
@@ -1176,7 +1176,7 @@ class ThisQ
 {
   public:
     E* FUN_00410220(int);
-    void FUN_00410140(int);
+    void RemoveExtraType(int);
     void FUN_0041c900();
     void FUN_00419d10(G*);
     ListQ* FUN_00422700();
@@ -1216,7 +1216,7 @@ void ThisQ::FUN_00426020(unsigned int a1, int a2, O* a3, void* a4)
                 if (c)
                 {
                     if (!c->FUN_00726070() || c->FUN_00726070()->FUN_0084e3a0() != id)
-                        FUN_00410140(0xd);
+                        RemoveExtraType(0xd);
                 }
             }
         }

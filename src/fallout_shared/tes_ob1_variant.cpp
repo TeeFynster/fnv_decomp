@@ -2967,7 +2967,7 @@ struct AttachRef
     void* FUN_00430830();
     void FUN_00565730();
     void* FUN_005d43c0();
-    double FUN_00567400();
+    double GetScale();
     void FUN_008c4640();
     unsigned int FUN_0084e3a0();
 };
@@ -2986,8 +2986,8 @@ struct AttachContext
 };
 extern AttachContext* DAT_011ddf38;
 extern AttachRef* DAT_011dea3c;
-void __cdecl FUN_005ac190(AttachRef*, void*);
-void __cdecl FUN_005ac750(AttachRef*, void*, unsigned int);
+void __cdecl DoCheckScriptRunnerAndRun(AttachRef*, void*);
+void __cdecl MarkBaseExtraListScriptEvent(AttachRef*, void*, unsigned int);
 void __cdecl FUN_004b6dc0(void*, unsigned int);
 struct AttachmentHandler
 {

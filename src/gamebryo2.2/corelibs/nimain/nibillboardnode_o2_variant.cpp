@@ -106,7 +106,7 @@ struct DummyNode
 };
 struct FUN_00a7de40_shell
 {
-    void FUN_00a7de40(NiCullingProcess*);
+    void RotateToCamera(NiCullingProcess*);
 };
 struct FUN_00a7e610_shell : NiBillboardNode
 {
@@ -115,7 +115,7 @@ struct FUN_00a7e610_shell : NiBillboardNode
 // @fnv 0x00a7e610
 void FUN_00a7e610_shell::FUN_00a7e610(NiCullingProcess* process)
 {
-    ((FUN_00a7de40_shell*)this)->FUN_00a7de40(*(NiCullingProcess**)((char*)process + 0xc));
+    ((FUN_00a7de40_shell*)this)->RotateToCamera(*(NiCullingProcess**)((char*)process + 0xc));
     ((DummyNode*)this)->FUN_00a5dbe0(process);
 }
 
@@ -857,10 +857,10 @@ struct BoardObject
     float time;
     __declspec(noalias) bool FUN_00a7dc40(const BoardObject*, const BoardVector&, BoardVector&, BoardVector&,
                                           BoardVector&);
-    void FUN_00a7de40(const BoardObject*);
+    void RotateToCamera(const BoardObject*);
 };
 // @fnv 0x00a7de40
-void BoardObject::FUN_00a7de40(const BoardObject* camera)
+void BoardObject::RotateToCamera(const BoardObject* camera)
 {
     CompositionResult composition;
     BillboardResults results;

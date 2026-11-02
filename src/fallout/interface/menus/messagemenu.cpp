@@ -572,7 +572,7 @@ struct Message
 };
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
-void* FUN_00401000(unsigned int);
+void* FormHeap_Allocate(unsigned int);
 int FUN_0044a670(const char*);
 void FUN_00406d30(char*, unsigned int, const char*);
 int FUN_00408b20(const char*, const char*);
@@ -1053,7 +1053,7 @@ struct MsgTile
     void FUN_00700320(int aiID, int aiValue);
     float FUN_00a011b0(int aiID);
     const char* FUN_00a011f0(int aiID);
-    void FUN_00a012d0(int aiID, float afValue, bool abPropagate);
+    void SetFloat(int aiID, float afValue, bool abPropagate);
     MsgTile* FUN_00a03da0(const char* apName);
     bool IsTraitNonZero(int aiID);
 };
@@ -1276,8 +1276,8 @@ void MsgMenu::PopulateFromMessageData()
         fButtonsWidth = FUN_0040ebd0(iMaxWidthCur + 80.0, (float)pMessagePtr->uiWidth);
     else
         fButtonsWidth = iMaxWidthCur + 80.0;
-    DAT_011da4f0->m_pTiles[4]->FUN_00a012d0(0xfb0, fListHeightTmp, false);
-    DAT_011da4f0->m_pTiles[4]->FUN_00a012d0(0xfb1, fButtonsWidth, false);
+    DAT_011da4f0->m_pTiles[4]->SetFloat(0xfb0, fListHeightTmp, false);
+    DAT_011da4f0->m_pTiles[4]->SetFloat(0xfb1, fButtonsWidth, false);
     DAT_011da4f0->kButtons.RebuildVisibleTiles();
     if (pMessagePtr->uiWidth > 0)
         fButtonsWidth = FUN_0040ebd0(fHorBuf * 2 + fButtonsWidth, (float)pMessagePtr->uiWidth);
@@ -1291,7 +1291,7 @@ void MsgMenu::PopulateFromMessageData()
     fMaxWidthCur = fMaxWidthCur - fHorBuf * 2;
     if (DAT_011da4f0->m_pTiles[2]->IsTraitNonZero(0xfa3))
         fMaxWidthCur = fMaxWidthCur - 120.0;
-    DAT_011da4f0->m_pTiles[3]->FUN_00a012d0(0xfba, fMaxWidthCur, true);
+    DAT_011da4f0->m_pTiles[3]->SetFloat(0xfba, fMaxWidthCur, true);
     MsgSize kSizeFinal = FUN_005bd5b0()->FUN_00a1b020(pMessagePtr->kText.FUN_00559450(), 2,
                                                       DAT_011da4f0->m_pTiles[3]->FUN_00a011b0(0xfba), 0);
     fTheTextHeight = fHorBuf * 2 + kSizeFinal.x + fTheTextHeight;
@@ -1317,13 +1317,13 @@ void MsgMenu::PopulateFromMessageData()
         fWidths = FUN_00715d40() * (pMessagePtr->uiWidth / FUN_00706e50());
         fWidths = FUN_0040ebd0(fWidths, FUN_00715d40() - FUN_007177c0() * 2);
     }
-    DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfb1, fWidths, true);
+    DAT_011da4f0->m_pTiles[0]->SetFloat(0xfb1, fWidths, true);
     DAT_0119f348 = pMessagePtr->iType == 0x17;
     FUN_00726070()->FUN_00700320(0x1772, 0);
     FUN_00726070()->FUN_00700320(0xfa3, 1);
     if (!pMessagePtr->GetByteAtOffset56())
     {
-        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa9, 0.0f, true);
+        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa9, 0.0f, true);
         if (FUN_004b7210()->FUN_00714f90(GetID()))
             FUN_00706fd0(GetID(), 1);
         float fScreenWidth = FUN_00715d40();
@@ -1344,16 +1344,16 @@ void MsgMenu::PopulateFromMessageData()
             fY = FUN_00404010(fTop, FUN_00717820());
             fY = FUN_0040ebd0(fY, fScreenHeight - fMenuHeightNew - FUN_00717820());
         }
-        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa1, fXNew, true);
-        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa2, fY, true);
+        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa1, fXNew, true);
+        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa2, fY, true);
     }
     else
     {
-        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa9, 1.0f, true);
+        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa9, 1.0f, true);
         if (!FUN_004b7210()->FUN_00714f90(GetID()))
             FUN_00706fb0(GetID(), 0);
     }
-    DAT_011da4f0->m_pTiles[5]->FUN_00a012d0(0xfa9, pMessagePtr->fAlpha, true);
+    DAT_011da4f0->m_pTiles[5]->SetFloat(0xfa9, pMessagePtr->fAlpha, true);
 }
 
 }
@@ -1380,7 +1380,7 @@ struct Helper
     int FUN_00a03c90();
     void FUN_00a1dc70(Tile* tile, int zero);
     double FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, unsigned char);
+    void SetFloat(int, float, unsigned char);
     void FUN_0075a0d0(void* arg1, const char* arg2);
     void PopulateFromMessageData();
     void FUN_00a1dc20(int);
@@ -1422,7 +1422,7 @@ bool __cdecl FUN_007a8ba0()
         if (((Helper*)pTile)->FUN_00a011b0(0xfa7) == DAT_010704f0 ||
             ((Helper*)pTile)->FUN_00a011b0(0xfa7) == DAT_010704e8)
         {
-            ((Helper*)pTile)->FUN_00a012d0(0xfad, FUN_00a01530(), 1);
+            ((Helper*)pTile)->SetFloat(0xfad, FUN_00a01530(), 1);
         }
         ((Helper*)((char*)DAT_011da4f0 + 0x40))
             ->FUN_0075a0d0(*(void**)((char*)DAT_011da4f0 + 0x38), "MM_ButtonTemplate");
@@ -1433,7 +1433,7 @@ bool __cdecl FUN_007a8ba0()
         if (flag)
         {
             ((Helper*)(((Helper*)(((Helper*)DAT_011da4f0)->FUN_00726070()))->FUN_00a03da0((char*)"MM_Background")))
-                ->FUN_00a012d0(0xfa9, *(float*)(((Helper*)&DAT_011d3bc8)->FUN_00403e20()) * DAT_0101e568, 1);
+                ->SetFloat(0xfa9, *(float*)(((Helper*)&DAT_011d3bc8)->FUN_00403e20()) * DAT_0101e568, 1);
         }
         if (FUN_007050d0())
         {

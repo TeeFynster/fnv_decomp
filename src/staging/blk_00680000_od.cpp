@@ -2229,7 +2229,7 @@ class SpawnedObject
     virtual int vDel(int flags);
 };
 
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 
 // @fnv 0x00682740
 void __cdecl ReleaseSpawnedObject(SpawnedObject* apObject)
@@ -2247,7 +2247,7 @@ void __cdecl ReleaseSpawnedObject(SpawnedObject* apObject)
         }
         else
         {
-            FUN_00401030((char*)kObj - 4);
+            FormHeap_Free((char*)kObj - 4);
             iResult = 0;
         }
         iResult2 = iResult;
@@ -2758,7 +2758,7 @@ FUN_0069b6d0_cls::~FUN_0069b6d0_cls()
     FUN_00438af0();
 }
 
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 
 struct Obj_b9971
 {
@@ -2769,7 +2769,7 @@ struct Obj_b9971
     Obj_b9971();
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
     static void operator delete(void*, unsigned int);
 };
@@ -2911,7 +2911,7 @@ struct S_0069d9a0_cls
 
 extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (S_0069d9a0_cls::*callback)());
 
-extern "C" void __cdecl FUN_00401030(void* apMemory);
+extern "C" void __cdecl FormHeap_Free(void* apMemory);
 
 // @fnv 0x0069d9a0
 void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
@@ -2922,7 +2922,7 @@ void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
 
         if (flags & 1)
         {
-            FUN_00401030(reinterpret_cast<char*>(this) - 4);
+            FormHeap_Free(reinterpret_cast<char*>(this) - 4);
         }
 
         return reinterpret_cast<char*>(this) - 4;
@@ -2932,7 +2932,7 @@ void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
 
     if (flags & 1)
     {
-        FUN_00401030(this);
+        FormHeap_Free(this);
     }
 
     return this;
@@ -3598,7 +3598,7 @@ extern int DAT_011f426c;
 
 void* operator new(unsigned int n);
 void* __cdecl FUN_00aa13e0(unsigned int n);
-void* __cdecl FUN_00401000(unsigned int n);
+void* __cdecl FormHeap_Allocate(unsigned int n);
 void* __stdcall GetPathManager(void* p, int a);
 void* __cdecl FUN_00c56680(float f, int a, int b, void* p);
 void __cdecl AttachLightingPropertyRecursive(void* p);

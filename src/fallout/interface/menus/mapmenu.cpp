@@ -2574,7 +2574,7 @@ struct HighlightTile : public Tile
 {
     HighlightTile* FUN_00a03da0(const char* pcName);
     void FUN_0071aa60(bool abVisible);
-    void FUN_00a07530(int a1);
+    void SetChangeFlag(int a1);
     bool GetSpeechChallengeFailure();
 };
 
@@ -2616,19 +2616,19 @@ void FUN_007a6c80_shell::UpdateHighlightBox()
                     if (pSide)
                     {
                         pSide->FUN_0071aa60(true);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("bottom");
                         pSide->FUN_0071aa60(true);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("left");
                         pSide->FUN_0071aa60(true);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("right");
                         pSide->FUN_0071aa60(true);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                     }
                     pBox->FUN_0071aa60(true);
-                    pBox->FUN_00a07530(8);
+                    pBox->SetChangeFlag(8);
                 }
             }
             else
@@ -2640,19 +2640,19 @@ void FUN_007a6c80_shell::UpdateHighlightBox()
                     if (pSide)
                     {
                         pSide->FUN_0071aa60(false);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("bottom");
                         pSide->FUN_0071aa60(false);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("left");
                         pSide->FUN_0071aa60(false);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                         pSide = pBox->FUN_00a03da0("right");
                         pSide->FUN_0071aa60(false);
-                        pSide->FUN_00a07530(8);
+                        pSide->SetChangeFlag(8);
                     }
                     pBox->FUN_0071aa60(false);
-                    pBox->FUN_00a07530(8);
+                    pBox->SetChangeFlag(8);
                 }
             }
         }
@@ -2883,7 +2883,7 @@ struct MenuInterfaceCalls
 struct MapTileCalls
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
 };
 // @fnv 0x00798710
 void __cdecl FUN_00798710()
@@ -2899,11 +2899,11 @@ void __cdecl FUN_00798710()
     if (!FUN_004b71d0())
     {
         ((MapTileCalls*)DAT_011da368->m_pTiles[6])
-            ->FUN_00a012d0(4001, ((MenuInterfaceCalls*)FUN_004b7210())->FUN_007697f0(true) -
+            ->SetFloat(4001, ((MenuInterfaceCalls*)FUN_004b7210())->FUN_007697f0(true) -
                                      ((A7d*)DAT_011da368->m_pTiles[6]->GetParent())->GetTotalFloat() -
                                      ((MapTileCalls*)DAT_011da368->m_pTiles[6])->FUN_00a011b0(4017) / 2.0);
         ((MapTileCalls*)DAT_011da368->m_pTiles[6])
-            ->FUN_00a012d0(4002, ((MenuInterfaceCalls*)FUN_004b7210())->GetScaledValue(true) -
+            ->SetFloat(4002, ((MenuInterfaceCalls*)FUN_004b7210())->GetScaledValue(true) -
                                      ((C7d*)DAT_011da368->m_pTiles[6]->GetParent())->GetAccumulatedFloat() -
                                      ((MapTileCalls*)DAT_011da368->m_pTiles[6])->FUN_00a011b0(4016) / 2.0);
     }
@@ -3053,7 +3053,7 @@ void MapMenu_Shell::UpdateChallengeText(TESChallenge* apChallenge)
 struct WidgetTile
 {
     int GetAxisState();
-    void FUN_00a012d0(int before, float value, int flag);
+    void SetFloat(int before, float value, int flag);
     void SetTraitAndReset(int before, float value);
     void SetTraitAndReset(int before);
     double FUN_00a011b0(int before);
@@ -3285,16 +3285,16 @@ bool Controller::HandleInputCommand(int command, int ignored)
                 {
                     if (valueX || selected)
                     {
-                        current->FUN_00a012d0(0xfea, 1.0f, 1);
-                        current->FUN_00a012d0(0xfeb, 1.0f, 1);
+                        current->SetFloat(0xfea, 1.0f, 1);
+                        current->SetFloat(0xfeb, 1.0f, 1);
                         current->SetTraitAndReset(0xfee, (float)((double)valueX * DAT_01074f30 / DAT_01029790));
                         current->SetTraitAndReset(0xfef, (float)((double)selected * DAT_0102fc70 / DAT_01029790));
                         changed = true;
                     }
                     else
                     {
-                        current->FUN_00a012d0(0xfea, DAT_01012054, 1);
-                        current->FUN_00a012d0(0xfeb, DAT_01012054, 1);
+                        current->SetFloat(0xfea, DAT_01012054, 1);
+                        current->SetFloat(0xfeb, DAT_01012054, 1);
                     }
                     UpdateMapHighlight();
                 }
@@ -3315,7 +3315,7 @@ bool Controller::HandleInputCommand(int command, int ignored)
                         {
                             int before = FUN_00a01860(DAT_010702d8);
                             int property = (int)item->FUN_00a011b0(before);
-                            item->FUN_00a012d0(before, (float)(property + direction), 0);
+                            item->SetFloat(before, (float)(property + direction), 0);
                             if ((double)property != item->FUN_00a011b0(before))
                             {
                                 item->SetTraitAndReset(FUN_00a01860(DAT_01070250), 1.0f);
@@ -3445,7 +3445,7 @@ class NoteTile
 {
   public:
     void FUN_00700320(int m_uiSoundID, int iValue);
-    void FUN_00a012d0(int m_uiSoundID, float fValue, bool bPropagate);
+    void SetFloat(int m_uiSoundID, float fValue, bool bPropagate);
 };
 class NotesListBox
 {
@@ -3497,7 +3497,7 @@ void NotesMapMenu::RefreshNotesList()
             NoteData* pkNote = DAT_011dea3c->GetItemAt(i);
             NoteTile* pkTile2 = m_kNotesList.CreateListItem(pkNote, pkNote->m_kName.FUN_00408da0(), 0, 0);
             pkTile2->FUN_00700320(0xfaa, 0x18);
-            pkTile2->FUN_00a012d0(DAT_011da344, pkNote->GetUnk7d() ? 128.0f : 255.0f, true);
+            pkTile2->SetFloat(DAT_011da344, pkNote->GetUnk7d() ? 128.0f : 255.0f, true);
         }
         m_kNotesList.FUN_007a30e0(true);
         m_kNotesList.ApplyNoteFilter(FUN_0079b390);
@@ -3617,7 +3617,7 @@ extern Handler600* g_dataHandler;
 struct Tile600
 {
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 bool __cdecl FUN_0079b720(TESChallenge*);
 int __cdecl CompareItems(Challenge600*, Challenge600*);
@@ -3777,7 +3777,7 @@ void Target600::RefreshChallengeList()
         {
             Tile600* tile = list.AddItem(item, item->name.FUN_00408da0(), 0, 0);
             tile->FUN_00700320(0xfaa, 0x18);
-            tile->FUN_00a012d0(DAT_011da344, item->FUN_005a6150() ? 128.0f : 255.0f, true);
+            tile->SetFloat(DAT_011da344, item->FUN_005a6150() ? 128.0f : 255.0f, true);
         }
         node = node->FUN_00726070();
     }
@@ -4871,7 +4871,7 @@ extern Reference* DAT_011dea3c;
 struct Tile
 {
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
     bool FUN_00a07ed0(int);
     void StartFade(int, float, float, float, int);
     Tile* FUN_0045cd60();
@@ -4992,19 +4992,19 @@ void Menu::FUN_0079dbb0()
                 world->FUN_00555b10(position, position, 1);
             point = GetMarkerPosition(position, target->FUN_00575d70());
             tile->FUN_00700320(4003, 1);
-            tile->FUN_00a012d0(DAT_011da350, point.x, 1);
-            tile->FUN_00a012d0(DAT_011da34c, point.y, 1);
+            tile->SetFloat(DAT_011da350, point.x, 1);
+            tile->SetFloat(DAT_011da34c, point.y, 1);
             float angle = -DAT_011dea3c->Heading(0) - DAT_010290d0;
             angle -= DAT_011dea3c->FUN_00575d10() ? DAT_011dea3c->FUN_008d6f30()->FUN_00555ad0() : 0.0f;
-            tile->FUN_00a012d0(4090, angle, 1);
+            tile->SetFloat(4090, angle, 1);
         }
         else
             tile->FUN_00700320(4003, 0);
         if (!tile->FUN_00a07ed0(4085))
             tile->StartFade(4085, DAT_0101e704, DAT_01023cd8, 1.0f, 1);
-        map->FUN_00a012d0(
+        map->SetFloat(
             4001, map->FUN_0045cd60()->FUN_00a011b0(4017) / DAT_01011590 - map->FUN_00a011b0(4017) * point.x, 0);
-        map->FUN_00a012d0(
+        map->SetFloat(
             4002, map->FUN_0045cd60()->FUN_00a011b0(4016) / DAT_01011590 - map->FUN_00a011b0(4016) * point.y, 0);
         FUN_0079e0a0();
         UpdateMapMarkers();
@@ -5043,7 +5043,7 @@ struct QuestNode
 };
 struct PlayerQuestOps
 {
-    QuestNode* FUN_00952ba0();
+    QuestNode* GetCurrentQuestTargets();
 };
 struct RefMapOps
 {
@@ -5094,7 +5094,7 @@ void MarkerMap::FUN_0079e0a0()
         delete tile;
         tile = ((MarkerTile*)m_pMapTile)->FUN_00a03eb0(29);
     }
-    for (QuestNode* node = ((PlayerQuestOps*)g_thePlayer)->FUN_00952ba0();
+    for (QuestNode* node = ((PlayerQuestOps*)g_thePlayer)->GetCurrentQuestTargets();
          g_011e07f0.FUN_00408d60()->b && node && *node->FUN_006815c0(); node = node->FUN_00726070())
     {
         TESObjectREFR* reference = (*node->FUN_006815c0())->FUN_006101b0(true);
@@ -5167,7 +5167,7 @@ struct MarkerTile : Tile
 {
     float FUN_00a011b0(int);
     MarkerTile* FUN_00a03da0(const char*);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct MarkerMenu : MapMenu
 {
@@ -5238,7 +5238,7 @@ void MarkerMenu::UpdateQuestMarkers()
                 aCacheObject->AppendFloatAction(0x7d1, 60.0f);
                 aCacheObject->FUN_00a09410(0);
             }
-            a->FUN_00a07530(0x3ff);
+            a->SetChangeFlag(0x3ff);
         }
         p = p->GetNext();
     }
@@ -5302,7 +5302,7 @@ struct TileEx
     void Release();
     TileEx* GetChildById(int);
     void SetName(const char*);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 
 struct MapMenuExt : public MapMenu
@@ -5447,7 +5447,7 @@ void MapMenuExt::UpdateMapMarkers()
             newTile->Set(0xfb7, 2);
             newTile->Set(0xfb9, 2);
             newTile->Set(0xfb0, 60.0f, true);
-            ((TileEx*)newTile)->FUN_00a07530(2);
+            ((TileEx*)newTile)->SetChangeFlag(2);
 
             LBValue* xVal = (LBValue*)newTile->GetValue(0xfa1);
             LBValue* valY = (LBValue*)newTile->GetValue(0xfa2);
@@ -6561,7 +6561,7 @@ struct SelectTile
     SelectAction* FUN_00a00f30(int);
     bool FUN_0071aa80();
     void FUN_0071aa60(bool);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
     SelectTile* FUN_00a03da0(const char*);
     void FUN_00700320(int, int);
 };
@@ -6601,19 +6601,19 @@ void SelectionList::UpdateSelectionState()
                     if (part)
                     {
                         part->FUN_0071aa60(true);
-                        part->FUN_00a07530(8);
+                        part->SetChangeFlag(8);
                         part = container->FUN_00a03da0(DAT_0106f88c);
                         part->FUN_0071aa60(true);
-                        part->FUN_00a07530(8);
+                        part->SetChangeFlag(8);
                         part = container->FUN_00a03da0(DAT_0106f884);
                         part->FUN_0071aa60(true);
-                        part->FUN_00a07530(8);
+                        part->SetChangeFlag(8);
                         part = container->FUN_00a03da0(DAT_0106f87c);
                         part->FUN_0071aa60(true);
-                        part->FUN_00a07530(8);
+                        part->SetChangeFlag(8);
                     }
                     container->FUN_0071aa60(true);
-                    container->FUN_00a07530(8);
+                    container->SetChangeFlag(8);
                 }
             }
             else
@@ -6625,19 +6625,19 @@ void SelectionList::UpdateSelectionState()
                     if (partOff3)
                     {
                         partOff3->FUN_0071aa60(false);
-                        partOff3->FUN_00a07530(8);
+                        partOff3->SetChangeFlag(8);
                         partOff3 = containerOff4->FUN_00a03da0(DAT_0106f88c);
                         partOff3->FUN_0071aa60(false);
-                        partOff3->FUN_00a07530(8);
+                        partOff3->SetChangeFlag(8);
                         partOff3 = containerOff4->FUN_00a03da0(DAT_0106f884);
                         partOff3->FUN_0071aa60(false);
-                        partOff3->FUN_00a07530(8);
+                        partOff3->SetChangeFlag(8);
                         partOff3 = containerOff4->FUN_00a03da0(DAT_0106f87c);
                         partOff3->FUN_0071aa60(false);
-                        partOff3->FUN_00a07530(8);
+                        partOff3->SetChangeFlag(8);
                     }
                     containerOff4->FUN_0071aa60(false);
-                    containerOff4->FUN_00a07530(8);
+                    containerOff4->SetChangeFlag(8);
                 }
             }
         }
@@ -7151,7 +7151,7 @@ class AMTile
 {
   public:
     void FUN_00a01350(int m_iValueId, const char* pcValue, int iFlag);
-    void FUN_00a012d0(int m_iValueId, float fValue, int iFlag);
+    void SetFloat(int m_iValueId, float fValue, int iFlag);
     void FUN_00700320(int m_iValueId, int iValue);
 };
 
@@ -7279,7 +7279,7 @@ void AMMenuView::UpdateHolotapePlayback()
         FUN_00406d00(acText, 0x40, "%02d:%02d:%01d %s", iRemaining / 60000, iRemaining % 60000 / 1000,
                      iRemaining % 1000 / 100, DAT_011d3960.FUN_00403df0());
         m_pkInfoTile->FUN_00a01350(FUN_00a01860("_ItemStringInfo"), acText, 1);
-        m_pkInfoTile->FUN_00a012d0(FUN_00a01860("_AudioFileCompletion"), fTimeOffset / m_fSoundVolume, 1);
+        m_pkInfoTile->SetFloat(FUN_00a01860("_AudioFileCompletion"), fTimeOffset / m_fSoundVolume, 1);
     }
     if (m_pkCurrent && !m_pkCurrent->FUN_006815c0()->FUN_00ad8ce0())
     {
@@ -7298,7 +7298,7 @@ void AMMenuView::UpdateHolotapePlayback()
         {
             FUN_00406d00(acText, 0x40, "00:00:0 %s", DAT_011d3960.FUN_00403df0());
             m_pkInfoTile->FUN_00a01350(FUN_00a01860("_ItemStringInfo"), acText, 1);
-            m_pkInfoTile->FUN_00a012d0(FUN_00a01860("_AudioFileCompletion"), 1.0f, 1);
+            m_pkInfoTile->SetFloat(FUN_00a01860("_AudioFileCompletion"), 1.0f, 1);
             m_pkInfoTile->FUN_00700320(0x1004, 0);
             StopHolotapeAudio();
         }
@@ -7385,7 +7385,7 @@ class MMTile
   public:
     void FUN_00a01350(int m_iValueId, const char* pcValue, int iFlag);
     void FUN_00715c60(int m_iValueId, int iValue);
-    void FUN_00a012d0(int m_iValueId, float fValue, int iFlag);
+    void SetFloat(int m_iValueId, float fValue, int iFlag);
     void FUN_00700320(int m_iValueId, int iValue);
     void FUN_00707e10(const char* pcName);
     MMTile* FUN_00a03eb0(int iIndex);
@@ -7677,8 +7677,8 @@ void MMMenu::RefreshMap()
                                                     pkRef->FUN_00569060()->FUN_00438eb0(), 1);
                     pkMarkerEntry->FUN_00707e10(pkRef->FUN_00569060()->FUN_00438eb0());
                     pkMarkerEntry->FUN_00700320(0xfaa, 0x1a);
-                    pkMarkerEntry->FUN_00a012d0(DAT_011da350, kMapPos.x, 1);
-                    pkMarkerEntry->FUN_00a012d0(DAT_011da34c, kMapPos.y, 1);
+                    pkMarkerEntry->SetFloat(DAT_011da350, kMapPos.x, 1);
+                    pkMarkerEntry->SetFloat(DAT_011da34c, kMapPos.y, 1);
                     if (pkRef->FUN_00569060()->FUN_00438ef0())
                         pkMarkerEntry->FUN_00a01350(0xfcc, DAT_011a0404[pkRef->FUN_00569060()->FUN_00438f30()], 1);
                     else
@@ -7724,7 +7724,7 @@ struct NoteTile
     float FUN_00a011b0(int);
     void FUN_00700320(int, int);
     void FUN_00a01350(int, const char*, bool);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
     NoteTile* FUN_0045cd60();
 };
@@ -7822,8 +7822,8 @@ void NoteMenu::SetNote(NoteInput* note)
                 ->y;
         overflow3 = textHeight2 - textTile2->FUN_0045cd60()->FUN_00a011b0(0xfb0);
         overflow3 = FUN_00404010(0.0f, overflow3);
-        scrollbar2->FUN_00a012d0(FUN_00a01860("_number_of_items"), FUN_004e4430(overflow3 / scrollDelta) + 1.0, true);
-        scrollbar2->FUN_00a012d0(FUN_00a01860("_current_value"), 0.0f, false);
+        scrollbar2->SetFloat(FUN_00a01860("_number_of_items"), FUN_004e4430(overflow3 / scrollDelta) + 1.0, true);
+        scrollbar2->SetFloat(FUN_00a01860("_current_value"), 0.0f, false);
         scrollbar2->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         break;
     case 2:
@@ -7837,7 +7837,7 @@ void NoteMenu::SetNote(NoteInput* note)
         {
             sprintf_s(timeText2, 64, "--:--:- %s", g_011d3960.FUN_00403df0());
             noteTile->FUN_00a01350(FUN_00a01860("_ItemStringInfo"), timeText2, true);
-            noteTile->FUN_00a012d0(FUN_00a01860("_AudioFileCompletion"), 0.0f, true);
+            noteTile->SetFloat(FUN_00a01860("_AudioFileCompletion"), 0.0f, true);
         }
         break;
     }
@@ -7887,19 +7887,19 @@ void HighlightList::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(true);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
             else
@@ -7911,19 +7911,19 @@ void HighlightList::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(false);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
         }

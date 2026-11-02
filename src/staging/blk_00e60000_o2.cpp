@@ -710,7 +710,7 @@ void __cdecl _delete(void* p, unsigned int size);
 
 struct M788
 {
-    void __thiscall FUN_004ed900();
+    void __thiscall RemoveAll();
 };
 
 struct FUN_00e7b550_Class
@@ -734,7 +734,7 @@ void __thiscall FUN_00e7bb50_Class::FUN_00e7bb50()
 
         if (item)
         {
-            reinterpret_cast<M788*>(reinterpret_cast<unsigned char*>(item) + 0x10)->FUN_004ed900();
+            reinterpret_cast<M788*>(reinterpret_cast<unsigned char*>(item) + 0x10)->RemoveAll();
             _delete(item, 0x1c);
         }
     }
@@ -10009,7 +10009,7 @@ struct SpinLk
 {
     int owner;
     unsigned int count;
-    void FUN_0040fbf0(const char* name = 0) throw();
+    void Wait(const char* name = 0) throw();
     void Unlock() throw()
     {
         if (--count == 0)
@@ -10034,7 +10034,7 @@ struct PoolAlloc
 {
     static ListItem* Allocate() throw()
     {
-        DAT_011c5f80.FUN_0040fbf0();
+        DAT_011c5f80.Wait();
         if (!NiTAbstractPoolAllocator_unsigned_int_instance.head)
             FUN_0043a080();
         ListItem* p = NiTAbstractPoolAllocator_unsigned_int_instance.head;

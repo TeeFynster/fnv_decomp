@@ -157,11 +157,11 @@ struct NiTPointerListBase
     NiTListItem* m_pkTail;
     int m_uiCount;
     void DeleteItem(NiTListItem*);
-    void FUN_004ed900();
+    void RemoveAll();
 };
 // Walks the list from m_pkHead, deleting each item via DeleteItem, then resets m_uiCount, m_pkHead and m_pkTail.
 // @fnv 0x004ed900
-void NiTPointerListBase::FUN_004ed900()
+void NiTPointerListBase::RemoveAll()
 {
     NiTListItem* pkCurr = m_pkHead;
     while (pkCurr)

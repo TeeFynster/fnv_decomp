@@ -2476,8 +2476,8 @@ class AutoMemContext
 
 struct SpinLock6c67
 {
-    void FUN_0040fbf0(const char* pcName);
-    void FUN_0040fba0();
+    void Wait(const char* pcName);
+    void Leave();
     int m_kNextStreamField[2];
 };
 
@@ -2513,7 +2513,7 @@ struct Queue6c67
 // @fnv 0x006c6700
 void Queue6c67::ClearQueue(bool abFreeNodes)
 {
-    m_kLock.FUN_0040fbf0(0);
+    m_kLock.Wait(0);
     AutoMemContext kMemContext(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
                                "d:\\_fallout3\\platforms\\common\\code\\bsmain\\ThreadSafeStructures.inl", 0x115);
     int iCapacity = m_pkTable->FUN_00559450();
@@ -2533,7 +2533,7 @@ void Queue6c67::ClearQueue(bool abFreeNodes)
         m_pkTail = m_pkHead;
         m_pkTable = new FUN_006c73b0(iCapacity);
     }
-    m_kLock.FUN_0040fba0();
+    m_kLock.Leave();
 }
 
 struct FUN_006c6ae0_Base
@@ -3440,7 +3440,7 @@ class TESObjectREFR
     virtual void Slot117();
     virtual TargetTypes::Point3 GetMinimum();
     virtual TargetTypes::Point3 GetMaximum();
-    float FUN_00567400();
+    float GetScale();
 };
 float __cdecl FUN_00404010(float, float);
 bool __cdecl FindPathToTarget(TargetTypes::Request*, void*, int);
@@ -3460,7 +3460,7 @@ bool __cdecl BuildPathingRequest(TESObjectREFR* pFirstRef, TESObjectREFR* pSecon
         float delta = maximumTmp.x - minimumB.x;
         float delta5 = maximumTmp.y - minimumB.y;
         float kRadius = FUN_00404010(delta, delta5);
-        kRadius *= pFirstRef->FUN_00567400();
+        kRadius *= pFirstRef->GetScale();
         kRadius = FUN_00404010(kRadius, 32.0f);
         kRadius *= 0.5;
         originRadius = kRadius;
@@ -3470,7 +3470,7 @@ bool __cdecl BuildPathingRequest(TESObjectREFR* pFirstRef, TESObjectREFR* pSecon
         delta = maximumTmp.x - minimumB.x;
         delta5 = maximumTmp.y - minimumB.y;
         kRadius = FUN_00404010(delta, delta5);
-        kRadius *= pSecondRef->FUN_00567400();
+        kRadius *= pSecondRef->GetScale();
         kRadius = FUN_00404010(kRadius, 32.0f);
         kRadius *= 0.5;
         destinationRadius = kRadius;

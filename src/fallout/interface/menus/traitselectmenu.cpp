@@ -593,7 +593,7 @@ struct FUN_00755680_shell
 };
 struct FUN_00a012d0_t
 {
-    void FUN_00a012d0(int id, float value, bool propagate);
+    void SetFloat(int id, float value, bool propagate);
 };
 struct TraitScrollTile : FUN_00a012d0_t
 {
@@ -671,23 +671,23 @@ void TraitScrollMenu::UpdateScrollAnimation()
         unsigned int elapsed = gm_GetTickCount() - selectionTick;
         if (elapsed < 50)
         {
-            selectedTile->FUN_00a012d0(4032, 0.0f, true);
-            selectedTile->FUN_00a012d0(4031, 0.0f, true);
+            selectedTile->SetFloat(4032, 0.0f, true);
+            selectedTile->SetFloat(4031, 0.0f, true);
         }
         else if (elapsed < 100)
         {
-            selectedTile->FUN_00a012d0(4032, 0.0f, true);
-            selectedTile->FUN_00a012d0(4031, 32.0f, true);
+            selectedTile->SetFloat(4032, 0.0f, true);
+            selectedTile->SetFloat(4031, 32.0f, true);
         }
         else if (elapsed < 150)
         {
-            selectedTile->FUN_00a012d0(4032, 64.0f, true);
-            selectedTile->FUN_00a012d0(4031, 0.0f, true);
+            selectedTile->SetFloat(4032, 64.0f, true);
+            selectedTile->SetFloat(4031, 0.0f, true);
         }
         else
         {
-            selectedTile->FUN_00a012d0(4032, 64.0f, true);
-            selectedTile->FUN_00a012d0(4031, 32.0f, true);
+            selectedTile->SetFloat(4032, 64.0f, true);
+            selectedTile->SetFloat(4031, 32.0f, true);
         }
     }
     if ((FUN_004b7210(), FUN_004b71d0()) && !static_cast<FUN_00755680_shell*>(FUN_004b7210())->FUN_00755680())
@@ -735,13 +735,13 @@ void FUN_007e82b0_shell::FUN_007e8310(float afDelta)
         float fPos2 = 0.0f;
         ((TraitScrollMenu*)this)->unk64 &&
             (fPos2 = fA5 - ((TraitScrollMenu*)this)->currentPosition * fE2,
-             ((TraitScrollTile*)((TraitScrollMenu*)this)->unk64)->FUN_00a012d0(0xfa2, fPos2, true), 1);
+             ((TraitScrollTile*)((TraitScrollMenu*)this)->unk64)->SetFloat(0xfa2, fPos2, true), 1);
         FUN_00706f30(4);
         if (((TraitScrollMenu*)this)->scrollTile)
         {
             int iID2 = FUN_00a01860("_current_value");
             float fScaled5 = ((TraitScrollMenu*)this)->currentPosition * 10.0;
-            ((TraitScrollMenu*)this)->scrollTile->FUN_00a012d0(iID2, fScaled5, false);
+            ((TraitScrollMenu*)this)->scrollTile->SetFloat(iID2, fScaled5, false);
             ((TraitPokeTile*)((TraitScrollMenu*)this)->scrollTile)->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         }
     }

@@ -811,7 +811,7 @@ void* __cdecl FUN_004b5820(void*);
 S9c_Form* __cdecl FUN_0056f930(void*);
 void* __cdecl FUN_004b5950(void*);
 S9c_World* __cdecl FUN_004b5a80(void*);
-void __cdecl FUN_005ac750(void*, void*, unsigned int);
+void __cdecl MarkBaseExtraListScriptEvent(void*, void*, unsigned int);
 extern NiPoint3 DAT_011a9490;
 extern void* DAT_011ca288;
 S9c_Pt __cdecl FUN_004a3760(float, const NiPoint3*);
@@ -981,8 +981,8 @@ bool S9c_Actor::FUN_009c0090()
                 if (world->FUN_0043b4f0().FUN_0043b4d0() == 23 || world->FUN_0043b4f0().FUN_0043b4d0() == 24)
                 {
                     found = true;
-                    FUN_005ac750(this, form->FUN_005d43c0(), 0x80);
-                    FUN_005ac750(DAT_011ca288, form->FUN_005d43c0(), 0x100);
+                    MarkBaseExtraListScriptEvent(this, form->FUN_005d43c0(), 0x80);
+                    MarkBaseExtraListScriptEvent(DAT_011ca288, form->FUN_005d43c0(), 0x100);
                 }
             }
         }

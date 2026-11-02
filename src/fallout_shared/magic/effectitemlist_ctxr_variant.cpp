@@ -9,7 +9,7 @@ ActorPathHandler::PATH_HANDLER_RESULT CallNoPathUpdate(ActorPathHandler* pHandle
 extern "C" char DAT_011837c4, DAT_01183028, DAT_010120d8, DAT_010125c0, DAT_01012578, DAT_01012520, DAT_011c33d4;
 struct File
 {
-    int FUN_004726b0();
+    int GetNextChunk();
     void ReadChunkInt(unsigned*);
     void FUN_004726f0();
 };
@@ -59,7 +59,7 @@ void List::FUN_00405760(File* file, const char* name)
     EffectSetting* effect;
     Item* actorValue;
     int item;
-    switch (file->FUN_004726b0())
+    switch (file->GetNextChunk())
     {
     case 0x44494645:
         file->ReadChunkInt(&id);

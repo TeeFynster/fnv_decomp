@@ -2066,7 +2066,7 @@ class Model
 };
 struct Loader_S
 {
-    NiNode* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    NiNode* LoadModel(const char*, int, bool, bool, bool, bool);
 };
 extern bool DAT_011d8908;
 class FileFinder
@@ -2930,9 +2930,9 @@ struct Tile30
 {
     unsigned int FUN_0056c7f0();
     void FUN_007a1400(int);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
 };
 // small local-object stand-ins (methods invoked with ecx = local)
 struct V3Maker
@@ -3183,7 +3183,7 @@ struct MapMenuR6
 };
 int __cdecl FUN_00556870(V3Maker*);
 // free helpers; conventions read from add esp evidence
-extern "C" void* __cdecl FUN_00401000(unsigned int);
+extern "C" void* __cdecl FormHeap_Allocate(unsigned int);
 extern "C" void __stdcall FUN_00401050(void*, unsigned int, unsigned int, void*);
 extern "C" void* __cdecl FUN_00aa1070(unsigned int);
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
@@ -3246,8 +3246,8 @@ namespace s7094f0 {
 
 struct Lock
 {
-    void FUN_0040fbf0(int iArg);
-    void FUN_0040fba0();
+    void Wait(int iArg);
+    void Leave();
 };
 
 struct InterfaceManagerView
@@ -3632,7 +3632,7 @@ static const char s_szPlayerNameEntryMenu[] = "Player Name Entry Menu";
 // @fnv 0x007094f0
 void FUN_007094f0()
 {
-    DAT_011d89c0.FUN_0040fbf0(0);
+    DAT_011d89c0.Wait(0);
     if (DAT_011d8950 && (!FUN_004b7210()->m_iModalCount || DAT_011d8950 == 6 || DAT_011d8950 == 7))
     {
         bool bPickResultFound = false;
@@ -3695,7 +3695,7 @@ void FUN_007094f0()
             DAT_011d899c = 0;
         }
     }
-    DAT_011d89c0.FUN_0040fba0();
+    DAT_011d89c0.Leave();
 }
 
 }
@@ -3718,7 +3718,7 @@ struct DisplayTile
     int unk00;
     DisplayList children;
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
 };

@@ -793,8 +793,8 @@ struct Player
     virtual void v3c0();
     virtual void v3c4();
     int FUN_008a7570();
-    void FUN_0088c650(Form*, int, void*, int, int, int);
-    void FUN_0088c790(Form*, int, void*, int, int, int);
+    void EquipItem(Form*, int, void*, int, int, int);
+    void UnequipItem(Form*, int, void*, int, int, int);
     void FUN_00950030();
     Process* FUN_008d8520();
 };
@@ -836,9 +836,9 @@ void Wheel::FUN_00701e80()
     else
     {
         if (!entry5->FUN_004bddd0(false))
-            DAT_011dea3c->FUN_0088c650(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
+            DAT_011dea3c->EquipItem(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
         else
-            DAT_011dea3c->FUN_0088c790(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
+            DAT_011dea3c->UnequipItem(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
     }
     DAT_011dea3c->FUN_00950030();
     DAT_011dea3c->FUN_008d8520()->v580(1, 0, 0);

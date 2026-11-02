@@ -518,7 +518,7 @@ class ManagedSubObject
     ~ManagedSubObject();
 };
 
-extern "C" void __cdecl FUN_00401030(void* p);
+extern "C" void __cdecl FormHeap_Free(void* p);
 
 class FUN_007a8960_cls : public ManagedSubObject
 {
@@ -542,7 +542,7 @@ class FUN_007a8960_cls : public ManagedSubObject
 FUN_007a8960_cls::~FUN_007a8960_cls()
 {
     void* p = m_08;
-    FUN_00401030(p);
+    FormHeap_Free(p);
     m_08 = 0;
 }
 
@@ -658,7 +658,7 @@ extern "C" const double DAT_01012060;
 struct ActiveEffectEntry
 {
     float FUN_00a011b0(unsigned int id);
-    void FUN_00a012d0(unsigned int id, float value, bool update);
+    void SetFloat(unsigned int id, float value, bool update);
 };
 struct ActiveEffectCollection
 {
@@ -679,7 +679,7 @@ void ActiveEffectCollection::FUN_007b4530(int amount)
         ActiveEffectEntry* pEffect = **FUN_0057cbe0(&it);
         float fAmount = pEffect->FUN_00a011b0(4002);
         fAmount = (float)amount * rate + fAmount;
-        pEffect->FUN_00a012d0(4002, fAmount, true);
+        pEffect->SetFloat(4002, fAmount, true);
     }
 }
 

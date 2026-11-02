@@ -4726,7 +4726,7 @@ struct FUN_006317a0_shell
 };
 struct FUN_00a012d0_shell
 {
-    void FUN_00a012d0();
+    void SetFloat();
 };
 struct FUN_007b52d0_shell
 {
@@ -4738,7 +4738,7 @@ struct FUN_007bf710_cls
     void ApplyValueToChain(int aiId, float afValue);
 };
 
-// Walks the object chain at DAT_011da878 slot aiId, calling FUN_00a012d0 on each node produced by AddEight with afValue.
+// Walks the object chain at DAT_011da878 slot aiId, calling SetFloat on each node produced by AddEight with afValue.
 // @fnv 0x007bf710
 void FUN_007bf710_cls::ApplyValueToChain(int aiId, float afValue)
 {
@@ -4746,7 +4746,7 @@ void FUN_007bf710_cls::ApplyValueToChain(int aiId, float afValue)
     char* pCur = *(char**)((char*)DAT_011da878 + 0x2c + aiId * 4) + 4;
     while (pObj != 0 && pCur != 0 && *((FUN_0073ac90_shell*)pCur)->FUN_0073ac90() != 0)
     {
-        ((FUN_00a012d0_shell*)*((FUN_006317a0_shell*)pCur)->AddEight(pObj, 0xfa9, afValue, 1))->FUN_00a012d0();
+        ((FUN_00a012d0_shell*)*((FUN_006317a0_shell*)pCur)->AddEight(pObj, 0xfa9, afValue, 1))->SetFloat();
         pObj = ((FUN_007b52d0_shell*)pCur)->DereferenceIfNotNull(pObj);
     }
 }
@@ -10217,11 +10217,11 @@ struct RouletteTile
     RouletteTile* FUN_00a01b00();
     RouletteMenu* FUN_00a03c90();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void FUN_00a01350(int, const char*, bool);
     void SetTraitAndReset(int, float);
     void FUN_00700320(int, int);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct InterfaceRoulette
 {
@@ -10332,7 +10332,7 @@ RouletteTile* __cdecl FUN_007bbe20(RoulettePlayerStandIn* casino, int bet, int a
             return 0;
         }
         if (ui->FUN_00a011b0(0xfa7) == DAT_010704f0 || ui->FUN_00a011b0(0xfa7) == DAT_010704e8)
-            ui->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            ui->SetFloat(0xfad, FUN_00a01530(1));
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk002c)->FUN_00a01350(DAT_011da870, g_011d3804.String(), true);
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk002c)->SetTraitAndReset(DAT_011da86c, 1.0f);
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk002c)
@@ -10351,7 +10351,7 @@ RouletteTile* __cdecl FUN_007bbe20(RoulettePlayerStandIn* casino, int bet, int a
             FUN_00406d00(name, 64, "%s %s", ((PlayerVirtual*)DAT_011da880)->GetName(), g_011d3e08.String());
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk0034)->FUN_00a01350(DAT_011da870, name, true);
         FUN_00a08b20((Tile*)((RouletteState*)DAT_011da878)->unk0034, DAT_010761e4)->FUN_00700320(0xfa3, 0);
-        FUN_00a08b20((Tile*)((RouletteState*)DAT_011da878)->unk0034, DAT_010761e4)->FUN_00a07530(8);
+        FUN_00a08b20((Tile*)((RouletteState*)DAT_011da878)->unk0034, DAT_010761e4)->SetChangeFlag(8);
         ((MenuMethods*)DAT_011da878)->UpdateBetTileText();
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk0038)->FUN_00a01350(0xfc4, g_011d41e0.String(), true);
         ((RouletteTile*)((RouletteState*)DAT_011da878)->unk003c)->FUN_00a01350(0xfc4, g_011d2c1c.String(), true);
@@ -15193,7 +15193,7 @@ void Big::InitRouletteWheel()
 namespace fnv_007bd2a0 {
 struct TileX
 {
-    void FUN_00a012d0(int aiID, float afValue, bool abPropagate);
+    void SetFloat(int aiID, float afValue, bool abPropagate);
     void SetTraitAndReset(int aiID, float afValue);
     void FUN_00700320(int aiID, int aiValue);
     void FUN_00a01350(int aiID, const char* apText, bool abPropagate);
@@ -15690,11 +15690,11 @@ void RouletteMenuX::FUN_007bd2a0()
     }
     if (!bActive2)
     {
-        FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+        FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
     }
     else
     {
-        FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 0.0f, true);
+        FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 0.0f, true);
     }
     int iStickX3 = 0;
     int iStickY5 = 0;
@@ -15732,7 +15732,7 @@ void RouletteMenuX::FUN_007bd2a0()
     case 5:
         if (FUN_0059bb30() != 2)
         {
-            FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+            FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();
             int iChipDiff;

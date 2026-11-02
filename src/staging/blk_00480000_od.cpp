@@ -2180,7 +2180,7 @@ struct ItemObj
 extern Loader* DAT_011c3b3c;
 extern int DAT_011f36bc;
 extern int DAT_011f36e4;
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 struct FUN_0048fb50
 {
     void* f00;
@@ -2338,7 +2338,7 @@ FUN_0048fb50::~FUN_0048fb50()
         {
             itemValB2 = *nodeBq->FUN_006815c0();
             itemCopy2 = itemValB2;
-            FUN_00401030(itemCopy2);
+            FormHeap_Free(itemCopy2);
             nodeBq = nodeBq->FUN_00726070();
         }
         m134.FUN_00470470();
@@ -4044,7 +4044,7 @@ struct FNV_Member14
     int unk00;
     int unk04;
     int unk08;
-    void FUN_004ed900();
+    void RemoveAll();
     ~FNV_Member14();
 };
 
@@ -4061,14 +4061,14 @@ struct FUN_0049fe20_Object : FNV_Handle
 extern FNV_Handle g_011c58e0;
 void __cdecl FUN_00622bc0();
 
-// Calls FUN_00622bc0, sets g_011c58e0 to 0, calls FUN_004a4650 on m_08 and FUN_004ed900 on m_14, then sets m_20 and m_24 to 0.
+// Calls FUN_00622bc0, sets g_011c58e0 to 0, calls FUN_004a4650 on m_08 and RemoveAll on m_14, then sets m_20 and m_24 to 0.
 // @fnv 0x0049fe20
 FUN_0049fe20_Object::~FUN_0049fe20_Object()
 {
     FUN_00622bc0();
     g_011c58e0 = 0;
     m_08.FUN_004a4650();
-    m_14.FUN_004ed900();
+    m_14.RemoveAll();
     m_20 = 0;
     m_24 = 0;
 }

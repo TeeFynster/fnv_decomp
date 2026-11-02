@@ -5819,7 +5819,7 @@ struct RefOps
     void FUN_004846a0(bool);
     void FUN_00575830(NiPoint3*);
     void FUN_00575700(NiPoint3);
-    void* FUN_0055d310();
+    void* GetContainer();
     void FUN_00564c60(bool);
     FloatMatrix3 FUN_0056fa00();
 };
@@ -6475,7 +6475,7 @@ TESObjectREFR* HandlerView::PlaceObjectReference(TESBoundObject* base, NiPoint3*
                     b->Set3D(node, true);
                 }
                 b->SetParentCell(c);
-                void* container = ((RefOps*)b)->FUN_0055d310();
+                void* container = ((RefOps*)b)->GetContainer();
                 if (container)
                 {
                     InventoryView* changes = FUN_004bf220(b);
@@ -7702,7 +7702,7 @@ struct FNVObject
     short FUN_00418770();
     void* FUN_00418630();
     void FUN_00418600();
-    int FUN_0055d310();
+    int GetContainer();
     unsigned int FUN_0040fe20();
     int FUN_00410220(int mode);
     int FUN_00418800();
@@ -7797,7 +7797,7 @@ void FUN_0046f640_shell::ProcessInventoryRecords(FNVFile* file, int remaining, i
             }
             if (processed)
             {
-                if (reinterpret_cast<FNVObject*>(processed)->FUN_0055d310())
+                if (reinterpret_cast<FNVObject*>(processed)->GetContainer())
                 {
                     FNVObject* input = 0;
                     if (current->FUN_0040fe20())

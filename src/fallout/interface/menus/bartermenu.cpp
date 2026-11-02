@@ -883,7 +883,7 @@ struct ObjB
     BigObj* FUN_00a03c90();
     Obj135* FUN_00a03da0(const char* a);
     double FUN_00a011b0(int a);
-    void FUN_00a012d0(int a, float b);
+    void SetFloat(int a, float b);
 };
 
 struct ObjX
@@ -984,7 +984,7 @@ int __cdecl InitInventoryMenu(int arg0, int aiValue)
         }
         if (bb->FUN_00a011b0(0xfa7) == DAT_010704f0 || bb->FUN_00a011b0(0xfa7) == DAT_010704e8)
         {
-            bb->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            bb->SetFloat(0xfad, FUN_00a01530(1));
         }
         FUN_00763ff0();
         ((SelfObj*)((char*)selfa + 0x4d4))->FUN_00718630(0x17, FUN_0072d6c0(), 0x200);
@@ -1172,7 +1172,7 @@ void __cdecl FUN_00703c00(const char* pFormat, ...);
 void __cdecl UpdateBarterQuantity(int iCount);
 void __cdecl CreateQuantityMenu(int iCount, void(__cdecl* pfnCallback)(int), int iMax);
 void __cdecl FUN_0072db40();
-void __cdecl FUN_00703e80(int a1, int a2, const char* pMessage, void(__cdecl* pfnCallback)(), int a5, int a6, float f7,
+void __cdecl ShowMessageBox(int a1, int a2, const char* pMessage, void(__cdecl* pfnCallback)(), int a5, int a6, float f7,
                           float f8, const char* pButton1, const char* pButton2, int a11);
 void __cdecl UpdateTopicMenu();
 void __cdecl FUN_00706f30(void* pkTile);
@@ -1249,7 +1249,7 @@ void BarterMenuClick::HandleTileClick(int iTileIndex, BmTile* pkTile)
         break;
     case 19:
         if (m_kMerchantItems.FUN_005ae380() || m_kPlayerItems.FUN_005ae380())
-            FUN_00703e80(0, 0, g_s_011d1fa4.FUN_00403df0(), FUN_0072db40, 0, 0x17, 0.0f, 0.0f,
+            ShowMessageBox(0, 0, g_s_011d1fa4.FUN_00403df0(), FUN_0072db40, 0, 0x17, 0.0f, 0.0f,
                          g_s_011d34f8.FUN_00403df0(), g_s_011d3684.FUN_00403df0(), 0);
         else
             UpdateTopicMenu();
@@ -1835,7 +1835,7 @@ struct BarterTile
     void FUN_00700320(int m_uiSoundID, int iValue);
     void FUN_00a01350(int m_uiSoundID, const char* pString, bool bPropagate);
     void FUN_00707e10(const char* pName);
-    void FUN_00a012d0(int m_uiSoundID, float fValue, bool bPropagate);
+    void SetFloat(int m_uiSoundID, float fValue, bool bPropagate);
 };
 
 struct BarterMenuStandIn
@@ -1898,7 +1898,7 @@ void __cdecl UpdateBarterItemTile(BarterTile* pkTile, BarterItem* pkItem)
         FUN_00406d00(acBuffer, 0x80, s_szValueFormat0, fValue);
     pkTile->FUN_00a01350(g_iTileIDValue_011d8fb0, acBuffer, true);
     pkTile->FUN_00707e10(pkItem->GetTargetFullName());
-    pkTile->FUN_00a012d0(0xfb0, 0.0f, true);
+    pkTile->SetFloat(0xfb0, 0.0f, true);
 }
 }  // namespace fnv_0072f210
 
@@ -2053,7 +2053,7 @@ struct QtyTile
     bool IsTraitNonZero(int m_uiSoundID);
     void FUN_00700320(int m_uiSoundID, int iValue);
     void FUN_00a01350(int m_uiSoundID, const char* pString, bool bPropagate);
-    void FUN_00a012d0(int m_uiSoundID, float fValue, bool bPropagate);
+    void SetFloat(int m_uiSoundID, float fValue, bool bPropagate);
 };
 
 struct QtyForm;
@@ -2154,14 +2154,14 @@ void __cdecl UpdateBarterQuantity(int iCount)
             g_pkBarterMenu_011d8fa4->unk5c->FUN_00700320(0xfaf, 1);
             if (g_pkBarterMenu_011d8fa4->m_fBarterTotal > 0.0 &&
                 g_pkBarterMenu_011d8fa4->m_fBarterTotal > g_pkBarterMenu_011d8fa4->unk90)
-                g_pkBarterMenu_011d8fa4->unk58->FUN_00a012d0(0xfa9, 64.0f, true);
+                g_pkBarterMenu_011d8fa4->unk58->SetFloat(0xfa9, 64.0f, true);
             else
-                g_pkBarterMenu_011d8fa4->unk58->FUN_00a012d0(0xfa9, 255.0f, true);
+                g_pkBarterMenu_011d8fa4->unk58->SetFloat(0xfa9, 255.0f, true);
         }
         else
         {
             g_pkBarterMenu_011d8fa4->unk5c->FUN_00700320(0xfaf, 0);
-            g_pkBarterMenu_011d8fa4->unk58->FUN_00a012d0(0xfa9, 64.0f, true);
+            g_pkBarterMenu_011d8fa4->unk58->SetFloat(0xfa9, 64.0f, true);
         }
     }
     else
@@ -3122,7 +3122,7 @@ struct ItemTransferManager
 };
 extern ItemTransferManager* g_transferMgr_011c3f2c;
 
-bool __cdecl FUN_005ac750(TESObjectREFR* apRef, ExtraDataList* apExtraList, unsigned int auiFlags);
+bool __cdecl MarkBaseExtraListScriptEvent(TESObjectREFR* apRef, ExtraDataList* apExtraList, unsigned int auiFlags);
 float __cdecl FUN_00406ce0(float afValue);
 int __cdecl TruncateFloatToInt(float afValue);
 extern "C" const char* __cdecl FUN_00ec7d40(int aiValue);
@@ -3182,7 +3182,7 @@ void BarterMenuImpl::CompleteBarterTransaction()
         InventoryStackRecord* pItem = *pNode6->FUN_006815c0();
         ExtraDataList* pExtraList = pItem->FUN_00559450() ? *pItem->FUN_00559450()->FUN_006815c0() : 0;
         if (pExtraList)
-            FUN_005ac750(m_merchant, pExtraList, 0x4000);
+            MarkBaseExtraListScriptEvent(m_merchant, pExtraList, 0x4000);
         g_transferMgr_011c3f2c->ProcessInventoryRecords(pItem, pItem->FUN_00726070(), m_merchant);
         delete pItem;
     }
@@ -3192,7 +3192,7 @@ void BarterMenuImpl::CompleteBarterTransaction()
         InventoryStackRecord* pItem3 = *pNode3->FUN_006815c0();
         ExtraDataList* pExtraList5 = pItem3->FUN_00559450() ? *pItem3->FUN_00559450()->FUN_006815c0() : 0;
         if (pExtraList5)
-            FUN_005ac750((TESObjectREFR*)g_player_011dea3c, pExtraList5, 0x4000);
+            MarkBaseExtraListScriptEvent((TESObjectREFR*)g_player_011dea3c, pExtraList5, 0x4000);
         g_player_011dea3c->AddItem(pItem3->FUN_0044ddc0(), pExtraList5, pItem3->FUN_00726070(), 0, 0, pTarget3, 0, 0, 1,
                                    0);
         delete pItem3;
@@ -3335,7 +3335,7 @@ struct Holder7313
 };
 struct Traits7313
 {
-    void FUN_00a012d0(int m_uiSoundID, float fValue, bool bFlag);
+    void SetFloat(int m_uiSoundID, float fValue, bool bFlag);
     void SetTraitAndReset(int m_uiSoundID, float fValue);
 };
 struct IM7313
@@ -3367,7 +3367,7 @@ void List7313::UpdateCurrentValueTile(bool abFlag)
     Tile7313* pTile = 0;
     if (m_0c && m_14)
     {
-        m_14->FUN_00a012d0(FUN_00a01860("_current_value"), m_28, false);
+        m_14->SetFloat(FUN_00a01860("_current_value"), m_28, false);
         m_14->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         pTile = GetTile7313((unsigned int)FUN_0040ebd0(m_24, (float)(FUN_0071ae60(0) - 1.0)));
         ((IM7313*)FUN_004b7210())->FUN_00715860(pTile, 0xfc3, abFlag);

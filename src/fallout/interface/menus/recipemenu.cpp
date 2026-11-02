@@ -1438,7 +1438,7 @@ struct FUN_004702f0
 };
 struct Tile49
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 extern unsigned char DAT_011d8909;
 extern char DAT_0106f8d0;
@@ -1487,7 +1487,7 @@ void List49::ClearList()
     count = 0;
     value = 0.0f;
     if (tile)
-        tile->FUN_00a012d0(FUN_00a01860(&DAT_0106f8d0), 0.0f, true);
+        tile->SetFloat(FUN_00a01860(&DAT_0106f8d0), 0.0f, true);
     FUN_0072c000();
     selected = 0;
     RefreshHighlight();
@@ -1721,7 +1721,7 @@ struct SelectionMenuLink
 };
 struct SelectionTile
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
     float FUN_00a011b0(int);
     SelectionMenuLink* FUN_00a03d40();
@@ -1763,7 +1763,7 @@ void SelectionList::UpdateSelection(bool abNotify)
     SelectionTile* selected = 0;
     if (container && scrollBar)
     {
-        scrollBar->FUN_00a012d0(FUN_00a01860("_current_value"), storedScroll, false);
+        scrollBar->SetFloat(FUN_00a01860("_current_value"), storedScroll, false);
         scrollBar->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         selected = GetTile((unsigned int)FUN_0040ebd0(storedIndex, (float)(GetFilteredCount(0) - 1.0)));
         FUN_004b7210()->FUN_00715860(selected, 0xfc3, abNotify);
@@ -1858,7 +1858,7 @@ struct ListValue
 struct ListTile
 {
     ~ListTile();
-    void FUN_00a012d0(int property, float value, bool propagate);
+    void SetFloat(int property, float value, bool propagate);
 };
 struct ListItem
 {
@@ -1920,7 +1920,7 @@ void ListPanel::ClearItems()
     count = 0;
     position = 0.0f;
     if (tile)
-        tile->FUN_00a012d0(FUN_00a01860("_num_filtered"), 0.0f, true);
+        tile->SetFloat(FUN_00a01860("_num_filtered"), 0.0f, true);
     FUN_0072c5d0();
     selection = 0;
     FUN_0072c2b0();
@@ -2279,7 +2279,7 @@ struct RcTile
     RcTile* FUN_00a01b00(const char* path);
     RcMenu* FUN_00a03c90();
     float FUN_00a011b0(int trait);
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
     void FUN_00a01350(int trait, const char* value, bool propagate);
 };
 
@@ -2752,7 +2752,7 @@ RcTile* CreateRecipeMenu(int vendor, int type)
         }
         if (tile2->FUN_00a011b0(0xfa7) == 6006.0 || tile2->FUN_00a011b0(0xfa7) == 102.0)
         {
-            tile2->FUN_00a012d0(0xfad, FUN_00a01530(), true);
+            tile2->SetFloat(0xfad, FUN_00a01530(), true);
         }
         FUN_00763ff0();
         ((RcMenu*)DAT_011d8e90)->list6C.FUN_0075a0d0(((RcMenu*)DAT_011d8e90)->tile34, "CM_list_template");
@@ -2764,9 +2764,9 @@ RcTile* CreateRecipeMenu(int vendor, int type)
         ((RcMenu*)DAT_011d8e90)->tile44->FUN_00a01350(0xfc4, g_011d26f4.FUN_00403df0(), true);
         ((RcMenu*)DAT_011d8e90)->tile48->FUN_00a01350(0xfc4, g_011d33fc.FUN_00403df0(), true);
         ((RcMenu*)DAT_011d8e90)
-            ->tile44->FUN_00a012d0(0xfa1, ((RcMenu*)DAT_011d8e90)->tile44->FUN_00a011b0(0xfa1) - 20.0, true);
+            ->tile44->SetFloat(0xfa1, ((RcMenu*)DAT_011d8e90)->tile44->FUN_00a011b0(0xfa1) - 20.0, true);
         ((RcMenu*)DAT_011d8e90)
-            ->tile48->FUN_00a012d0(0xfa1, ((RcMenu*)DAT_011d8e90)->tile48->FUN_00a011b0(0xfa1) - 20.0, true);
+            ->tile48->SetFloat(0xfa1, ((RcMenu*)DAT_011d8e90)->tile48->FUN_00a011b0(0xfa1) - 20.0, true);
         ((RcMenu*)DAT_011d8e90)->unk60 = vendor;
         ((RcMenu*)DAT_011d8e90)->unk64 = type;
         FUN_00717280(0x24);
@@ -4016,7 +4016,7 @@ struct TileObj
 {
     void FUN_00a01350(int a, const char* b, bool c);
     void FUN_00700320(int a, int b);
-    void FUN_00a012d0(int a, float b, bool c);
+    void SetFloat(int a, float b, bool c);
 };
 
 struct ListLinks
@@ -4392,7 +4392,7 @@ void SelfObj::FUN_00728da0(TESForm* apForm, MenuTileList* apTiles)
                     }
                     qrEZrs[11]->FUN_00a01350(qvyWyw, local2, true);
                     DAT_011d8eb0 = (Tile*)qrEZrs[11];
-                    qrEZrs[4]->FUN_00a012d0(qSVM, FUN_0040ebd0(conditionalColorA, 1.0f), true);
+                    qrEZrs[4]->SetFloat(qSVM, FUN_0040ebd0(conditionalColorA, 1.0f), true);
                     FUN_00406d00(local2, 0x80, str_01020764, skillA);
                     if (qrEZrs[10])
                     {
@@ -4546,7 +4546,7 @@ void SelfObj::FUN_00728da0(TESForm* apForm, MenuTileList* apTiles)
                 if (qrEZrs[10])
                 {
                     qrEZrs[10]->FUN_00700320(0xfa3, (qsSDDgz & 0x400) ? 1 : 0);
-                    qrEZrs[10]->FUN_00a012d0(0xfa9, DAT_01023cd8, true);
+                    qrEZrs[10]->SetFloat(0xfa9, DAT_01023cd8, true);
                 }
 
                 qkbsJ = (float)(apTiles->FUN_00a011b0(0xfb0) / 2.0 - 20.0);
@@ -4554,10 +4554,10 @@ void SelfObj::FUN_00728da0(TESForm* apForm, MenuTileList* apTiles)
                 {
                     qkbsJ = qkbsJ * 2.0f;
                 }
-                qrEZrs[6]->FUN_00a012d0(0xfa2, qkbsJ, true);
-                qrEZrs[7]->FUN_00a012d0(0xfa2, qkbsJ, true);
-                qrEZrs[8]->FUN_00a012d0(0xfa2, qkbsJ + qpqRa, true);
-                qrEZrs[9]->FUN_00a012d0(0xfa2, qkbsJ + qdqWL, true);
+                qrEZrs[6]->SetFloat(0xfa2, qkbsJ, true);
+                qrEZrs[7]->SetFloat(0xfa2, qkbsJ, true);
+                qrEZrs[8]->SetFloat(0xfa2, qkbsJ + qpqRa, true);
+                qrEZrs[9]->SetFloat(0xfa2, qkbsJ + qdqWL, true);
             }
         }
     }

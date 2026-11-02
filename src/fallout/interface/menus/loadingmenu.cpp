@@ -300,7 +300,7 @@ void __cdecl FUN_004581c0(bool abOn)
 
 struct SubObj
 {
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_004ed8c0(int*);
 };
 struct LM2
@@ -312,25 +312,25 @@ struct LM2
     SubObj s;
     void FUN_00788f30();
 };
-// Calls s.FUN_004ed900, then passes &a and &b to s.FUN_004ed8c0 in turn.
+// Calls s.RemoveAll, then passes &a and &b to s.FUN_004ed8c0 in turn.
 // @fnv 0x00788f30
 void LM2::FUN_00788f30()
 {
-    s.FUN_004ed900();
+    s.RemoveAll();
     s.FUN_004ed8c0(&a);
     s.FUN_004ed8c0(&b);
 }
 
 struct FUN_Sub
 {
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_004ed8c0(void* p);
 };
-// Calls FUN_004ed900 on the FUN_Sub at self+0xdc, then FUN_004ed8c0 with self+0x94, self+0x34 and self+0x60.
+// Calls RemoveAll on the FUN_Sub at self+0xdc, then FUN_004ed8c0 with self+0x94, self+0x34 and self+0x60.
 // @fnv 0x00788f80
 void __fastcall FUN_00788f80(char* self)
 {
-    ((FUN_Sub*)(self + 0xdc))->FUN_004ed900();
+    ((FUN_Sub*)(self + 0xdc))->RemoveAll();
     ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x94);
     ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x34);
     ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x60);
@@ -338,7 +338,7 @@ void __fastcall FUN_00788f80(char* self)
 
 struct M788
 {
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_004ed8c0(void*);
 };
 struct S788
@@ -347,11 +347,11 @@ struct S788
     M788 m;
     void FUN_00788fe0();
 };
-// Calls m.FUN_004ed900, then passes six member addresses (offsets 0x68, 0x98, 0x9c, 0x64, 0x50, 0xa0) to m.FUN_004ed8c0.
+// Calls m.RemoveAll, then passes six member addresses (offsets 0x68, 0x98, 0x9c, 0x64, 0x50, 0xa0) to m.FUN_004ed8c0.
 // @fnv 0x00788fe0
 void S788::FUN_00788fe0()
 {
-    m.FUN_004ed900();
+    m.RemoveAll();
     m.FUN_004ed8c0((char*)this + 0x68);
     m.FUN_004ed8c0((char*)this + 0x98);
     m.FUN_004ed8c0((char*)this + 0x9c);
@@ -363,7 +363,7 @@ void S788::FUN_00788fe0()
 namespace fnv_00789080 {
 struct SubObj
 {
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_004ed8c0(int*);
 };
 struct LM3
@@ -377,13 +377,13 @@ struct LM3
     SubObj s2;
     void FUN_00789080();
 };
-// Calls FUN_004ed900 then FUN_004ed8c0 on s1 with &a and on s2 with &b.
+// Calls RemoveAll then FUN_004ed8c0 on s1 with &a and on s2 with &b.
 // @fnv 0x00789080
 void LM3::FUN_00789080()
 {
-    s1.FUN_004ed900();
+    s1.RemoveAll();
     s1.FUN_004ed8c0(&a);
-    s2.FUN_004ed900();
+    s2.RemoveAll();
     s2.FUN_004ed8c0(&b);
 }
 }  // namespace fnv_00789080
@@ -2797,8 +2797,8 @@ class TileX
     void Set(int aeValue, unsigned int auiValue);
     void SetInt(int aeValue, int aiValue);
     float GetFloat(int aeValue);
-    void FUN_00a07530(int aiFlags);
-    void FUN_00a0b520();
+    void SetChangeFlag(int aiFlags);
+    void ApplyRotationOnChildren();
 };
 
 struct TileListX
@@ -2919,12 +2919,12 @@ void LoadingMenuX::ApplyXPBarSettings(LoadingTileSettingsX* apSettings)
                 pTile->Set(0xfb3, apSettings->fGreen, true);
                 pTile->Set(0xfb4, apSettings->fBlue, true);
                 pTile->SetInt(0xff5, -1);
-                pTile->FUN_00a07530(8);
+                pTile->SetChangeFlag(8);
             }
         }
     }
     pXPBox->Set(0xffa, apSettings->fAlpha, true);
-    pXPBox->FUN_00a0b520();
+    pXPBox->ApplyRotationOnChildren();
 }
 }  // namespace fnv_0078c210
 
@@ -3176,8 +3176,8 @@ struct LoadingStatsTile : Tile
     int unk00;
     NiTPointerList<Tile*> children;
     float FUN_00a011b0(int value);
-    void FUN_00a07530(int flags);
-    void FUN_00a0b520();
+    void SetChangeFlag(int flags);
+    void ApplyRotationOnChildren();
 };
 struct LoadingStatsSettings
 {
@@ -3285,8 +3285,8 @@ void LoadingStatsMenu::ApplySettings(LoadingStatsSettings* settings)
                 firstTile->Set(0xfa2, y, true);
                 secondTile->Set(0xfa2, y, true);
                 y += spacing;
-                static_cast<LoadingStatsTile*>(firstTile)->FUN_00a07530(8);
-                static_cast<LoadingStatsTile*>(secondTile)->FUN_00a07530(8);
+                static_cast<LoadingStatsTile*>(firstTile)->SetChangeFlag(8);
+                static_cast<LoadingStatsTile*>(secondTile)->SetChangeFlag(8);
                 ++uiIndex;
             }
             else
@@ -3298,7 +3298,7 @@ void LoadingStatsMenu::ApplySettings(LoadingStatsSettings* settings)
         }
     }
     container->Set(0xffa, settings->first.fAlpha, true);
-    container->FUN_00a0b520();
+    container->ApplyRotationOnChildren();
 }
 
 struct Font

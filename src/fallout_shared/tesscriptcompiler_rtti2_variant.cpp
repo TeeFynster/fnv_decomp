@@ -170,7 +170,7 @@ struct BGSListForm;
 
 struct EncodeReferenceView : EncodeFormView
 {
-    void* FUN_0055d310();
+    void* GetContainer();
     TESForm* FUN_007af430();
 };
 
@@ -307,7 +307,7 @@ extern const char* DAT_0118a2d8[];
 extern unsigned char DAT_0118a598[];
 
 // @fnv 0x005b1ba0
-bool __cdecl FUN_005b1ba0(unsigned short count, const EncodeParameter* parameters, ScriptLineBuffer* line,
+bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* parameters, ScriptLineBuffer* line,
                           EncodeCompiler* compiler)
 
 {
@@ -428,7 +428,7 @@ bool __cdecl FUN_005b1ba0(unsigned short count, const EncodeParameter* parameter
                     {
 
                     case 26:
-                        if (!reference->FUN_0055d310())
+                        if (!reference->GetContainer())
                         {
                             FUN_005aea90(
                                 compiler,

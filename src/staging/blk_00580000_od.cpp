@@ -625,7 +625,7 @@ float __thiscall FUN_00589850_Class::FUN_00589850()
 
 struct FUN_004726b0_class
 {
-    int __thiscall FUN_004726b0();
+    int __thiscall GetNextChunk();
 };
 struct FUN_00589890_Class
 {
@@ -636,7 +636,7 @@ bool FUN_00589890_Class::FUN_00589890(FUN_004726b0_class* apData)
 {
     if (!apData)
         return false;
-    if (apData->FUN_004726b0() != 0x4b524d4d)
+    if (apData->GetNextChunk() != 0x4b524d4d)
         return false;
     return true;
 }

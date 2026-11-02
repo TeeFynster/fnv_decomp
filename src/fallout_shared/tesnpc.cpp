@@ -2826,8 +2826,8 @@ extern void __cdecl FUN_00485950(unsigned int tag, unsigned int value);
 extern void __cdecl AppendChunk(unsigned int tag, void* ptr, unsigned int length);
 extern void __cdecl FUN_00485710(unsigned int tag, const void* ptr, unsigned int length);
 extern void __cdecl FUN_00403d30(void*, int, unsigned int);
-extern void* __cdecl FUN_00401000(unsigned int size);
-extern void __cdecl FUN_00401030(void*);
+extern void* __cdecl FormHeap_Allocate(unsigned int size);
+extern void __cdecl FormHeap_Free(void*);
 extern bool __cdecl FUN_00401500();
 
 struct NPCSerializer
@@ -2898,21 +2898,21 @@ void NPCSerializer::WriteToStream()
     if (formID != 0)
     {
         unsigned int values = formID * 4;
-        float* bytes = (float*)FUN_00401000(values);
+        float* bytes = (float*)FormHeap_Allocate(values);
         FUN_00403d30(bytes, 0, values);
         for (unsigned int index = 0; index < formID; ++index)
         {
             bytes[index] = *((FaceMatrix*)((char*)this + 0x134))->FUN_0060b370(index, 0).FUN_00629ab0();
         }
         FUN_00485710(0x53474746, bytes, formID);
-        FUN_00401030(bytes);
+        FormHeap_Free(bytes);
         bytes = 0;
     }
     formID = ((FaceMatrix*)((char*)this + 0x154))->FUN_009611e0();
     if (formID != 0)
     {
         unsigned int bytesSecond = formID * 4;
-        float* valuesSecond = (float*)FUN_00401000(bytesSecond);
+        float* valuesSecond = (float*)FormHeap_Allocate(bytesSecond);
         FUN_00403d30(valuesSecond, 0, bytesSecond);
         for (unsigned int indexSecond = 0; indexSecond < formID; ++indexSecond)
         {
@@ -2920,21 +2920,21 @@ void NPCSerializer::WriteToStream()
                 *((FaceMatrix*)((char*)this + 0x154))->FUN_0060b370(indexSecond, 0).FUN_00629ab0();
         }
         FUN_00485710(0x41474746, valuesSecond, formID);
-        FUN_00401030(valuesSecond);
+        FormHeap_Free(valuesSecond);
         valuesSecond = 0;
     }
     formID = ((FaceMatrix*)((char*)this + 0x174))->FUN_009611e0();
     if (formID != 0)
     {
         unsigned int bytesThird = formID * 4;
-        float* valuesThird = (float*)FUN_00401000(bytesThird);
+        float* valuesThird = (float*)FormHeap_Allocate(bytesThird);
         FUN_00403d30(valuesThird, 0, bytesThird);
         for (unsigned int indexThird = 0; indexThird < formID; ++indexThird)
         {
             valuesThird[indexThird] = *((FaceMatrix*)((char*)this + 0x174))->FUN_0060b370(indexThird, 0).FUN_00629ab0();
         }
         FUN_00485710(0x53544746, valuesThird, formID);
-        FUN_00401030(valuesThird);
+        FormHeap_Free(valuesThird);
         valuesThird = 0;
     }
 

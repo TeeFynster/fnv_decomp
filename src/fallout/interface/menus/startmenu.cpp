@@ -1578,7 +1578,7 @@ struct OptionManager
 };
 struct M788
 {
-    void FUN_004ed900();
+    void RemoveAll();
 };
 extern M788 g_011dabd8;
 class BSAudio
@@ -1670,7 +1670,7 @@ FUN_007cb5b0::~FUN_007cb5b0()
     }
     DAT_011de134->FUN_00851540();
     DAT_011daac0 = 0;
-    g_011dabd8.FUN_004ed900();
+    g_011dabd8.RemoveAll();
     OptionManager::Instance()->FUN_007cb7a0();
 }
 }  // namespace fnv_007cb5b0
@@ -5736,7 +5736,7 @@ unsigned int __cdecl FUN_00457fe0();
 void __cdecl HandleBackAction();
 void __cdecl FUN_007d0700();
 void __cdecl FUN_007d6d70();
-void __cdecl FUN_00703e80(const char*, const char*, const char*, void(__cdecl*)(), int, int, float, float, const char*,
+void __cdecl ShowMessageBox(const char*, const char*, const char*, void(__cdecl*)(), int, int, float, float, const char*,
                           const char*, int);
 void __cdecl FUN_007d3a30();
 void __cdecl ApplyConfigEntry();
@@ -5762,7 +5762,7 @@ struct TileX
 {
     TileX* FUN_0045cd60();
     void FUN_00a01350(int, const char*, int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void FUN_00700320(int, int);
 };
 struct LBOpt
@@ -5850,7 +5850,7 @@ void TargetSM::FUN_007ce9b0(int reason, TileX* tile)
         {
             if (((StartMenu*)this)->IsFlagSet((StartMenu::Flag)0x1000))
             {
-                FUN_00703e80(DAT_011d29dc.GetString(), (const char*)0, (const char*)0, FUN_007d3a30, 0, 0x12, 0.0f,
+                ShowMessageBox(DAT_011d29dc.GetString(), (const char*)0, (const char*)0, FUN_007d3a30, 0, 0x12, 0.0f,
                              0.0f, DAT_011d3684.String(), DAT_011d34f8.String(), 0);
             }
             else
@@ -5962,7 +5962,7 @@ void TargetSM::FUN_007ce9b0(int reason, TileX* tile)
                 {
                     aSel->iVal = (aSel->iVal + aSel->m_uiValueCount + (reason != 100 ? 1 : -1)) % aSel->m_uiValueCount;
                     pDirty = aSel;
-                    tile->FUN_00a012d0(0xff5, pMenu->FUN_00a011b0(0xff5, 1));
+                    tile->SetFloat(0xff5, pMenu->FUN_00a011b0(0xff5, 1));
                 }
             }
         }
@@ -6006,7 +6006,7 @@ bool __cdecl FUN_00702450(int);
 int __cdecl FUN_007189c0(int);
 void __cdecl FUN_00717280(int);
 int __cdecl FUN_00a09030(int);
-void __cdecl FUN_00703e80(const char*, int, int, int, int, int, float, float, const char*, int);
+void __cdecl ShowMessageBox(const char*, int, int, int, int, int, float, float, const char*, int);
 float __cdecl FUN_004bd510(float, float);
 void FUN_007d0c50();
 struct OptionList151 : StartMenu::OptionListBox
@@ -6071,7 +6071,7 @@ bool Candidate151::HandleButtonInput(int button, int unused)
                 else if (!FUN_00a09030(0x3e9))
                 {
                     FUN_00717280(10);
-                    FUN_00703e80(((MenuSetting*)&g_011d3108)->FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
+                    ShowMessageBox(((MenuSetting*)&g_011d3108)->FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
                                  ((Settings151*)&g_011d38b8)->FUN_004c69f0(), 0);
                 }
                 return true;
@@ -7006,7 +7006,7 @@ struct TileOpsLocal
 {
     float FUN_00a011b0(int);
     void FUN_00a01350(int, const char*, bool);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct SaveListOps
 {
@@ -7115,7 +7115,7 @@ void UpdateSaveListSelection()
             char text_2[64];
             FUN_00406d00(text_2, 64, "%s %u/%i %s", g_011d2c4c.FUN_00403df0(), count, 1000, g_011d25d4.FUN_00403df0());
             ((SaveListOps*)&DAT_011daac0->m_kOptionHelper)->CallVirtualZero()->FUN_00a01350(0xfc4, text_2, true);
-            ((SaveListOps*)&DAT_011daac0->m_kOptionHelper)->CallVirtualZero()->FUN_00a07530(8);
+            ((SaveListOps*)&DAT_011daac0->m_kOptionHelper)->CallVirtualZero()->SetChangeFlag(8);
         }
     }
 }
@@ -7502,7 +7502,7 @@ struct TileX
     void FUN_00a01350(int a, const char* s, bool b);
     TV38* FUN_00a03eb0(int id);
     float FUN_00a011b0(int id);
-    void FUN_00a012d0(int a, float f, bool b);
+    void SetFloat(int a, float f, bool b);
 };
 struct LbT : ListBox<OptSI*>
 {
@@ -7684,7 +7684,7 @@ void ThisT::PopulateList(int flags)
     {
         cnt = FUN_00404010(cnt, m04->FUN_00a011b0(0x1008));
     }
-    m04->FUN_00a012d0(FUN_00a00940("_center_x", -1), cnt, true);
+    m04->SetFloat(FUN_00a00940("_center_x", -1), cnt, true);
 }
 
 namespace fnv_007d52a0 {
@@ -7706,7 +7706,7 @@ extern int __cdecl FUN_0072fa60(int);
 
 extern "C" int __cdecl FUN_00a00940(const char*, int);
 
-extern void __cdecl FUN_00703e80(const char*, int, int, int, int, int, float, float, const char*, int);
+extern void __cdecl ShowMessageBox(const char*, int, int, int, int, int, float, float, const char*, int);
 
 extern void __cdecl UpdateBindingText();
 
@@ -7820,7 +7820,7 @@ static void ShowInvalidBindingMessage_7d()
 
     const char* label = g_011d4750.FUN_00403df0();
 
-    FUN_00703e80(label, 0, 0, 0, 1, 0x12, 0.0f, 0.0f, details, 0);
+    ShowMessageBox(label, 0, 0, 0, 1, 0x12, 0.0f, 0.0f, details, 0);
 }
 
 // @fnv 0x007d52a0
@@ -7873,7 +7873,7 @@ bool StartMenuInput_7d::HandleBindingInput()
 
                             {
 
-                                FUN_00703e80(g_011d4750.FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
+                                ShowMessageBox(g_011d4750.FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
                                              reinterpret_cast<DialogSetting_7d*>(&g_011d38b8)->FUN_004c69f0(), 0);
                             }
 
@@ -8001,7 +8001,7 @@ bool StartMenuInput_7d::HandleBindingInput()
 
                     {
 
-                        FUN_00703e80(g_011d3108.FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
+                        ShowMessageBox(g_011d3108.FUN_00403df0(), 0, 0, 0, 1, 0x12, 0.0f, 0.0f,
                                      reinterpret_cast<DialogSetting_7d*>(&g_011d38b8)->FUN_004c69f0(), 0);
                     }
                 }
@@ -8036,7 +8036,7 @@ void FUN_007d62e0_shell::EnableAndRemoveHighlightedItem()
 
 extern int DAT_0107704c;
 
-void __cdecl FUN_00401030(int value);
+void __cdecl FormHeap_Free(int value);
 
 struct FUN_007d64d0_cls
 {
@@ -8055,13 +8055,13 @@ struct FUN_007d64d0_cls
     void Initialize();
 };
 
-// Sets the vtable pointer, passes m_28 to FUN_00401030, then calls InitPointer on this object.
+// Sets the vtable pointer, passes m_28 to FormHeap_Free, then calls InitPointer on this object.
 // @fnv 0x007d64d0
 void FUN_007d64d0_cls::Initialize()
 {
     m_vptr = (int)&DAT_0107704c;
     int value = m_28;
-    FUN_00401030(value);
+    FormHeap_Free(value);
     ((FUN_007ce690_cls*)this)->InitPointer();
 }
 
@@ -8557,7 +8557,7 @@ struct GlobX
 extern GlobX DAT_011dabb0;
 struct TileX
 {
-    void FUN_00a012d0(int m_uiSoundID, float f, bool b);
+    void SetFloat(int m_uiSoundID, float f, bool b);
     void FUN_00a01350(int m_uiSoundID, const char* s, bool b);
     void FUN_00700320(int m_uiSoundID, int iVal);
 };
@@ -8624,7 +8624,7 @@ void MenuX::UpdateTargetInfo()
         {
             FUN_007cb710()->FUN_007d5120();
             bA = true;
-            m54->FUN_00a012d0(0xfa9, 0.0f, true);
+            m54->SetFloat(0xfa9, 0.0f, true);
         }
         else
         {
@@ -8736,7 +8736,7 @@ SMMessageTile* __cdecl FUN_00a09030(int aiMenuID);
 int __cdecl FUN_00647b70(int aiA, int aiB);
 int __cdecl MinInt(int aiA, int aiB);
 void __cdecl FUN_0078d2d0(int aiValue);
-void __cdecl FUN_00703e80(const char* apText, int a1, int a2, int a3, int a4, int aiType, float afA, float afB,
+void __cdecl ShowMessageBox(const char* apText, int a1, int a2, int a3, int a4, int aiType, float afA, float afB,
                           const char* apButton, ...);
 void __cdecl ProcessArcList();
 void __cdecl FUN_007d69f0();
@@ -8785,7 +8785,7 @@ bool SMStartMenu::FUN_007d5830()
         SMMessageTile* pkMessage = FUN_00a09030(1001);
         if (!pkMessage)
         {
-            FUN_00703e80(g_kSMDLCWaitText.GetString(), 0, 0, 0, 0, 18, 0.0f, 0.0f, DAT_01011584);
+            ShowMessageBox(g_kSMDLCWaitText.GetString(), 0, 0, 0, 0, 18, 0.0f, 0.0f, DAT_01011584);
         }
         else if (pkMessage->FUN_00a03c90()->FUN_0059bb30() == 1)
         {
@@ -8802,7 +8802,7 @@ bool SMStartMenu::FUN_007d5830()
     if (IsFlagSet(FLAG_DLC_CORRUPT_MESSAGE) && !FUN_00a09030(1001))
     {
         SetFlag(FLAG_DLC_CORRUPT_MESSAGE, false);
-        FUN_00703e80(g_kSMDLCCorruptText.FUN_00403df0(), 0, 0, 0, 0, 18, 0.0f, 0.0f,
+        ShowMessageBox(g_kSMDLCCorruptText.FUN_00403df0(), 0, 0, 0, 0, 18, 0.0f, 0.0f,
                      g_kSMDLCCorruptButton.FUN_00403df0(), 0);
     }
     return true;
@@ -8857,7 +8857,7 @@ unsigned gm_GetTickCount();
 int FUN_00a00940(const char*, int);
 void InitSaveLoadTile(Tile*, EntryOps*);
 void FUN_007d5f50();
-void FUN_00703e80(const char*, int, int, void (*)(), int, int, float, float, const char*, int);
+void ShowMessageBox(const char*, int, int, void (*)(), int, int, float, float, const char*, int);
 void CloseStartMenu(bool);
 bool FUN_004b71d0();
 struct MenuVirtualOps
@@ -8900,7 +8900,7 @@ bool StartSaveMenu::FUN_007d5af0()
             }
             else if (!IsFlagSet(FLAG_SAVE_SAVING))
             {
-                FUN_00703e80(g_011d4420.FUN_00403df0(), 0, 0, FUN_007d5f50, 1, 0, 0.0f, 0.0f, g_011d38b8.FUN_00403df0(),
+                ShowMessageBox(g_011d4420.FUN_00403df0(), 0, 0, FUN_007d5f50, 1, 0, 0.0f, 0.0f, g_011d38b8.FUN_00403df0(),
                              0);
                 FUN_0075f6f0(0x8000000, true);
                 FUN_0075f6f0(0x8000, false);
@@ -9130,7 +9130,7 @@ struct TileAccess
     void FUN_00700320(int, int);
     void FUN_00715c60(int, int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     NiAVObject* FUN_0056c7f0();
     Menu* FUN_00a03c90();
 };
@@ -9332,7 +9332,7 @@ void StartMenuInit::FUN_007cbaf0(bool inGame, bool forceReload)
     bool p = FUN_00706e50() <= 640.0 ? 1 : 0;
     if (p && m_pTiles[3])
         ((TileAccess*)m_pTiles[3])
-            ->FUN_00a012d0(0xfa2, (float)(((TileAccess*)m_pTiles[3])->FUN_00a011b0(0xfa2) + 25.0), true);
+            ->SetFloat(0xfa2, (float)(((TileAccess*)m_pTiles[3])->FUN_00a011b0(0xfa2) + 25.0), true);
     ((TileAccess*)pMenu)->FUN_00700320(0x1004, FUN_00706e70() > 1.333299994468689 ? 1 : 0);
     if (inGame)
     {
@@ -9369,9 +9369,9 @@ void StartMenuInit::FUN_007cbaf0(bool inGame, bool forceReload)
         DAT_011f2250.FUN_009c6c30(0, false);
         ((TileAccess*)m_pTiles[3])->FUN_00700320(0xfa3, 1);
         if (FUN_00702450(0x3f5))
-            ((TileAccess*)m_pTiles[3])->FUN_00a012d0(0xfa9, 0.0f, true);
+            ((TileAccess*)m_pTiles[3])->SetFloat(0xfa9, 0.0f, true);
         else
-            ((TileAccess*)m_pTiles[3])->FUN_00a012d0(0xfa9, 255.0f, true);
+            ((TileAccess*)m_pTiles[3])->SetFloat(0xfa9, 255.0f, true);
         ((MenuOpsLocal*)this)->FUN_0075f6f0(32, true);
     }
     if (IsFlagSet(FLAG_FORCE_RELOAD))

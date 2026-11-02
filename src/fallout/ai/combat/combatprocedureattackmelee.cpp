@@ -4941,7 +4941,7 @@ struct Act9cc240
 {
     bool FUN_008b3b90();
     bool FUN_008b3960();
-    float FUN_00567400();
+    float GetScale();
 };
 struct Tgt9cc240
 {
@@ -5071,7 +5071,7 @@ void CPAM9cc240::UpdateCombatState()
     {
         _v = GetModifierValue();
         a7 = FUN_009ce560();
-        if (_v - a7 < *originalRuntimeFloatSetting594.Float() * dst0->FUN_00567400() * 2.25)
+        if (_v - a7 < *originalRuntimeFloatSetting594.Float() * dst0->GetScale() * 2.25)
             bDone6 = true;
     }
     if (bDone6)

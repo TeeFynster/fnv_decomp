@@ -2018,7 +2018,7 @@ Ref* FUN_00703180();
 const char* FUN_00464f30(int a, int b);
 int FUN_00ec623a(char* buf, const char* fmt, ...);
 void FUN_00703c00(const char* s);
-void FUN_005ac750(Pkg* p, int a, int b);
+void MarkBaseExtraListScriptEvent(Pkg* p, int a, int b);
 
 struct ProcStandIn
 {
@@ -2836,7 +2836,7 @@ void ProcStandIn::FUN_0092d050(Ref* apRef)
                 {
                     if (!Is5a4())
                     {
-                        FUN_005ac750(GetAssignedPackage(), pActor->GetFlags(), 0x400);
+                        MarkBaseExtraListScriptEvent(GetAssignedPackage(), pActor->GetFlags(), 0x400);
                         Do5a0(pActor, GetAssignedPackage());
                         Set5a8(1);
                     }

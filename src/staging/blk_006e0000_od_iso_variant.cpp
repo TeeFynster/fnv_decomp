@@ -1900,7 +1900,7 @@ class FUN_006ec4b0_cls
 class RecursiveSpinLock
 {
   public:
-    void FUN_0040fbf0(char* name);
+    void Wait(char* name);
     void Unlock();
 };
 struct FUN_006ec900_Class
@@ -3702,7 +3702,7 @@ struct FUN_006ffda0_cls
     int __thiscall FUN_00559450();
     int __thiscall FUN_004048e0();
 };
-int __cdecl FUN_00401030(int a);
+int __cdecl FormHeap_Free(int a);
 int __cdecl AllocateZeroed(int a, int b);
 class NiTMapBase6E2
 {
@@ -5642,8 +5642,8 @@ struct FUN_006ffcf0
 struct LockEC7E
 {
     int unk00[2];
-    void FUN_0040fbf0(const char* pcName);
-    void FUN_0040fba0();
+    void Wait(const char* pcName);
+    void Leave();
 };
 struct EntryEC7E
 {

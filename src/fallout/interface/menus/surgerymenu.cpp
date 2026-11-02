@@ -2762,7 +2762,7 @@ float __cdecl FUN_00715d40();
 float __cdecl FUN_00715da0();
 struct CursorTile
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct CursorMenu
 {
@@ -2860,8 +2860,8 @@ void CursorMenu::UpdateTilePositions(int x, int y)
         originY.NormalizeXY();
         originY.Scale((float)originX);
     }
-    tile->FUN_00a012d0(4001, edge + originY.x, true);
-    tile->FUN_00a012d0(4002, offset + originY.y, true);
+    tile->SetFloat(4001, edge + originY.x, true);
+    tile->SetFloat(4002, offset + originY.y, true);
 }
 
 struct SeqHolder
@@ -3185,7 +3185,7 @@ struct EventEntry
 struct EventTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
     void FUN_00a01350(int, const char*, bool);
 };
@@ -3501,7 +3501,7 @@ struct EventPlayer
     int unka0;
     EventValues values;
     EventEntry* FUN_00576260(EventForm*, int);
-    void FUN_0088c650(void*, int, void*, bool, bool, bool);
+    void EquipItem(void*, int, void*, bool, bool, bool);
     void FUN_0088b740(int, float);
 };
 struct EventScene
@@ -3610,10 +3610,10 @@ void EventMenu::OnButtonClick(int button, int arg)
                             if (((EventMenu*)DAT_011dada4)->entry &&
                                 ((EventMenu*)DAT_011dada4)->entry->FUN_00726070() > 0)
                             {
-                                FUN_00726070()->FUN_00a012d0(stimpak, FUN_00726070()->FUN_00a011b0(stimpak) - 1.0,
+                                FUN_00726070()->SetFloat(stimpak, FUN_00726070()->FUN_00a011b0(stimpak) - 1.0,
                                                              true);
                                 ((EventPlayer*)_g_thePlayer)
-                                    ->FUN_0088c650(
+                                    ->EquipItem(
                                         ((EventMenu*)DAT_011dada4)->entry->FUN_0044ddc0(),
                                         ((EventMenu*)DAT_011dada4)->entry->FUN_00726070(),
                                         ((EventMenu*)DAT_011dada4)->entry->FUN_00559450()
@@ -3627,16 +3627,16 @@ void EventMenu::OnButtonClick(int button, int arg)
                             if (FUN_00726070()->FUN_00a011b0(morphine) > 0.0)
                             {
                                 EventEntry* item = ((EventPlayer*)_g_thePlayer)->FUN_00576260(FUN_0058db10(4), 0);
-                                FUN_00726070()->FUN_00a012d0(morphine, FUN_00726070()->FUN_00a011b0(morphine) - 1.0,
+                                FUN_00726070()->SetFloat(morphine, FUN_00726070()->FUN_00a011b0(morphine) - 1.0,
                                                              true);
                                 ((EventPlayer*)_g_thePlayer)
-                                    ->FUN_0088c650(FUN_0058db10(4), item->FUN_00726070(),
+                                    ->EquipItem(FUN_0058db10(4), item->FUN_00726070(),
                                                    item->FUN_00559450() ? *(item->FUN_00559450()->FUN_006815c0()) : 0,
                                                    false, false, true);
                                 delete item;
                                 amount -= 25.0;
                                 if (FUN_00726070()->FUN_00a011b0(DAT_011dad9c) >= 25.0)
-                                    FUN_00726070()->FUN_00a012d0(
+                                    FUN_00726070()->SetFloat(
                                         DAT_011dad9c, FUN_00726070()->FUN_00a011b0(DAT_011dad9c) - 25.0, true);
                                 else
                                     FUN_00726070()->FUN_00700320(DAT_011dad9c, 0);
@@ -3668,7 +3668,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                                 break;
                             }
                             amount = ScaleLimbWoundPercent(((EventPlayer*)_g_thePlayer)->values.Damage(limb));
-                            gauge->FUN_00a012d0(FUN_00a01860("_Value"),
+                            gauge->SetFloat(FUN_00a01860("_Value"),
                                                 ((EventPlayer*)_g_thePlayer)->values.Damage(limb) / 100.0, true);
                             label->FUN_00a01350(0xfc4, ActorValue::GetActorValueName((ActorValue::Index)limb), true);
                             FUN_007e5ee0(iOldLimb, limb);
@@ -3700,7 +3700,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                                 break;
                             }
                             amount = ScaleLimbWoundPercent(((EventPlayer*)_g_thePlayer)->values.Damage(limb));
-                            gauge->FUN_00a012d0(FUN_00a01860("_Value"),
+                            gauge->SetFloat(FUN_00a01860("_Value"),
                                                 ((EventPlayer*)_g_thePlayer)->values.Damage(limb) / 100.0, true);
                             label->FUN_00a01350(0xfc4, ActorValue::GetActorValueName((ActorValue::Index)limb), true);
                             FUN_007e5ee0(old2, limb);

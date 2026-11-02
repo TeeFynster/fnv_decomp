@@ -2202,7 +2202,7 @@ struct DecalHitList
     ~DecalHitList();
     int FUN_0049c680(DecalNode** appNode, int aiFlags);
     void FUN_0076b660(DecalNode** appNode);
-    void FUN_004ed900();
+    void RemoveAll();
 };
 
 struct DecalEmitter
@@ -2391,7 +2391,7 @@ void DecalManager::AddGeometryDecal(DecalRequest* apRequest, int aiType, bool ab
                     }
                 }
             }
-            kHits.FUN_004ed900();
+            kHits.RemoveAll();
         }
         break;
     }

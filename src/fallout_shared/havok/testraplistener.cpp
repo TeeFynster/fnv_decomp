@@ -1381,7 +1381,7 @@ struct Ref62C : Form62C
     void FUN_00565870();
 };
 Form62C* FUN_004839c0(unsigned int);
-bool FUN_005ac750(Form62C*, Extra62C*, unsigned int);
+bool MarkBaseExtraListScriptEvent(Form62C*, Extra62C*, unsigned int);
 struct Entry62C
 {
     unsigned int id;
@@ -1409,7 +1409,7 @@ void Shell62C::ApplyEntriesToRef(Ref62C* ref)
         if (form && form->isRef())
         {
             Ref62C* target = (Ref62C*)form;
-            FUN_005ac750(target, extra, 0x40000000);
+            MarkBaseExtraListScriptEvent(target, extra, 0x40000000);
             ref->FUN_00572e10(target);
             ref->FUN_00565870();
         }
@@ -1768,7 +1768,7 @@ struct Subject62
     bool ProcessCollisionPairs(int);
 };
 void* FUN_004b59f0(void*);
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 // @fnv 0x0062cc90
 bool Subject62::ProcessCollisionPairs(int arg)
 {
@@ -1816,7 +1816,7 @@ bool Subject62::ProcessCollisionPairs(int arg)
                                 if (found)
                                 {
                                     Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
-                                    world |= FUN_005ac750(ref, extra, 0x10000000);
+                                    world |= MarkBaseExtraListScriptEvent(ref, extra, 0x10000000);
                                 }
                             }
                         }
@@ -1848,7 +1848,7 @@ bool Subject62::ProcessCollisionPairs(int arg)
                             if (found)
                             {
                                 Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
-                                world |= FUN_005ac750(ref, extra, 0x10000000);
+                                world |= MarkBaseExtraListScriptEvent(ref, extra, 0x10000000);
                             }
                         }
                     }
@@ -1871,7 +1871,7 @@ bool Subject62::ProcessCollisionPairs(int arg)
         if (flags)
         {
             Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
-            world |= FUN_005ac750(flags, extra, ref);
+            world |= MarkBaseExtraListScriptEvent(flags, extra, ref);
             _ref_0084e3a0()->FUN_00572e10(flags);
         }
     }

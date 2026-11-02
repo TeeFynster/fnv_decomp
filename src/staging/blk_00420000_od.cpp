@@ -1892,13 +1892,13 @@ void FUN_0043b5f0_cls::FUN_0043b5f0()
 
 struct ExtraListShell
 {
-    void FUN_00410140(unsigned char type);
+    void RemoveExtraType(unsigned char type);
     void FUN_004216b0();
 };
 // @fnv 0x004216b0
 void ExtraListShell::FUN_004216b0()
 {
-    FUN_00410140(0x4E);
+    RemoveExtraType(0x4E);
 }
 
 extern "C" void* DAT_0101598c;
@@ -1982,10 +1982,10 @@ struct FUN_0042e060_class
 {
     void* __thiscall FUN_00410220(unsigned char type);
     void __thiscall FUN_00410020(void* extra, bool remove);
-    void __thiscall FUN_0040ff60(void* extra);
+    void __thiscall AddExtraData(void* extra);
     void __thiscall FUN_0042e060(unsigned int a, unsigned int b);
 };
-// Removes the existing 0x55-type entry, allocates a new FUN_00436b20 from a and b, and installs it via FUN_0040ff60.
+// Removes the existing 0x55-type entry, allocates a new FUN_00436b20 from a and b, and installs it via AddExtraData.
 // @fnv 0x0042e060
 void FUN_0042e060_class::FUN_0042e060(unsigned int a, unsigned int b)
 {
@@ -1993,7 +1993,7 @@ void FUN_0042e060_class::FUN_0042e060(unsigned int a, unsigned int b)
     if (pEntry)
         FUN_00410020(pEntry, true);
     pEntry = new FUN_00436b20(a, b);
-    FUN_0040ff60(pEntry);
+    AddExtraData(pEntry);
 }
 
 void* __cdecl operator new(unsigned int uiSize, void* pvMem);

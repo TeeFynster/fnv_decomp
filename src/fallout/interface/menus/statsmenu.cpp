@@ -2462,7 +2462,7 @@ struct TileAdapter007dc7e0
     float FUN_00a011b0(int trait);
     TileAdapter007dc7e0* FUN_0045cd60();
     void FUN_00a04640(int value);
-    void FUN_00a012d0(int trait, float value, bool update);
+    void SetFloat(int trait, float value, bool update);
     void SetTraitAndReset(int trait, float value);
 };
 struct StatsMenuFunction007dc7e0 : StatsMenu
@@ -2494,15 +2494,15 @@ void StatsMenuFunction007dc7e0::UpdateStatsDisplay(void* actor)
     pMain->FUN_00a04640(0);
     diff = pMain->FUN_00a011b0(0xfb0) - pMain->FUN_0045cd60()->FUN_00a011b0(0xfb0);
     diff = FUN_00404010(0.0f, diff);
-    second->FUN_00a012d0(FUN_00a01860(&UNK_0106f8f8), FUN_004e4430(diff / fMinimumInputValue) + DAT_01012070, true);
-    second->FUN_00a012d0(FUN_00a01860(&UNK_010702d8), 0.0f, false);
+    second->SetFloat(FUN_00a01860(&UNK_0106f8f8), FUN_004e4430(diff / fMinimumInputValue) + DAT_01012070, true);
+    second->SetFloat(FUN_00a01860(&UNK_010702d8), 0.0f, false);
     second->SetTraitAndReset(FUN_00a01860(&UNK_01070250), 1.0f);
 }
 
 struct TileValue
 {
     float FUN_00a011b0();
-    void FUN_00a012d0(unsigned int, float, bool);
+    void SetFloat(unsigned int, float, bool);
 };
 struct MenuItem
 {
@@ -2534,7 +2534,7 @@ void MenuItem::FUN_007ddc20()
         d = 1.0f;
     else
         d = FUN_004bd510(d, 1.0f);
-    value->FUN_00a012d0(0x100f, d, true);
+    value->SetFloat(0x100f, d, true);
 }
 
 namespace fnv_007ddd10 {
@@ -2544,7 +2544,7 @@ struct TraitSI
 };
 struct DisplaySI
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct ActivitySI
 {
@@ -2582,7 +2582,7 @@ void StatsMenuSI::FUN_007ddd10()
         currentValue = 1.0f;
     else
         currentValue = FUN_004bd510(currentValue, 1.0f);
-    unk04->FUN_00a012d0(0x1010, currentValue, true);
+    unk04->SetFloat(0x1010, currentValue, true);
 }
 }  // namespace fnv_007ddd10
 
@@ -3208,7 +3208,7 @@ struct ClickAlchemy
 };
 struct ClickPlayer
 {
-    void FUN_0088c650(TESBoundObject*, void*, AlchemyItem*, bool, bool, bool);
+    void EquipItem(TESBoundObject*, void*, AlchemyItem*, bool, bool, bool);
 };
 struct ClickTile
 {
@@ -3272,7 +3272,7 @@ void ClickMenu::FUN_007db380(int id, Tile* tile)
         if (tile == m_kHealingOptions[i].pTile && m_kHealingOptions[i].m_pStatusEffect)
         {
             ((ClickPlayer*)g_thePlayer)
-                ->FUN_0088c650(m_kHealingOptions[i].m_pStatusEffect->FUN_0044ddc0(),
+                ->EquipItem(m_kHealingOptions[i].m_pStatusEffect->FUN_0044ddc0(),
                                m_kHealingOptions[i].m_pStatusEffect->FUN_00726070(),
                                m_kHealingOptions[i].m_pStatusEffect->FUN_00559450()
                                    ? m_kHealingOptions[i].m_pStatusEffect->FUN_00559450()->FUN_006815c0()
@@ -3643,7 +3643,7 @@ struct TileSI : public Tile
 {
     float FUN_00a011b0(int);
     void FUN_00a04640(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
 };
 int __cdecl FUN_00a01860(const char*);
@@ -3669,10 +3669,10 @@ void FUN_007dc9b0_shell::UpdateScrollBar(EntrySI** apEntry)
         pHeadTile->FUN_00a04640(0);
         fPos = pHeadTile->FUN_00a011b0(0xfb0) - ((TileSI*)pHeadTile->GetParent())->FUN_00a011b0(0xfb0);
         fPos = FUN_00404010(0.0f, fPos);
-        pTailTile->FUN_00a012d0(FUN_00a01860("_number_of_items"), (float)(FUN_004e4430(fPos / fTailScrollDelta) + 1.0),
+        pTailTile->SetFloat(FUN_00a01860("_number_of_items"), (float)(FUN_004e4430(fPos / fTailScrollDelta) + 1.0),
                                 true);
     }
-    pTailTile->FUN_00a012d0(FUN_00a01860("_current_value"), 0.0f, false);
+    pTailTile->SetFloat(FUN_00a01860("_current_value"), 0.0f, false);
     pTailTile->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
 }
 }  // namespace fnv_007dc9b0
@@ -5469,7 +5469,7 @@ struct InputTile : public Tile
     bool IsTraitNonZero(int);
     bool IsAllChildrenFlag0();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
 };
 struct InputChildren
@@ -5729,7 +5729,7 @@ bool InputStats::FUN_007db680(int code, float amount)
                         : (InputTile*)((InputChildren*)&m_pTiles[26]->m_kChildTileList)->FUN_007b5370();
                 int trait3 = FUN_00a01860("_current_value");
                 int oldValue4 = (int)scrollTile->FUN_00a011b0(trait3);
-                scrollTile->FUN_00a012d0(trait3, (float)(oldValue4 + scrollStepVal4), false);
+                scrollTile->SetFloat(trait3, (float)(oldValue4 + scrollStepVal4), false);
                 if (oldValue4 != scrollTile->FUN_00a011b0(trait3))
                     scrollTile->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
                 DAT_011dad5c =

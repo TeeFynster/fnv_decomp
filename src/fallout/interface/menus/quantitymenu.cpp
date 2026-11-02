@@ -96,7 +96,7 @@ struct Tile_7aba00
     Tile_7aba00* FUN_00a03da0(const char* name);
     float FUN_00a011b0(unsigned int id);
     void FUN_00700320(int id, int value);
-    void FUN_00a012d0(int id, float value, bool propagate);
+    void SetFloat(int id, float value, bool propagate);
     void FUN_00a01350(int id, const char* value, bool propagate);
 };
 struct Menu_7aba00
@@ -204,7 +204,7 @@ Tile_7aba00* __cdecl CreateQuantityMenu(int max, void* callback, int initial)
         FUN_00453a70()->FUN_00ad7550(kSound_7aba00, 0x121).FUN_00ad8830(false);
         if (tile6->FUN_00a011b0(0xfa7) == 6006.0 || tile6->FUN_00a011b0(0xfa7) == 102.0)
         {
-            tile6->FUN_00a012d0(0xfad, FUN_00a01530(), true);
+            tile6->SetFloat(0xfad, FUN_00a01530(), true);
         }
         int value9 = MinInt(initial, max);
         int bigStep = FUN_00647b70(max / 20, 1);
@@ -215,7 +215,7 @@ Tile_7aba00* __cdecl CreateQuantityMenu(int max, void* callback, int initial)
         DAT_011da618->tile28->FUN_00700320(0x1006, value9);
         DAT_011da618->tile28->FUN_00700320(0x1007, bigStep);
         DAT_011da618->tile28->FUN_00700320(0x1008, smallStep);
-        DAT_011da618->tile28->FUN_00a012d0(0xff0, 0.0f, true);
+        DAT_011da618->tile28->SetFloat(0xff0, 0.0f, true);
         DAT_011da614 = callback;
         tile6->FUN_00a03da0(kChild1_7aba00)->FUN_00a01350(0xfc4, DAT_011d3ac8.FUN_00403df0(), true);
         DAT_011da618->tile38->FUN_00a01350(0xfc4, DAT_011d38b8.FUN_00403df0(), true);
@@ -224,7 +224,7 @@ Tile_7aba00* __cdecl CreateQuantityMenu(int max, void* callback, int initial)
         {
             DAT_011da618->FUN_00726070()
                 ->FUN_00a03da0(kChild2_7aba00)
-                ->FUN_00a012d0(0xfa9, *DAT_011d3bc8.FUN_00403e20() * 255.0, true);
+                ->SetFloat(0xfa9, *DAT_011d3bc8.FUN_00403e20() * 255.0, true);
         }
         DAT_011da618->FUN_00a1dc20(false);
         return tile6;

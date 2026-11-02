@@ -1690,8 +1690,8 @@ FUN_00a11880::FUN_00a11880()
 extern long (__stdcall *DAT_00fdf1c4)(long* value);
 unsigned int __cdecl FUN_0044a670(const char* text);
 unsigned int __cdecl FUN_00403940(unsigned int a, unsigned int b);
-void* __cdecl FUN_00401000(unsigned int size);
-void __cdecl FUN_00401030(void* p);
+void* __cdecl FormHeap_Allocate(unsigned int size);
+void __cdecl FormHeap_Free(void* p);
 void* __cdecl FUN_00401460(void* dst, const void* src, unsigned int size);
 
 struct NiRefObject_a119 {
@@ -1729,7 +1729,7 @@ public:
         unsigned int maxLen = MaxLength();
         if (newLen > maxLen) {
             T* oldString = pString;
-            T* newString = (T*)FUN_00401000(newLen + 1);
+            T* newString = (T*)FormHeap_Allocate(newLen + 1);
             pString = newString;
             if (text)
                 FUN_00401460(pString, text, srcLen + 1);
@@ -1737,7 +1737,7 @@ public:
                 *pString = 0;
             if (oldString) {
                 T* p = oldString;
-                FUN_00401030(p);
+                FormHeap_Free(p);
             }
             SetMaxLength(newLen);
         } else if (newLen) {
@@ -1748,7 +1748,7 @@ public:
         } else {
             if (pString) {
                 T* p = pString;
-                FUN_00401030(p);
+                FormHeap_Free(p);
             }
             pString = 0;
             newLen = 0;
@@ -2875,7 +2875,7 @@ struct State107 {
 };
 State107* State107::Create() { return new State107; }
 void State107::Destroy(State107* state) { delete state; }
-struct Lock107 { unsigned owner; void FUN_0040fbf0(const char*); };
+struct Lock107 { unsigned owner; void Wait(const char*); };
 extern Lock107 DAT_011f42a0;
 extern unsigned DAT_011f42a4;
 struct Parent107 { void FUN_00a5e3a0(State107*&); };
@@ -2905,7 +2905,7 @@ struct FUN_0051cf00 {
     void FUN_00439410(void*);
     void FUN_00a5a040() {
         State107* state=0;
-        DAT_011f42a0.FUN_0040fbf0(0);
+        DAT_011f42a0.Wait(0);
         if(unk18) ((Parent107*)unk18)->FUN_00a5e3a0(state);
         else state=State107::Create();
         UpdatePropertiesDown(state);

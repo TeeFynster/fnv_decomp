@@ -1532,7 +1532,7 @@ class Tile3DX
     const char* GetString(int id);
     bool GetBool(int id);
     void Set(int id, float value, bool b);
-    void FUN_00a07530(int a);
+    void SetChangeFlag(int a);
     bool AttachController(NiAVObject* obj);
     void RemovePropertyRecursive(NiAVObject* obj);
     void ConvertShadersToTileShader(NiAVObject* obj);
@@ -1574,7 +1574,7 @@ void Tile3DX::LoadTile()
     node->FUN_00a5a040();
     if (flags & 0x40)
         flags ^= 0x40;
-    FUN_00a07530(9);
+    SetChangeFlag(9);
     FUN_00707930(1);
     FUN_00707820();
 }

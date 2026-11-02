@@ -221,7 +221,7 @@ extern int DAT_011a0bb0;
 extern Flt g_011db63c;
 // If g_011db63c is nonzero, calls the model loader with DAT_011a0bb0, true, true, then sets g_011db63c to 0.
 // @fnv 0x007ffe00
-void FUN_007ffe00()
+void PurgeTerminalModel()
 {
     if ((unsigned int)g_011db63c)
         ((ModelLoader*)g_modelLoader)->QueueModelLoad((char*)DAT_011a0bb0, true, true);
@@ -1660,7 +1660,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1687,7 +1687,7 @@ struct RemoveInterface
 };
 RemoveInterface* FUN_004b7210();
 int FUN_00a01860(const char*);
-void FUN_00401030(void*);
+void FormHeap_Free(void*);
 struct RemoveBase
 {
     int unk00;
@@ -1714,7 +1714,7 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
         }
         if (container && (*node->FUN_006815c0())->filtered)
         {
-            container->FUN_00a012d0(FUN_00a01860("_num_filtered"),
+            container->SetFloat(FUN_00a01860("_num_filtered"),
                                     (float)(container->FUN_00a011b0(FUN_00a01860("_num_filtered")) - 1.0), true);
         }
         RemoveTile* tile_2 = (*node->FUN_006815c0())->tile;
@@ -1728,7 +1728,7 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
         }
         {
             RemoveData* record7 = *node->FUN_006815c0();
-            FUN_00401030(record7);
+            FormHeap_Free(record7);
         }
         if (node == static_cast<RemoveNode*>(this))
         {

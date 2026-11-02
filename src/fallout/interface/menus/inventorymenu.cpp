@@ -1118,8 +1118,8 @@ struct Tile
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, bool);
     const char* FUN_00a011f0(int);
-    void FUN_00a012d0(int, float, bool);
-    void FUN_00a07530(int);
+    void SetFloat(int, float, bool);
+    void SetChangeFlag(int);
 };
 struct TileRef
 {
@@ -1293,25 +1293,25 @@ void Menu::UpdateItemDisplay(int action, Tile* changed)
             }
             if (!FUN_00408b20(description->FUN_00a011f0(0xfcc), DAT_011d33f0.FUN_00403df0()))
             {
-                description->FUN_00a012d0(0xfa1, DAT_01050280, 1);
-                description->FUN_00a012d0(0xfb1, DAT_01072e3c, 1);
-                description->FUN_00a012d0(0xfb0, DAT_01072e3c, 1);
+                description->SetFloat(0xfa1, DAT_01050280, 1);
+                description->SetFloat(0xfb1, DAT_01072e3c, 1);
+                description->SetFloat(0xfb0, DAT_01072e3c, 1);
             }
             else if (DAT_011d9ea8->FUN_0044ddc0()->FUN_00401170() == 41)
             {
                 float heightSlot1 = DAT_01073af0;
                 float width = DAT_0104f754;
-                description->FUN_00a012d0(0xfa1, heightSlot1 + DAT_01073ae8, 1);
-                description->FUN_00a012d0(0xfb1, width + DAT_01073ae0, 1);
-                description->FUN_00a012d0(0xfb0, width + DAT_01073ae0, 1);
+                description->SetFloat(0xfa1, heightSlot1 + DAT_01073ae8, 1);
+                description->SetFloat(0xfb1, width + DAT_01073ae0, 1);
+                description->SetFloat(0xfb0, width + DAT_01073ae0, 1);
             }
             else
             {
-                description->FUN_00a012d0(0xfa1, DAT_01050280, 1);
-                description->FUN_00a012d0(0xfb1, DAT_01072e3c, 1);
-                description->FUN_00a012d0(0xfb0, DAT_01072e3c, 1);
+                description->SetFloat(0xfa1, DAT_01050280, 1);
+                description->SetFloat(0xfb1, DAT_01072e3c, 1);
+                description->SetFloat(0xfb0, DAT_01072e3c, 1);
             }
-            description->FUN_00a07530(17);
+            description->SetChangeFlag(17);
             char path[260];
             FUN_00406d30(path, 260, DAT_0106eb24);
             unsigned int prefixLengthSlot0 = FUN_0044a670(path);
@@ -1535,11 +1535,11 @@ struct Sh004bddd0
 };
 struct Sh0088c650
 {
-    void FUN_0088c650(void* a, int b, void* c, bool d, bool e, bool f);
+    void EquipItem(void* a, int b, void* c, bool d, bool e, bool f);
 };
 struct Sh0088c790
 {
-    void FUN_0088c790(void* a, int b, void* c, bool d, bool e, bool f);
+    void UnequipItem(void* a, int b, void* c, bool d, bool e, bool f);
 };
 
 unsigned __cdecl FUN_0058db10(int arg);
@@ -1604,12 +1604,12 @@ void Menu75b::FUN_00780d60()
     else if (!((Sh004bddd0*)DAT_011d9ea8)->FUN_004bddd0(false))
     {
         ((Sh0088c650*)g_thePlayer)
-            ->FUN_0088c650(a, (int)((Sh00726070*)DAT_011d9ea8)->FUN_00726070(), b, false, false, true);
+            ->EquipItem(a, (int)((Sh00726070*)DAT_011d9ea8)->FUN_00726070(), b, false, false, true);
     }
     else
     {
         ((Sh0088c790*)g_thePlayer)
-            ->FUN_0088c790(a, (int)((Sh00726070*)DAT_011d9ea8)->FUN_00726070(), b, false, false, true);
+            ->UnequipItem(a, (int)((Sh00726070*)DAT_011d9ea8)->FUN_00726070(), b, false, false, true);
     }
 
 done:

@@ -1902,7 +1902,7 @@ struct TextTile
 {
     TextTile* FUN_0045cd60();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
     void* FUN_00a00f30(int);
     void FUN_00a04640(bool);
@@ -2067,19 +2067,19 @@ void TextQueue::ProcessQueue()
                         {
                             tile->FUN_00a04620(false);
                             reinterpret_cast<QueueMenu*>(DAT_011d9334)
-                                ->positionTile->FUN_00a012d0(
+                                ->positionTile->SetFloat(
                                     0xfa1,
                                     x + tile->FUN_00a011b0(reinterpret_cast<int>(FUN_00a00940("_text_width", -1))),
                                     true);
                             reinterpret_cast<QueueMenu*>(DAT_011d9334)
-                                ->positionTile->FUN_00a012d0(
+                                ->positionTile->SetFloat(
                                     0xfa2, y + tile->FUN_00a011b0(reinterpret_cast<int>(FUN_00a00940("_text_y", -1))),
                                     true);
                         }
                         else if (!hasTrait)
                         {
                             reinterpret_cast<QueueMenu*>(DAT_011d9334)
-                                ->positionTile->FUN_00a012d0(0xfa1, x + tile->FUN_00a011b0(0xfb1), true);
+                                ->positionTile->SetFloat(0xfa1, x + tile->FUN_00a011b0(0xfb1), true);
                             reinterpret_cast<QueueMenu*>(DAT_011d9334)->positionTile->FUN_00700320(0xfa2, y);
                         }
                         break;
@@ -2091,7 +2091,7 @@ void TextQueue::ProcessQueue()
     if (FUN_0076b610() || hasTrait)
     {
         reinterpret_cast<QueueMenu*>(DAT_011d9334)
-            ->positionTile->FUN_00a012d0(
+            ->positionTile->SetFloat(
                 0xfa1,
                 reinterpret_cast<QueueMenu*>(DAT_011d9334)->previousTile->FUN_00a011b0(0xfa1) +
                     (reinterpret_cast<QueueMenu*>(DAT_011d9334)->previousTile->IsAllChildrenFlag0()
@@ -2099,7 +2099,7 @@ void TextQueue::ProcessQueue()
                          : 0.0f),
                 true);
         reinterpret_cast<QueueMenu*>(DAT_011d9334)
-            ->positionTile->FUN_00a012d0(
+            ->positionTile->SetFloat(
                 0xfa2, reinterpret_cast<QueueMenu*>(DAT_011d9334)->previousTile->FUN_00a011b0(0xfa2), true);
     }
 }
@@ -2435,7 +2435,7 @@ struct ScrollListHelper
 
 struct ScrollTileHelper
 {
-    void __thiscall FUN_00a012d0(int aiID, float afValue, bool abCreate);
+    void __thiscall SetFloat(int aiID, float afValue, bool abCreate);
 };
 
 struct FUN_0075b020_cls
@@ -2483,7 +2483,7 @@ void FUN_0075aa50_cls::UpdateScrollItems()
             if (iNumberOfItems > 1)
             {
                 ((ScrollTileHelper*)((ScrollData*)this)->pTile0c)
-                    ->FUN_00a012d0(FUN_00a01860("_scroll_delta"), (m_20 - fTimeOffset) / (iNumberOfItems - 1), true);
+                    ->SetFloat(FUN_00a01860("_scroll_delta"), (m_20 - fTimeOffset) / (iNumberOfItems - 1), true);
             }
         }
 
@@ -3002,7 +3002,7 @@ struct HighlightTile
     bool GetSpeechChallengeFailure();
     HighlightTile* FUN_00a03da0(const char* name);
     void FUN_0071aa60(bool visible);
-    void FUN_00a07530(int flags);
+    void SetChangeFlag(int flags);
     void FUN_00700320(const char* trait, int value);
 };
 HighlightTile* __cdecl FUN_00a08b20(HighlightTile* root, const char* path);
@@ -3039,19 +3039,19 @@ void HighlightList::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(true);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
             else
@@ -3063,19 +3063,19 @@ void HighlightList::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(false);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
         }
@@ -3094,7 +3094,7 @@ struct MyMenuTile
     void* FUN_00a00f30(int);
     MyMenuTile* FUN_0045cd60();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 
 class GlobalObject_0040c150
@@ -3183,19 +3183,19 @@ void ChallengeMenu::RefreshDisplay()
 
     this->pDisplay->InsertAtPosition(g_011d3d78.FUN_004c69f0(), this->pTile34->FUN_00a00f30(0xFC4),
                                      this->pTile34->FindTraitValue(0xFA3), 0);
-    this->pTile34->FUN_00a012d0(
+    this->pTile34->SetFloat(
         0xFA1,
         (this->pTile34->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(g_011d3d78.FUN_00403df0()) * 17) / 2.0, 1);
 
     this->pDisplay->InsertAtPosition(g_011d4978.FUN_004c69f0(), this->pTile38->FUN_00a00f30(0xFC4),
                                      this->pTile38->FindTraitValue(0xFA3), 1);
-    this->pTile38->FUN_00a012d0(
+    this->pTile38->SetFloat(
         0xFA1,
         (this->pTile38->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(g_011d4978.FUN_00403df0()) * 17) / 2.0, 1);
 
     this->pDisplay->InsertAtPosition(this->pChallenge->FUN_00758fe0(), this->pTile28->FUN_00a00f30(0xFC4),
                                      this->pTile28->FindTraitValue(0xFA3), 2);
-    this->pTile28->FUN_00a012d0(
+    this->pTile28->SetFloat(
         0xFA1,
         (this->pTile28->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(this->pChallenge->FUN_00758fe0()) * 17) /
             2.0,

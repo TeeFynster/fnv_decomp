@@ -777,7 +777,7 @@ struct NodeChildren
 };
 struct Context
 {
-    float FUN_00567400();
+    float GetScale();
     int FUN_008d6f30(int value);
 };
 struct Receiver
@@ -1026,7 +1026,7 @@ struct ManagedSceneHolder
     ManagedSceneEntry* current;
     void EnsureCurrentEntry();
 };
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 struct SpawnedItem_b10003
 {
     unsigned char unk00;
@@ -1040,7 +1040,7 @@ struct SpawnedItem_b10003
     SpawnedItem_b10003();
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
 };
 struct FUN_00478e90_This
@@ -1732,9 +1732,9 @@ class TESFile
     bool FUN_00473660();
     TESFile* GetFileByIndex(unsigned int);
     unsigned char FUN_00473250();
-    int FUN_004726b0();
+    int GetNextChunk();
     unsigned int GetField25C();
-    bool FUN_00472890(void*, unsigned int);
+    bool GetChunkData(void*, unsigned int);
     bool FUN_004726f0();
     bool IsEndianConversionRequired();
     void FUN_00471130();
@@ -1786,7 +1786,7 @@ struct TESWorldSpace : TESForm
 TESForm* FUN_004839c0(unsigned int);
 int FindFormEnumIndex(unsigned int);
 int __cdecl FUN_00404dc0(const char*, const char*);
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 
 extern "C" char DAT_010186b8[];
 extern DialogueResponse* DAT_011c3f2c;
@@ -1888,13 +1888,13 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                             }
                             else if (hdr->type == (unsigned int)DAT_011872b4)
                             {
-                                int chunk = f->FUN_004726b0();
+                                int chunk = f->GetNextChunk();
                                 if (chunk == 0x44494445)
                                 {
                                     unsigned int len = f->GetField25C() + 1;
                                     char* ptr = (char*)operator new(len);
                                     memset(ptr, 0, len);
-                                    f->FUN_00472890(ptr, 0);
+                                    f->GetChunkData(ptr, 0);
                                     if (FUN_00404dc0(ptr, name) == 0)
                                     {
                                         got = true;
@@ -1904,7 +1904,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                             {
                                                 XCLC v;
                                                 memset(&v, 0, sizeof(v));
-                                                f->FUN_00472890(&v, sizeof(v));
+                                                f->GetChunkData(&v, sizeof(v));
                                                 if (f->IsEndianConversionRequired())
                                                     v.FUN_00462230();
                                                 *out1 = v.x;
@@ -1913,7 +1913,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                             }
                                             else if (f->FUN_004726f0())
                                             {
-                                                chunk = f->FUN_004726b0();
+                                                chunk = f->GetNextChunk();
                                             }
                                             else
                                             {
@@ -1921,7 +1921,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                             }
                                         }
                                     }
-                                    FUN_00401030(ptr);
+                                    FormHeap_Free(ptr);
                                 }
                                 read2 = f->FUN_00472150(true);
                             }

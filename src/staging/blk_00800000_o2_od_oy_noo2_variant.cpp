@@ -354,7 +354,7 @@ struct xActor
     virtual void v192();
     virtual void FUN_304(xP3, void*, xActor*, int);
     xCell* FUN_008d6f30();
-    float FUN_00567400();
+    float GetScale();
     xFilter FUN_00931ed0();
     xOwner* FUN_009306d0();
     xShooterV* FUN_009185e0();
@@ -374,7 +374,7 @@ void xActor::FUN_0081eba0()
     xP3 DIR;
     MYPOS = *FUN_1f4();
     PLPOS = *xg_player_11dea3c->FUN_1f4();
-    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->FUN_00567400();
+    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->GetScale();
     DIR = MYPOS - PLPOS;
     xOwner* OWNER = FUN_009306d0();
     xFilter FILTER(0);

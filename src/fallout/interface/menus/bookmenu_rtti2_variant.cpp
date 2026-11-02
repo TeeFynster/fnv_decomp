@@ -850,7 +850,7 @@ struct Tile_00a01b00 : Tile
     static float __cdecl FUN_00a01530();
     Tile* FUN_00a01b00(const char*);
     Menu* FUN_00a03c90();
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct TileMenu : Tile
 {
@@ -925,7 +925,7 @@ Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
             return 0;
         }
         if (((TGF*)ptile)->GetFloat(0xfa7) == 6006.0 || ((TGF*)ptile)->GetFloat(0xfa7) == 102.0)
-            ptile->FUN_00a012d0(0xfad, ftop_depth, true);
+            ptile->SetFloat(0xfad, ftop_depth, true);
         ((BookMenuData*)g_pHudMainMenuInstance)->UpdateBookMenu(apBook, apRef);
         if (((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile->FUN_00409700())
             FUN_00717280(0x18);

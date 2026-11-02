@@ -567,7 +567,7 @@ extern Pointer90 DAT_011d90bc;
 extern int DAT_011f36ac;
 struct Loader90
 {
-    Node90* FUN_00447080(const char*, int, int, int, int, int);
+    Node90* LoadModel(const char*, int, int, int, int, int);
 };
 extern Loader90* DAT_011c3b3c;
 Node90* __cdecl FUN_004aae30(Node90*, const char*);
@@ -1635,7 +1635,7 @@ struct Casino129
 struct Tile129
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void FUN_00a01350(int, const char*, bool);
     void SetTraitAndReset(int, float);
     void FUN_00700320(int, int);
@@ -2738,7 +2738,7 @@ template <class T> class NiTPointerList
 };
 struct FUN_00a012d0_t
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct Entry738c
 {
@@ -3172,7 +3172,7 @@ void BlackjackUpdate::FUN_00734db0()
     lastTime = g_timeGlobal.FUN_00825c00();
     DAT_011d90dc = state;
     if (!active)
-        ((InterfaceUpdate*)FUN_004b7210())->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+        ((InterfaceUpdate*)FUN_004b7210())->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
     switch (state)
     {
     case 13:
@@ -3180,7 +3180,7 @@ void BlackjackUpdate::FUN_00734db0()
             break;
         if (FUN_0059bb30() != 2)
         {
-            ((InterfaceUpdate*)FUN_004b7210())->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+            ((InterfaceUpdate*)FUN_004b7210())->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();
             int difference =

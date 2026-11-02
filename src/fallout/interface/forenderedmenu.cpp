@@ -1602,7 +1602,7 @@ struct ControlsView
 };
 struct LoaderView
 {
-    NiNode* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    NiNode* LoadModel(const char*, int, bool, bool, bool, bool);
 };
 struct SettingView
 {
@@ -1801,7 +1801,7 @@ void FUN_007fd6c0_Class::UpdatePlayerFaceScene()
     savedCull = root->FUN_00456610();
     scene = (NiNode*)new NewScene(0);
     ((NiNode*)FUN_00450b80(3))->AddObject(scene, true);
-    light = (NodeView*)DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\PlayerFaceLights01.NIF", 0, true, false, false,
+    light = (NodeView*)DAT_011c3b3c->LoadModel("Meshes\\Terminals\\PlayerFaceLights01.NIF", 0, true, false, false,
                                                   false);
     scene->AddObject(root, true);
     scene->AddObject(light, true);

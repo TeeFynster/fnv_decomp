@@ -5784,7 +5784,7 @@ struct Actor
     void* FUN_005d43c0();
 };
 extern Actor* DAT_011dea3c;
-void __cdecl FUN_005ac750(void*, void*, int);
+void __cdecl MarkBaseExtraListScriptEvent(void*, void*, int);
 struct Manager
 {
     void TryStartDialogue(Actor*, Actor*, int, int, int, int);
@@ -5980,7 +5980,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                     {
                         member2Local23 = GetIntAt(index2Local31);
                         if (member2Local23 != DAT_011dea3c)
-                            FUN_005ac750(member2Local23->v42c(), member2Local23->FUN_005d43c0(), 0x8000);
+                            MarkBaseExtraListScriptEvent(member2Local23->v42c(), member2Local23->FUN_005d43c0(), 0x8000);
                     }
                     DAT_011f1708->TryStartDialogue(bestLocal4, subject, 4, 3, 1, 0);
                 }

@@ -229,7 +229,7 @@ struct xActor
     char m_pad04[0xf8];
     xActor* m_fc;
     xCell* FUN_008d6f30();
-    float FUN_00567400();
+    float GetScale();
     xFilter FUN_00931ed0();
     xOwner* FUN_009306d0();
     void* FUN_004181e0();
@@ -250,7 +250,7 @@ bool xActor::FUN_009c40c0()
     xP3 DIR;
     MYPOS = *FUN_1f4();
     PLPOS = *xg_player_11dea3c->FUN_1f4();
-    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->FUN_00567400();
+    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->GetScale();
     DIR = MYPOS - PLPOS;
     xOwner* OWNER = FUN_009306d0();
     xFilter FILTER(0);

@@ -110,7 +110,7 @@ struct Loader_S
 extern Loader_S* g_modelLoader;
 extern int DAT_011a0bb0;
 extern Flt g_011db63c;
-void FUN_007ffe00();
+void PurgeTerminalModel();
 struct FUN_007e0e30_Class
 {
     void* m_p;
@@ -146,7 +146,7 @@ struct Tile
     Tile* FUN_00a01b00();
     Menu* FUN_00a03c90();
     float FUN_00a011b0(int id);
-    void FUN_00a012d0(int id, float value, bool a);
+    void SetFloat(int id, float value, bool a);
     void FUN_00a01350(int id, const char* text, bool a);
     const char* FUN_00a011f0(int id);
 };
@@ -1181,7 +1181,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1209,7 +1209,7 @@ struct RemoveInterface
 };
 RemoveInterface* FUN_004b7210();
 int FUN_00a01860(const char*);
-void FUN_00401030(void*);
+void FormHeap_Free(void*);
 struct RemoveBase
 {
     int unk00;
@@ -1281,7 +1281,7 @@ bool __cdecl FUN_007e6320(const char* titleText, const char* initialText, void(_
         menu->FUN_00a1dc70(dynamic_cast<TileMenu*>(root2), false);
         g_011daec4 = dynamic_cast<TextEditMenu*>(menu);
         if (root2->FUN_00a011b0(0xfa7) == 6006.0 || root2->FUN_00a011b0(0xfa7) == 102.0)
-            root2->FUN_00a012d0(0xfad, depthA, true);
+            root2->SetFloat(0xfad, depthA, true);
 
         g_011daec4->title->FUN_00a01350(0xfc4, titleText, true);
         g_011daec4->input->FUN_00a01350(0xfc4, initialText, true);

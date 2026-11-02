@@ -704,7 +704,7 @@ class TreeReference : public TESObjectREFR
 {
   public:
     unsigned int FUN_005692d0();
-    float FUN_00567400();
+    float GetScale();
 };
 class BSTreeModel
 {
@@ -794,7 +794,7 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
     }
     float key = 1.0f;
     if (reference)
-        key = reference->FUN_00567400();
+        key = reference->GetScale();
     NiAVObject* instanceModel = model->CreateInstance(key);
     if (instanceModel)
         instanceModel->SetName(NiFixedString(tree->model.GetModelPath()));

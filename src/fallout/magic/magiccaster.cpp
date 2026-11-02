@@ -4395,7 +4395,7 @@ struct Object
     unsigned int unk84;
     CasterPart caster;
     TargetPart target;
-    float FUN_00567400();
+    float GetScale();
     float AttachSubObject();
     float FUN_008bec80();
     void* FUN_008d6f30();
@@ -4538,7 +4538,7 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
                     (casterObjectSlot2 == DAT_011dea3c || !target6->GetObject()->IsActor() ||
                      target6->GetObject()->GetActorType() != 9))
                     reach = casterObjectSlot2->GetReach();
-                reach *= FUN_00404010(1.0f, casterObjectSlot2->FUN_00567400());
+                reach *= FUN_00404010(1.0f, casterObjectSlot2->GetScale());
                 if (reach < FUN_009a64d0(casterObjectSlot2, target6->GetObject(), false))
                     target6 = 0;
             }

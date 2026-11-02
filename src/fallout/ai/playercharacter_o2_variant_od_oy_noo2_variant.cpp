@@ -930,7 +930,7 @@ extern const float DAT_01017868;
 extern const double DAT_01020998, DAT_0101ffa0, DAT_01018a90, DAT_01011588;
 GrabPhysics* FUN_004b52f0(GrabRef*);
 int GetBSXFlags(GrabRef*, int);
-bool FUN_005ac750(int, void*, unsigned);
+bool MarkBaseExtraListScriptEvent(int, void*, unsigned);
 void GetScalarAndVector(GrabRef*, GrabVector*, float*);
 bool FUN_00703430();
 GrabPhysics* FUN_00960510();
@@ -969,7 +969,7 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
         {
             bool character = GetBSXFlags(root, 8) || ref->IsDead();
             target = ref;
-            FUN_005ac750(0, target->FUN_005d43c0(), 0x80000);
+            MarkBaseExtraListScriptEvent(0, target->FUN_005d43c0(), 0x80000);
             mode = newMode;
             distance = range;
             GrabConstraintData data;
@@ -1144,7 +1144,7 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
         else if (newMode == 2)
         {
             target = ref;
-            FUN_005ac750(0, target->FUN_005d43c0(), 0x80000);
+            MarkBaseExtraListScriptEvent(0, target->FUN_005d43c0(), 0x80000);
             mode = 2;
             distance = range;
         }

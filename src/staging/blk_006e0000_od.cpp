@@ -4959,7 +4959,7 @@ unsigned char FUN_006ec4b0_cls::PushItem(void* arg)
 class RecursiveSpinLock
 {
   public:
-    void FUN_0040fbf0(char* name);
+    void Wait(char* name);
     void Unlock();
 };
 
@@ -4988,7 +4988,7 @@ struct FUN_006ec900_Class
 bool FUN_006ec900_Class::VisitUntilFound(int aiValue)
 {
     bool found = false;
-    lock.FUN_0040fbf0(0);
+    lock.Wait(0);
     for (unsigned int i = 0; i < count && !found; ++i)
     {
         found = Visit(i, aiValue);
@@ -7726,13 +7726,13 @@ struct FUN_006ffda0_cls
     int __thiscall FUN_004048e0();
 };
 
-int __cdecl FUN_00401030(int a);
+int __cdecl FormHeap_Free(int a);
 int __cdecl AllocateZeroed(int a, int b);
 
 // @fnv 0x006ffda0
 void FUN_006ffda0_cls::FUN_006ffda0()
 {
-    FUN_00401030(m_i24);
+    FormHeap_Free(m_i24);
     m_i24 = (FUN_00559450() != 0) ? AllocateZeroed(FUN_004048e0() + 1, 1) : 0;
     m_cb29 = 0;
     m_i1c = 0;
@@ -10985,8 +10985,8 @@ void FUN_006ffcf0::SetPackedFields(long aValue, int aLow, int aHigh, int aMid)
 struct LockEC7E
 {
     int unk00[2];
-    void FUN_0040fbf0(const char* pcName);
-    void FUN_0040fba0();
+    void Wait(const char* pcName);
+    void Leave();
 };
 
 struct EntryEC7E
@@ -11008,9 +11008,9 @@ class FUN_006ec7e0_C
 // @fnv 0x006ec7e0
 bool FUN_006ec7e0_C::FUN_006ec7e0(void* a1, void* a2, void* a3, bool a4)
 {
-    m_kLock.FUN_0040fbf0(0);
+    m_kLock.Wait(0);
     bool bResult = FUN_00449f80(a1, a2, a3, a4)->InsertOrReplaceNode();
-    m_kLock.FUN_0040fba0();
+    m_kLock.Leave();
     return bResult;
 }
 

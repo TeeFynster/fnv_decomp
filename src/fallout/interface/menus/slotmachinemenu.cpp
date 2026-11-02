@@ -1042,7 +1042,7 @@ struct GameTile
     GameTile* FUN_00a01b00();
     GameMenu* FUN_00a03c90();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void FUN_00a01350(int, const char*, bool);
     void SetTraitAndReset(int, float);
     void FUN_00700320(int, int);
@@ -1264,7 +1264,7 @@ GameTile* __cdecl FUN_007c0a40(char* casino, int wager, int mode, int threshold)
             return 0;
         }
         if (manager->FUN_00a011b0(0xfa7) == 6006.0 || manager->FUN_00a011b0(0xfa7) == 102.0)
-            manager->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            manager->SetFloat(0xfad, FUN_00a01530(1));
         BSAudio::GetSingleton()->GetSoundHandleByEditorID(DAT_01076600, 0x121).Play(false);
         DAT_011da9a4->stat = DAT_011dea3c->stats.FUN_0066ef20(11);
         DAT_011da9a4->wager = DAT_011a082c;
@@ -2795,7 +2795,7 @@ struct SlotTextureLoader
 extern SlotTextureLoader* DAT_011dea10;
 struct SlotModelLoader
 {
-    void* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    void* LoadModel(const char*, int, bool, bool, bool, bool);
 };
 extern SlotModelLoader* DAT_011c3b3c;
 void FUN_00406d00(char*, unsigned int, const char*, ...);
@@ -2896,13 +2896,13 @@ bool SlotMachineAssets::LoadAssets()
         FUN_00406d00(path, 260, "%sNV_SlotMachine-Symbol%s.dds", "Textures\\terminals\\NV_SlotMachine\\", "S");
         FUN_004b7240(path, normalized, 260);
         DAT_011dea10->FUN_004568c0(normalized, &special, false, false);
-        machine = DAT_011c3b3c->FUN_00447080(reinterpret_cast<SlotAssets*>(DAT_011da9ac)->FUN_00504e00(7)->GetPath(), 0,
+        machine = DAT_011c3b3c->LoadModel(reinterpret_cast<SlotAssets*>(DAT_011da9ac)->FUN_00504e00(7)->GetPath(), 0,
                                              true, false, false, false);
-        reel1 = DAT_011c3b3c->FUN_00447080("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF", 0, true,
+        reel1 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF", 0, true,
                                            false, false, false);
-        reel2 = DAT_011c3b3c->FUN_00447080("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF", 0, true,
+        reel2 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF", 0, true,
                                            false, false, false);
-        reel3 = DAT_011c3b3c->FUN_00447080("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF", 0, true,
+        reel3 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF", 0, true,
                                            false, false, false);
         loading = false;
         return InitReels();

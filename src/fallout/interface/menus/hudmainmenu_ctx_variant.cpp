@@ -43,7 +43,7 @@ class Tile
     virtual void vf1c();
     virtual CompassStub* vf20();
     void FUN_00700320(int trait, int value);
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
     float FUN_00a011b0(int trait);
     void FUN_00a01350(int trait, const char* text, bool propagate);
     Tile* FUN_00a01b00(const char* path);
@@ -370,10 +370,10 @@ Tile* FUN_0076bfe0()
         iTotalWidthTraitA = FUN_00a00940("_TotalWidth", -1);
         iImageWidthTraitT = FUN_00a00940("_ImageWidth", -1);
         HUDMainMenu_pme->m_pTiles[59] = FUN_00a08b20(FUN_00a09030(1004), "ActionPoints");
-        HUDMainMenu_pme->m_pTiles[59]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[59]->SetFloat(
             4001, (float)(iScreenWidthC - iSafeZoneX3 * 2) - HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4017) + 30.0,
             1);
-        HUDMainMenu_pme->m_pTiles[59]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[59]->SetFloat(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[59]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[43] = pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateRightBracket, 0);
@@ -381,7 +381,7 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[43]->FUN_00700320(4001, -37);
         HUDMainMenu_pme->m_pTiles[7] = pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateMeter3, 0);
         HUDMainMenu_pme->m_pTiles[7]->FUN_00700320(iOriginalXTrait14, 326);
-        HUDMainMenu_pme->m_pTiles[7]->FUN_00a012d0(4002, 41.0f, 1);
+        HUDMainMenu_pme->m_pTiles[7]->SetFloat(4002, 41.0f, 1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[7], 3);
         HUDMainMenu_pme->m_pTiles[8] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateJustifyRightText6, 0);
@@ -397,13 +397,13 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[9] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateJustifyRightText4, 0);
         HUDMainMenu_pme->m_pTiles[9]->FUN_00700320(4001, 80);
-        HUDMainMenu_pme->m_pTiles[9]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_pme->m_pTiles[9]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002), 1);
         HUDMainMenu_pme->m_pTiles[9]->FUN_00700320(4025, 7);
         HUDMainMenu_pme->m_pTiles[9]->FUN_00a01350(4036, DAT_011d4da4.FUN_00403df0(), 1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[9], 0);
         HUDMainMenu_pme->m_pTiles[10] = pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateMeter2, 0);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iOriginalXTrait14, 90);
-        HUDMainMenu_pme->m_pTiles[10]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
+        HUDMainMenu_pme->m_pTiles[10]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00a01350(4044, kInterfaceVATSVatsBarDds, 1);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iTotalWidthTraitA, 60);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iImageWidthTraitT, 1);
@@ -411,30 +411,30 @@ Tile* FUN_0076bfe0()
         FUN_00774800(HUDMainMenu_pme->m_pTiles[10], 3);
         HUDMainMenu_pme->m_pTiles[11] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[59], kTemplateMeterBackground, 0);
-        HUDMainMenu_pme->m_pTiles[11]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
+        HUDMainMenu_pme->m_pTiles[11]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[11], 4);
         HUDMainMenu_pme->m_pTiles[86] = FUN_00a08b20(FUN_00a09030(1004), kCNDArrows);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[86]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[9]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[10]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4017) * 0.75 + 8.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[86]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[10]->FUN_00a011b0(4002),
             1);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(4016, HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4016), 1);
+        HUDMainMenu_pme->m_pTiles[86]->SetFloat(4016, HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[86]->FUN_00700320(4003, 0);
         HUDMainMenu_pme->m_pTiles[60] = FUN_00a08b20(FUN_00a09030(1004), kHitPoints);
         HUDMainMenu_pme->m_pTiles[60]->FUN_00700320(4001, iSafeZoneX3 * 2 + 10);
-        HUDMainMenu_pme->m_pTiles[60]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[60]->SetFloat(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[60]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[42] = pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[60], kTemplateLeftBracket, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[42], 2);
         HUDMainMenu_pme->m_pTiles[1] = pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[60], kTemplateMeter, 0);
         HUDMainMenu_pme->m_pTiles[1]->FUN_00700320(iOriginalXTrait14, 20);
-        HUDMainMenu_pme->m_pTiles[1]->FUN_00a012d0(4002, 41.0f, 1);
+        HUDMainMenu_pme->m_pTiles[1]->SetFloat(4002, 41.0f, 1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[1], 3);
         HUDMainMenu_pme->m_pTiles[2] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[60], kTemplateJustifyRightText3, 0);
@@ -472,7 +472,7 @@ Tile* FUN_0076bfe0()
                 ((MenuStub*)HUDMainMenu_pme)->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[3], kTemplateCompassIconMarker, 0);
         }
         HUDMainMenu_pme->m_pTiles[61] = FUN_00a08b20(FUN_00a09030(1004), kRadiationMeter);
-        HUDMainMenu_pme->m_pTiles[61]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[61]->SetFloat(
             4001, (float)(iScreenWidthC - iSafeZoneX3 * 2) - HUDMainMenu_pme->m_pTiles[61]->FUN_00a011b0(4017) - 20.0,
             1);
         HUDMainMenu_pme->m_pTiles[61]->FUN_00700320(4002, iSafeZoneYY * 2);
@@ -483,9 +483,9 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[19]->FUN_00a01350(4036, "+0", 1);
         HUDMainMenu_pme->m_pTiles[20]->FUN_00a01350(4036, DAT_011d21d8.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_pTiles[62] = FUN_00a08b20(FUN_00a09030(1004), "EnemyHealth");
-        HUDMainMenu_pme->m_pTiles[62]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[62]->SetFloat(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[62]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) + 40.0, 1);
+        HUDMainMenu_pme->m_pTiles[62]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) + 40.0, 1);
         HUDMainMenu_pme->m_pTiles[62]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[62]->FUN_00700320(4084, 2);
         HUDMainMenu_pme->m_pTiles[21] =
@@ -524,7 +524,7 @@ Tile* FUN_0076bfe0()
         }
         HUDMainMenu_pme->m_pTiles[64] = FUN_00a08b20(FUN_00a09030(1004), "Region_Location");
         HUDMainMenu_pme->m_pTiles[64]->FUN_00700320(4001, iSafeZoneX3 * 2 + 15);
-        HUDMainMenu_pme->m_pTiles[64]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) - 75.0, 1);
+        HUDMainMenu_pme->m_pTiles[64]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) - 75.0, 1);
         HUDMainMenu_pme->m_pTiles[15] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[64], "template_justify_left_text", 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[15], 0);
@@ -532,16 +532,16 @@ Tile* FUN_0076bfe0()
         NiPoint3Stub kTextSize1 =
             FUN_005bd5b0()->FUN_00a1b020(kTestHeight2, (int)HUDMainMenu_pme->m_pTiles[15]->FUN_00a011b0(4025),
                                          HUDMainMenu_pme->m_pTiles[15]->FUN_00a011b0(4026), 0);
-        HUDMainMenu_pme->m_pTiles[15]->FUN_00a012d0(4002, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[15]->SetFloat(4002, kTextSize1.y, 1);
         HUDMainMenu_pme->m_pTiles[16] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[64], kTemplateJustifyLeftText3, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[16], 0);
         HUDMainMenu_pme->m_pTiles[16]->FUN_00700320(4003, 1);
-        HUDMainMenu_pme->m_pTiles[16]->FUN_00a012d0(4002, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[16]->SetFloat(4002, kTextSize1.y, 1);
         HUDMainMenu_pme->m_pTiles[65] = FUN_00a08b20(FUN_00a09030(1004), "ReticleCenter");
-        HUDMainMenu_pme->m_pTiles[65]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[65]->SetFloat(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[65]->FUN_00a011b0(4017) / 2.0 - 3.0, 1);
-        HUDMainMenu_pme->m_pTiles[65]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[65]->SetFloat(
             4002, (float)(iScreenHeightX / 2) - HUDMainMenu_pme->m_pTiles[65]->FUN_00a011b0(4016) / 2.0 - 3.0, 1);
         HUDMainMenu_pme->m_pTiles[65]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[65]->FUN_00700320(4003, 1);
@@ -575,9 +575,9 @@ Tile* FUN_0076bfe0()
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[67], kTemplateMessageBracket, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[27], 1);
         HUDMainMenu_pme->m_pTiles[68] = FUN_00a08b20(FUN_00a09030(1004), "Info");
-        HUDMainMenu_pme->m_pTiles[68]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[68]->SetFloat(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[68]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[68]->SetFloat(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4016) - 30.0,
             1);
         HUDMainMenu_pme->m_pTiles[68]->FUN_00700320(4008, 1);
@@ -585,22 +585,22 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[30] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[29], kPCShortcutLabel);
         HUDMainMenu_pme->m_pTiles[31] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[29], kXboxButton);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[29], 0);
-        HUDMainMenu_pme->m_pTiles[29]->FUN_00a012d0(FUN_00a01860("_x"),
+        HUDMainMenu_pme->m_pTiles[29]->SetFloat(FUN_00a01860("_x"),
                                                     HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
         HUDMainMenu_pme->m_pTiles[32] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], "template_justify_center_text", 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[32], 0);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_pme->m_pTiles[32]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[32]->SetFloat(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[32]->FUN_00700320(4002, 0);
         kTextSize1 = FUN_005bd5b0()->FUN_00a1b020(kTestHeight, (int)HUDMainMenu_pme->m_pTiles[32]->FUN_00a011b0(4025),
                                                   HUDMainMenu_pme->m_pTiles[32]->FUN_00a011b0(4026), 0);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4108, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[32]->SetFloat(4108, kTextSize1.y, 1);
         HUDMainMenu_pme->m_pTiles[33] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyCenterText3, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[33], 0);
-        HUDMainMenu_pme->m_pTiles[33]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[33]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_pme->m_pTiles[33]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[33]->SetFloat(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00700320(4002, 65);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00a01350(4036, DAT_011d2454.FUN_00403df0(), 1);
@@ -608,8 +608,8 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[34] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyCenterText2, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[34], 0);
-        HUDMainMenu_pme->m_pTiles[34]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[34]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_pme->m_pTiles[34]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[34]->SetFloat(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00700320(4002, 65);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00a01350(4036, DAT_011d1f68.FUN_00403df0(), 1);
@@ -622,10 +622,10 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[35] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyRightText2, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[35], 0);
-        HUDMainMenu_pme->m_pTiles[35]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[35]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0 - iInfoGapLeftAA, 1);
         HUDMainMenu_pme->m_pTiles[35]->FUN_00700320(4002, iInfoRowY);
-        HUDMainMenu_pme->m_pTiles[35]->FUN_00a012d0(4009, DAT_011d979c, 1);
+        HUDMainMenu_pme->m_pTiles[35]->SetFloat(4009, DAT_011d979c, 1);
         HUDMainMenu_pme->m_pTiles[36] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyLeftText, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[36], 0);
@@ -634,23 +634,23 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[37] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyRightText, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[37], 0);
-        HUDMainMenu_pme->m_pTiles[37]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[37]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) - iInfoPadRightQ, 1);
         HUDMainMenu_pme->m_pTiles[37]->FUN_00700320(4002, iInfoRowY);
-        HUDMainMenu_pme->m_pTiles[37]->FUN_00a012d0(4009, DAT_011d979c, 1);
+        HUDMainMenu_pme->m_pTiles[37]->SetFloat(4009, DAT_011d979c, 1);
         HUDMainMenu_pme->m_pTiles[38] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], "template_justify_left_text", 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[38], 0);
-        HUDMainMenu_pme->m_pTiles[38]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[38]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0 + iInfoPadMid34, 1);
         HUDMainMenu_pme->m_pTiles[38]->FUN_00700320(4002, iInfoRowY);
         HUDMainMenu_pme->m_pTiles[39] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[68], "template_info_seperator", 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[39], 2);
         HUDMainMenu_pme->m_pTiles[69] = FUN_00a08b20(FUN_00a09030(1004), "Subtitles");
-        HUDMainMenu_pme->m_pTiles[69]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[69]->SetFloat(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[69]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[69]->SetFloat(4002,
                                                     HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4002) -
                                                         HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4016) - 50.0,
                                                     1);
@@ -658,11 +658,11 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[28] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[69], kTemplateJustifyCenterText, 0);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[28], 0);
-        HUDMainMenu_pme->m_pTiles[28]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[28]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_pme->m_pTiles[28]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[28]->SetFloat(4026, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[70] = FUN_00a08b20(FUN_00a09030(1004), kHokeys);
-        HUDMainMenu_pme->m_pTiles[70]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) + 15.0, 1);
-        HUDMainMenu_pme->m_pTiles[70]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[70]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) + 15.0, 1);
+        HUDMainMenu_pme->m_pTiles[70]->SetFloat(4002,
                                                     (float)(iScreenHeightX - iSafeZoneYY * 2) -
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4016) -
                                                         HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4016) - 20.0,
@@ -673,7 +673,7 @@ Tile* FUN_0076bfe0()
         ((HotKeyWheelStub*)HUDMainMenu_pme->m_kMenuData)->FUN_00701610(HUDMainMenu_pme->m_pTiles[40]);
         HUDMainMenu_pme->m_pTiles[41] =
             pMenuXB->FUN_00a1ddb0(HUDMainMenu_pme->m_pTiles[70], "template_justify_center_text", 0);
-        HUDMainMenu_pme->m_pTiles[41]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[41]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4017) / 2.0, 1);
         HUDMainMenu_pme->m_pTiles[41]->FUN_00700320(4002, -50);
         HUDMainMenu_pme->m_pTiles[41]->FUN_00700320(4003, 0);
         HUDMainMenu_pme->m_pTiles[71] = FUN_00a08b20(FUN_00a09030(1004), "XPMeter");
@@ -689,7 +689,7 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[50] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPLevelUp");
         HUDMainMenu_pme->m_pTiles[72] = FUN_00a08b20(FUN_00a09030(1004), "BreathMeter");
         HUDMainMenu_pme->m_pTiles[72]->FUN_00700320(4001, iScreenWidthC / 2);
-        HUDMainMenu_pme->m_pTiles[72]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[66]->FUN_00a011b0(4002) + 80.0, 1);
+        HUDMainMenu_pme->m_pTiles[72]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[66]->FUN_00a011b0(4002) + 80.0, 1);
         HUDMainMenu_pme->m_pTiles[73] = FUN_00a08b20(FUN_00a09030(1004), "Explosive_positioning_rect");
         HUDMainMenu_pme->m_pTiles[73]->FUN_00700320(4001, iScreenWidthC / 2);
         HUDMainMenu_pme->m_pTiles[73]->FUN_00700320(4002, iScreenHeightX / 2);
@@ -705,22 +705,22 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[74]->FUN_00700320(4001, iScreenWidthC - iSafeZoneX3 * 2 - iLimbOffsetXQ);
         HUDMainMenu_pme->m_pTiles[74]->FUN_00700320(4002, iLimbOffsetYB + iSafeZoneYY * 2);
         HUDMainMenu_pme->m_pTiles[53] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Head");
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4017, fLimbScaleAC * 85.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4016, fLimbScaleAC * 92.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[53]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[53]->SetFloat(4017, fLimbScaleAC * 85.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[53]->SetFloat(4016, fLimbScaleAC * 92.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[53]->FUN_00700320(4001, 0);
         HUDMainMenu_pme->m_pTiles[53]->FUN_00700320(4002, 40);
         HUDMainMenu_pme->m_pTiles[52] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Face");
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4017, fLimbScaleAC * 48.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4016, fLimbScaleAC * 64.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[52]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[52]->SetFloat(4017, fLimbScaleAC * 48.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[52]->SetFloat(4016, fLimbScaleAC * 64.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[52]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4001) +
                                                         (HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4017) -
                                                          HUDMainMenu_pme->m_pTiles[52]->FUN_00a011b0(4017)) /
                                                             2.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[52]->SetFloat(4002,
                                                     HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4002) +
                                                         (HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4016) -
                                                          HUDMainMenu_pme->m_pTiles[52]->FUN_00a011b0(4016)) /
@@ -728,140 +728,140 @@ Tile* FUN_0076bfe0()
                                                         fLimbScaleAC * 16.0 / 100.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[54] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Torso");
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4017, fLimbScaleAC * 102.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4016, fLimbScaleAC * 128.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[54]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[54]->SetFloat(4017, fLimbScaleAC * 102.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[54]->SetFloat(4016, fLimbScaleAC * 128.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[54]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4001) + fLimbScaleAC * -14.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[54]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4002) + fLimbScaleAC * 86.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[55] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Left_Arm");
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4017, fLimbScaleAC * 100.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4016, fLimbScaleAC * 52.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[55]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[55]->SetFloat(4017, fLimbScaleAC * 100.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[55]->SetFloat(4016, fLimbScaleAC * 52.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[55]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * 90.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_pme->m_pTiles[55]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002), 1);
         HUDMainMenu_pme->m_pTiles[56] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Right_Arm");
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4017, fLimbScaleAC * 96.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4016, fLimbScaleAC * 54.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[56]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[56]->SetFloat(4017, fLimbScaleAC * 96.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[56]->SetFloat(4016, fLimbScaleAC * 54.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[56]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * -88.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[56]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * -5.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[57] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Left_Leg");
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4017, fLimbScaleAC * 72.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4016, fLimbScaleAC * 112.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[57]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[57]->SetFloat(4017, fLimbScaleAC * 72.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[57]->SetFloat(4016, fLimbScaleAC * 112.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[57]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * 47.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[57]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * 86.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[58] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Right_Leg");
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4017, fLimbScaleAC * 84.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4016, fLimbScaleAC * 112.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[58]->SetFloat(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[58]->SetFloat(4017, fLimbScaleAC * 84.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[58]->SetFloat(4016, fLimbScaleAC * 112.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[58]->SetFloat(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * -37.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[58]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * 83.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[75] = FUN_00a08b20(FUN_00a09030(1004), "DDTIcon");
-        HUDMainMenu_pme->m_pTiles[75]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[75]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4017) + 5.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[75]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[75]->SetFloat(4002,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) +
                                                         HUDMainMenu_pme->m_pTiles[6]->FUN_00a011b0(4002) - 16.0,
                                                     1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[75], 0);
         HUDMainMenu_pme->m_pTiles[75]->FUN_00700320(4003, 0);
         HUDMainMenu_pme->m_pTiles[76] = FUN_00a08b20(FUN_00a09030(1004), "DDTIconEnemy");
-        HUDMainMenu_pme->m_pTiles[76]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[76]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4001) - 32.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[76]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[76]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4002),
             1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[76], 0);
         HUDMainMenu_pme->m_pTiles[76]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[76]->FUN_00700320(4084, 2);
         HUDMainMenu_pme->m_pTiles[82] = FUN_00a08b20(FUN_00a09030(1004), "DDTIcon");
-        HUDMainMenu_pme->m_pTiles[82]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[82]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4017) + 5.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[82]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[82]->SetFloat(4002,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) +
                                                         HUDMainMenu_pme->m_pTiles[6]->FUN_00a011b0(4002) - 16.0,
                                                     1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[82], 0);
         HUDMainMenu_pme->m_pTiles[82]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[83] = FUN_00a08b20(FUN_00a09030(1004), "DDTIconEnemyAP");
-        HUDMainMenu_pme->m_pTiles[83]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[83]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4001) - 32.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[83]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[83]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4002),
             1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[83], 0);
         HUDMainMenu_pme->m_pTiles[83]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[83]->FUN_00700320(4084, 2);
         HUDMainMenu_pme->m_pTiles[77] = FUN_00a08b20(FUN_00a09030(1004), "AmmoTypeLabel");
-        HUDMainMenu_pme->m_pTiles[77]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[77]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4001) - 165.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[77]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[77]->SetFloat(
             4002, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002),
             1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[77], 0);
         HUDMainMenu_pme->m_pTiles[77]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[78] = FUN_00a08b20(FUN_00a09030(1004), "HardcoreMode");
-        HUDMainMenu_pme->m_pTiles[78]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) + 150.0, 1);
-        HUDMainMenu_pme->m_pTiles[78]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_pme->m_pTiles[78]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) + 150.0, 1);
+        HUDMainMenu_pme->m_pTiles[78]->SetFloat(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002), 1);
         FUN_00774800(HUDMainMenu_pme->m_pTiles[78], 0);
         HUDMainMenu_pme->m_pTiles[78]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[78]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[79] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Dehydration");
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4001, 0);
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[79]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[79]->SetFloat(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[81] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Hunger");
-        HUDMainMenu_pme->m_pTiles[81]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0, 1);
+        HUDMainMenu_pme->m_pTiles[81]->SetFloat(4001, HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0, 1);
         HUDMainMenu_pme->m_pTiles[81]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[81]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[81]->SetFloat(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[81]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[80] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Sleep");
-        HUDMainMenu_pme->m_pTiles[80]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[80]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[80]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[80]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[80]->SetFloat(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[80]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[84] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Rads");
-        HUDMainMenu_pme->m_pTiles[84]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[84]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[80]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[84]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[84]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[84]->SetFloat(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[84]->FUN_00700320(4009, 0);
         HUDMainMenu_pme->m_pTiles[85] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "LMBs");
-        HUDMainMenu_pme->m_pTiles[85]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[85]->SetFloat(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[80]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[84]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[85]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[85]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[85]->SetFloat(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[85]->FUN_00700320(4009, 0);
         if (!((MenuStub*)HUDMainMenu_pme)->FUN_00770070())
         {
@@ -870,7 +870,7 @@ Tile* FUN_0076bfe0()
             FUN_007037e0();
         }
         if (pMenuTileN->FUN_00a011b0(4007) == 6006.0 || pMenuTileN->FUN_00a011b0(4007) == 102.0)
-            pMenuTileN->FUN_00a012d0(4013, fTileAlphaM, true);
+            pMenuTileN->SetFloat(4013, fTileAlphaM, true);
         HUDMainMenu_pme->m_pTiles[12]->FUN_00a01350(4036, DAT_011d4918.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_pTiles[8]->FUN_00a01350(4036, DAT_011d3e8c.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_pTiles[2]->FUN_00a01350(4036, DAT_011d300c.FUN_00403df0(), 1);

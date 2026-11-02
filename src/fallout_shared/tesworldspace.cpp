@@ -1994,8 +1994,8 @@ struct FileReader
     bool FUN_00472150(bool);
     TypeGroupInfo* FUN_00462270();
     void FUN_00473660();
-    int FUN_004726b0();
-    bool FUN_00472890(void*, unsigned int);
+    int GetNextChunk();
+    bool GetChunkData(void*, unsigned int);
     bool FUN_00401680();
     bool FUN_004726f0();
     void SkipCurrentForm();
@@ -2093,18 +2093,18 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
                 else
                 {
                     bool read = false;
-                    int chunk = file->FUN_004726b0();
+                    int chunk = file->GetNextChunk();
                     while (chunk && !read)
                     {
                         if (chunk == 0x434c4358)
                         {
-                            file->FUN_00472890(&cellCoords, 12);
+                            file->GetChunkData(&cellCoords, 12);
                             if (file->FUN_00401680())
                                 cellCoords.FUN_00462230();
                             read = true;
                         }
                         if (file->FUN_004726f0())
-                            chunk = file->FUN_004726b0();
+                            chunk = file->GetNextChunk();
                         else
                             chunk = 0;
                     }
@@ -2383,8 +2383,8 @@ FUN_00582e30::~FUN_00582e30()
 
 struct WorldRecordFile : TESFile
 {
-    unsigned int FUN_004726b0();
-    void FUN_00472890(void*, unsigned int);
+    unsigned int GetNextChunk();
+    void GetChunkData(void*, unsigned int);
     bool FUN_00401680();
     bool FUN_00471c20();
     bool FUN_004726f0();
@@ -2453,13 +2453,13 @@ struct WorldBounds
 bool WorldBounds::FUN_00583360(WorldRecordFile* file)
 {
     unsigned int type = 0;
-    while (type = file->FUN_004726b0())
+    while (type = file->GetNextChunk())
     {
         switch (type)
         {
         case 0x304d414e: {
             BoundsPoint minimum;
-            file->FUN_00472890(&minimum, 8);
+            file->GetChunkData(&minimum, 8);
             if (file->FUN_00401680())
             {
                 BSEndian(&minimum.x, EndianSizeTag<4>());
@@ -2476,7 +2476,7 @@ bool WorldBounds::FUN_00583360(WorldRecordFile* file)
         }
         case 0x394d414e: {
             BoundsPoint maximum;
-            file->FUN_00472890(&maximum, 8);
+            file->GetChunkData(&maximum, 8);
             if (file->FUN_00401680())
             {
                 BSEndian(&maximum.x, EndianSizeTag<4>());
@@ -2886,9 +2886,9 @@ struct DataFile
     DataFile* FUN_004739b0();
     bool FUN_004723a0(unsigned int);
     unsigned int FUN_00472660();
-    unsigned int FUN_004726b0();
+    unsigned int GetNextChunk();
     unsigned int GetField25C();
-    bool FUN_00472890(void*, unsigned int);
+    bool GetChunkData(void*, unsigned int);
 };
 struct CellOffsetData
 {
@@ -2896,8 +2896,8 @@ struct CellOffsetData
     float minX, minY, maxX, maxY;
     unsigned int baseOffset;
 };
-void* FUN_00401000(unsigned int);
-void FUN_00401030(void*);
+void* FormHeap_Allocate(unsigned int);
+void FormHeap_Free(void*);
 void FUN_00403d30(void*, int, unsigned int);
 int FUN_00404dc0(const char*, const char*);
 struct WorldData
@@ -2936,21 +2936,21 @@ bool WorldData::FindCellByEditorID(const char* editorID, int* outX, int* outY)
                             data->FUN_004723a0(offset + file->baseOffset);
                             if (data->FUN_00472660() == 0x39)
                             {
-                                unsigned int chunkID = data->FUN_004726b0();
+                                unsigned int chunkID = data->GetNextChunk();
                                 if (chunkID == 0x44494445)
                                 {
                                     unsigned int uiBufferSize = data->GetField25C() + 1;
-                                    char* size = (char*)FUN_00401000(uiBufferSize);
+                                    char* size = (char*)FormHeap_Allocate(uiBufferSize);
                                     FUN_00403d30(size, 0, uiBufferSize);
-                                    data->FUN_00472890(size, 0);
+                                    data->GetChunkData(size, 0);
                                     if (!FUN_00404dc0(size, editorID))
                                     {
                                         *outX = x;
                                         *outY = y;
-                                        FUN_00401030(size);
+                                        FormHeap_Free(size);
                                         return true;
                                     }
-                                    FUN_00401030(size);
+                                    FormHeap_Free(size);
                                 }
                             }
                         }

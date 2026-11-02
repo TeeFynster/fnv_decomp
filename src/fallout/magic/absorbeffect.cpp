@@ -457,7 +457,7 @@ F40ActiveEffect* F40ActiveEffect::CreateAbsorbEffectClone()
     return pkClone;
 }
 
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 
 struct AbsorbRecord
 {
@@ -486,7 +486,7 @@ struct AbsorbRecord
     unsigned int unk58;
     static void* operator new(unsigned int size)
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
     AbsorbRecord(unsigned int a, unsigned int b, unsigned int c);
 };

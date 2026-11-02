@@ -4950,7 +4950,7 @@ struct TileX
 {
     float FUN_00a011b0(int);
     void RemoveFadeItemsForTile(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     bool FUN_00a07fc0(int);
     float GetTraitFloat(int);
     int FindValueByKey(int);
@@ -5145,7 +5145,7 @@ void Owner7::UpdateLimbHighlight()
             if (((ChanceX*)*node7->FUN_006815c0())->tile->FUN_00a011b0(0xfa9) > 0.0)
             {
                 ((ChanceX*)*node7->FUN_006815c0())->tile->RemoveFadeItemsForTile(0xfa9);
-                ((ChanceX*)*node7->FUN_006815c0())->tile->FUN_00a012d0(0xfa9, 0.0f, true);
+                ((ChanceX*)*node7->FUN_006815c0())->tile->SetFloat(0xfa9, 0.0f, true);
             }
             node7 = node7->FUN_00726070();
         }
@@ -6623,7 +6623,7 @@ struct Tile392
 {
     float FUN_00a011b0(int);
     void FUN_00a01350(int, const char*, bool);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
     void RemoveFadeItemsForTile(int);
     void StartFade(int, float, float, float, int);
@@ -7102,14 +7102,14 @@ void VATSMenuX::UpdateLimbTiles()
             !weapon7 || weapon7->FUN_006450c0())
         {
             item2->tile->FUN_00a01350(xFUN_00a00940("_LimbName", -1), target->actor->FUN_0055d520(), true);
-            item2->tile->FUN_00a012d0(
+            item2->tile->SetFloat(
                 xFUN_00a00940("_MeterPercent", -1),
                 FUN_0040ebd0(1.0f, FUN_00404010(0.0f, (float)(target->actor->FUN_00568ad0() / 100.0))), true);
         }
         else if (parts3)
         {
             item2->tile->FUN_00a01350(xFUN_00a00940("_LimbName", -1), parts3->FUN_006838b0(), true);
-            item2->tile->FUN_00a012d0(
+            item2->tile->SetFloat(
                 xFUN_00a00940("_MeterPercent", -1),
                 FUN_0040ebd0(
                     1.0f, FUN_00404010(
@@ -7119,7 +7119,7 @@ void VATSMenuX::UpdateLimbTiles()
         else if (weaponVal)
         {
             item2->tile->FUN_00a01350(xFUN_00a00940("_LimbName", -1), weaponVal->name.FUN_00408da0(), true);
-            item2->tile->FUN_00a012d0(
+            item2->tile->SetFloat(
                 xFUN_00a00940("_MeterPercent", -1),
                 FUN_0040ebd0(1.0f, FUN_00404010(0.0f, ba->FUN_004bcdb0(0) / (FUN_004873d0(ba->FUN_0044ddc0())
                                                                                  ? FUN_004873d0(ba->FUN_0044ddc0())
@@ -7234,10 +7234,10 @@ void VATSMenuX::UpdateLimbTiles()
                     v.y = FUN_00404010(minY, FUN_0040ebd0(maxY, v.y));
                     secondVal.x = FUN_00404010(minX, FUN_0040ebd0(maxX, secondVal.x));
                     secondVal.y = FUN_00404010(minY, FUN_0040ebd0(maxY, secondVal.y));
-                    a->tile->FUN_00a012d0(0xfa1, v.x, true);
-                    a->tile->FUN_00a012d0(0xfa2, v.y, true);
-                    b->tile->FUN_00a012d0(0xfa1, secondVal.x, true);
-                    b->tile->FUN_00a012d0(0xfa2, secondVal.y, true);
+                    a->tile->SetFloat(0xfa1, v.x, true);
+                    a->tile->SetFloat(0xfa2, v.y, true);
+                    b->tile->SetFloat(0xfa1, secondVal.x, true);
+                    b->tile->SetFloat(0xfa2, secondVal.y, true);
                     stateA = true;
                 }
                 next = next->GetNext();
@@ -9128,7 +9128,7 @@ extern double DAT_01012060;
 extern double DAT_01012070;
 extern float DAT_010718c0;
 
-void* __cdecl FUN_00401000(unsigned int a1);
+void* __cdecl FormHeap_Allocate(unsigned int a1);
 extern Vec3 DAT_011f426c;
 struct ListHead
 {

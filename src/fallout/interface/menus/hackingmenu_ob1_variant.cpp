@@ -209,7 +209,7 @@ struct FUN_007021b0_cls
     void* DestroyOrFree(unsigned int flags);
 };
 extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (FUN_007021b0_cls::*callback)());
-extern "C" void __cdecl FUN_00401030(void* apMemory);
+extern "C" void __cdecl FormHeap_Free(void* apMemory);
 class NiNode;
 class TileD766
 {
@@ -256,7 +256,7 @@ extern int DAT_010729c8;
 struct ValueRow
 {
     float __thiscall FUN_00a011b0(unsigned int key, unsigned int mode);
-    void __thiscall FUN_00a012d0(unsigned int key, float value);
+    void __thiscall SetFloat(unsigned int key, float value);
     void __thiscall FUN_00715c60(unsigned int key, unsigned int value);
     void __thiscall FUN_00a01350(unsigned int key, unsigned int value, unsigned int mode);
 };
@@ -843,7 +843,7 @@ struct SubM
     int f1c;
     int f20;
     int f24;
-    void FUN_004ed900();
+    void RemoveAll();
     ~SubM();
 };
 struct SettingValue
@@ -864,7 +864,7 @@ struct Menu_007a8b10
     virtual ~Menu_007a8b10();
 };
 unsigned int __cdecl gm_GetTickCount();
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 extern SettingColl DAT_011d0b90;
 extern unsigned int DAT_011d95c0;
 extern char DAT_011d9674;

@@ -1614,7 +1614,7 @@ struct MobileObjectCellAccess
 };
 struct NiTPointerListBase
 {
-    void FUN_004ed900();
+    void RemoveAll();
 };
 void BuildWaterSurfaces(MeshInput*);
 
@@ -1628,7 +1628,7 @@ void FUN_0049c860(MeshInput* apMeshInput)
     if (DAT_011c57ac)
         DAT_011c57ac->FUN_008454f0(true);
     if (DAT_011c57b0)
-        reinterpret_cast<NiTPointerListBase*>(DAT_011c57b0)->FUN_004ed900();
+        reinterpret_cast<NiTPointerListBase*>(DAT_011c57b0)->RemoveAll();
     BuildMeshBoundaryGeometry(apMeshInput);
     BuildWaterSurfaces(apMeshInput);
     CreateAutoWaterNode(reinterpret_cast<ParamObj*>(apMeshInput));

@@ -425,7 +425,7 @@ struct MemoryManager
     void* Allocate(unsigned int);
 };
 MemoryManager* __cdecl FUN_00401020(void);
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 struct QueuedItemList
 {
     PaddedFloatRecord** _ref_006815c0();
@@ -4284,7 +4284,7 @@ struct FUN_0092b460_cls
     FUN_0092b460_cls* GetTargetFromOffset();
     FUN_0092b460_cls* FUN_008d8520();
     FUN_0092b460_cls* FUN_008d0430();
-    void FUN_005ac1e0(FUN_0092b460_cls* a, int b, int c, int d);
+    void Execute(FUN_0092b460_cls* a, int b, int c, int d);
     void FUN_0092b460(FUN_0092b460_cls* a1, FUN_0092b460_cls* a2);
 };
 struct FUN_0092b9c0_Class : public MiddleHighProcess
@@ -5596,7 +5596,7 @@ struct P114RefOps
     P114RefOps** FUN_006815c0();
     TESObjectREFR* FUN_0041c8d0();
     TESObjectREFR* FUN_0067f390();
-    void* FUN_0055d310();
+    void* GetContainer();
     TESBoundObject* FUN_007af430();
     unsigned int FUN_004459e0(unsigned int);
 };
@@ -7971,7 +7971,7 @@ struct ActivationReference : TESObjectREFR
     void* FUN_00568e50();
     const NiPoint3& FUN_00568fa0();
     bool FUN_00440d80();
-    bool FUN_00573170(Actor*, bool, TESBoundObject*, int);
+    bool Activate(Actor*, bool, TESBoundObject*, int);
 };
 struct ActivationPlayer : Actor
 {
@@ -11261,7 +11261,7 @@ struct P124Actor
     virtual void v175();
     virtual void v176();
     virtual void SetAngle(float);
-    float FUN_00567400();
+    float GetScale();
     void FUN_00931d30(float);
     P124Controller* FUN_009306d0();
 };
@@ -12244,7 +12244,7 @@ struct ActRef
     void* FUN_008d6f30();
     void* FUN_00575d70();
     bool FUN_005686b0(ActPoint* apPos, int a2, int a3, ActPoint* apOut, int* apMarker, int a6);
-    bool FUN_00573170(ActActor* apActor, int aiActivate, void* apItem, int a4);
+    bool Activate(ActActor* apActor, int aiActivate, void* apItem, int a4);
     void FUN_00565870();
 };
 
@@ -13055,9 +13055,9 @@ bool ActProcess::FUN_00915f10(ActActor* apActor, bool abActivate)
                     }
                     else if (m_pDetectionData60)
                     {
-                        pTarget->FUN_00573170(apActor, 1, m_pDetectionData60->pItem, 1);
+                        pTarget->Activate(apActor, 1, m_pDetectionData60->pItem, 1);
                     }
-                    else if (!pTarget->IsActor() && !pTarget->FUN_00573170(apActor, 1, 0, 1) &&
+                    else if (!pTarget->IsActor() && !pTarget->Activate(apActor, 1, 0, 1) &&
                              pPackage->FUN_0067efd0())
                     {
                         SetProcessTarget(apActor, -1);
@@ -13096,11 +13096,11 @@ bool ActProcess::FUN_00915f10(ActActor* apActor, bool abActivate)
                     }
                     else if (m_pDetectionData60)
                     {
-                        pTarget->FUN_00573170(apActor, 0, m_pDetectionData60->pItem, 1);
+                        pTarget->Activate(apActor, 0, m_pDetectionData60->pItem, 1);
                     }
                     else
                     {
-                        pTarget->FUN_00573170(apActor, 0, 0, 1);
+                        pTarget->Activate(apActor, 0, 0, 1);
                     }
                 }
                 if (pUsed)
@@ -16919,7 +16919,7 @@ struct UseRef
     float FUN_005723b0(UseRef* apRef, int a2, int a3);
     UseProcess* FUN_008d8520();
     void FUN_0087faa0();
-    int FUN_0055d310();
+    int GetContainer();
 };
 
 struct UseExtraList
@@ -17342,7 +17342,7 @@ bool UseProcess::FUN_0091c810(UseRef* apActor)
                 UseRef* pLocationCur = pPackage->FUN_0055b980()->FUN_0067f390();
                 if (!pLocationCur)
                     pLocationCur = m_pReference40;
-                if (pLocationCur && pLocationCur->FUN_0055d310())
+                if (pLocationCur && pLocationCur->GetContainer())
                 {
                     apActor->FUN_00892e90(
                         pEntryOut->FUN_0044ddc0(pXData, pLocationCur, pPackage->FUN_00672930(), pOwner));
@@ -17378,7 +17378,7 @@ bool UseProcess::FUN_0091c810(UseRef* apActor)
                         pEntryOut = apActor->FUN_00576260(m_pDetectionData60->pItem, 0);
                         delete m_pDetectionData60;
                         m_pDetectionData60 = 0;
-                        if (pLocationCur && pLocationCur->FUN_0055d310())
+                        if (pLocationCur && pLocationCur->GetContainer())
                         {
                             apActor->FUN_00892e90(
                                 pEntryOut->FUN_0044ddc0(pXData, pLocationCur, pPackage->FUN_00672930(), pOwner));

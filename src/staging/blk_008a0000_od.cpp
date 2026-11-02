@@ -2202,7 +2202,7 @@ struct NodeObj
 };
 struct Glob
 {
-    NodeObj* FUN_00447080(const char* n, int a, bool b, bool c, bool d, bool e);
+    NodeObj* LoadModel(const char* n, int a, bool b, bool c, bool d, bool e);
     void FUN_0045a5e0(const char* n);
 };
 extern Glob* DAT_011c3b3c;
@@ -2456,7 +2456,7 @@ struct ThisC
     virtual RObj* GetR116(NiTransform* t);
     BaseObj* FUN_004181e0();
     int FUN_008d6f30();
-    double FUN_00567400();
+    double GetScale();
     ResObj* CreateNodeFromTransform(void* a1, A2* a2, A3* a3, unsigned char a4);
 };
 
@@ -2490,7 +2490,7 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
                             if (p4->GetUnk66() > 0)
                             {
                                 p4->FUN_008d8520()->FUN_004fa6f0(FUN_008d6f30(), &pPlacement->m_24, p4->GetUnk66(),
-                                                                 (float)(FUN_00567400() * p4->FUN_009b0bd0()));
+                                                                 (float)(GetScale() * p4->FUN_009b0bd0()));
                             }
                         }
                     }
@@ -2499,7 +2499,7 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
                         if (pTransformSource != 0)
                         {
                             NodeObj* u;
-                            u = DAT_011c3b3c->FUN_00447080(p4->FUN_005d8a70()->GetNameV5(), 0, 1, 0, 0, 0);
+                            u = DAT_011c3b3c->LoadModel(p4->FUN_005d8a70()->GetNameV5(), 0, 1, 0, 0, 0);
                             if (u != 0)
                             {
                                 X38 x_(1.0f);

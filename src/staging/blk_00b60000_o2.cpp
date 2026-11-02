@@ -2833,10 +2833,10 @@ struct B6List
     void* head;
     void* tail;
     unsigned count;
-    void FUN_004ed900() throw();
+    void RemoveAll() throw();
     ~B6List() throw()
     {
-        FUN_004ed900();
+        RemoveAll();
     }
 };
 struct FUN_00b6a520 : B6Base
@@ -2849,7 +2849,7 @@ struct FUN_00b6a520 : B6Base
 // @fnv 0x00b6a520
 FUN_00b6a520::~FUN_00b6a520()
 {
-    list.FUN_004ed900();
+    list.RemoveAll();
     B6Ref* p = p148;
     if (p && !InterlockedDecrement(&p->refs))
         p->DeleteThis();
@@ -8560,12 +8560,12 @@ FUN_00b60b10::FUN_00b60b10()
     m_i24 = 0;
 }
 
-void FUN_004ed900() throw();
+void RemoveAll() throw();
 
 // @fnv 0x00b6a510
 void FUN_00b6a510()
 {
-    FUN_004ed900();
+    RemoveAll();
 }
 
 void* __cdecl FUN_00aa13e0(unsigned int size);

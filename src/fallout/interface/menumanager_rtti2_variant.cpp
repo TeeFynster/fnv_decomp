@@ -40,7 +40,7 @@ Tile* FUN_007046c0();
 Tile* CreateInventoryMenuIfModifierKey();
 Tile* FUN_00704be0();
 Tile* FUN_0076bfe0();
-Tile* FUN_00784c80();
+Tile* ShowLevelUpMenu();
 void FUN_007164c0(Tile* menu, float value);
 bool FUN_0070cb7d0(bool flag, bool other);
 Tile* CreateLoadingMenuTile(void* form, bool a, bool b);
@@ -107,7 +107,7 @@ void* Mgr20::FUN_00720aa0(int menuClass)
     }
     else if (menuClass == 0x403)
     {
-        pMenu = FUN_00784c80();
+        pMenu = ShowLevelUpMenu();
     }
     else if (menuClass == 0x3f0)
     {

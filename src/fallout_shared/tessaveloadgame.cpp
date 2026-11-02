@@ -2153,7 +2153,7 @@ struct Node_00855010
 };
 struct FUN_00855010_cls
 {
-    bool FUN_00853130(void* r1, Node_00855010** out);
+    bool Lookup(void* r1, Node_00855010** out);
     void FUN_00844700(void* r1, Node_00855010* out);
     void* GetOrCreateNode(void* a1, unsigned int a2);
 };
@@ -2165,14 +2165,14 @@ Guard_00855010::~Guard_00855010()
 Node_00855010::Node_00855010()
 {}
 
-// Looks up a node for the form via FUN_00853130, creates and registers one if missing, then calls FUN_00854e40 with a2 and returns it.
+// Looks up a node for the form via Lookup, creates and registers one if missing, then calls FUN_00854e40 with a2 and returns it.
 // @fnv 0x00855010
 void* FUN_00855010_cls::GetOrCreateNode(void* pForm, unsigned int uiValue)
 {
     void* out = reinterpret_cast<Form_00855010*>(pForm)->FUN_0084e3a0();
     Node_00855010* r1;
     {
-        bool found = FUN_00853130(out, &r1);
+        bool found = Lookup(out, &r1);
         if (!found)
         {
             Guard_00855010 g(0x11, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESSaveLoadGame.cpp",
@@ -7050,7 +7050,7 @@ struct ExpiredCellMap
     ~ExpiredCellMap();
     void* FUN_004b9ba0();
     void FUN_006b7f20(void*&, unsigned int&, ExpiredCellList*&);
-    bool FUN_00853130(unsigned int, ExpiredCellList*&);
+    bool Lookup(unsigned int, ExpiredCellList*&);
     void FUN_00844700(unsigned int, ExpiredCellList*);
     void FUN_00438af0();
 };
@@ -7231,7 +7231,7 @@ void ExpiredSaveLoadGame::PurgeExpiredCellChanges()
                     storedCoordinates = new ExpiredCellCoordinates;
                     __memcpy(storedCoordinates, &p, 8);
                     ExpiredCellList* cells = 0;
-                    if (!expired.FUN_00853130(e, cells))
+                    if (!expired.Lookup(e, cells))
                     {
                         cells = new ExpiredCellList;
                         expired.FUN_00844700(e, cells);
@@ -7330,7 +7330,7 @@ void ExpiredSaveLoadGame::PurgeExpiredCellChanges()
         if (a && q != 0x7fffffff && i != 0x7fffffff)
         {
             ExpiredCellList* cells = 0;
-            if (expired.FUN_00853130(a, cells))
+            if (expired.Lookup(a, cells))
             {
                 bool reset = false;
                 if (!cells)
@@ -7652,7 +7652,7 @@ struct List61 : Node61
 };
 struct Map61
 {
-    bool FUN_00853130(const char* k, List61*& v) const;
+    bool Lookup(const char* k, List61*& v) const;
 };
 class Own61
 {
@@ -7671,7 +7671,7 @@ void* Own61::RemoveCommand(const char* key, int a, int b)
     {
         bool found;
         Node61* it;
-        found = m_10->FUN_00853130(key, list);
+        found = m_10->Lookup(key, list);
         if (!found)
             return 0;
         it = list;

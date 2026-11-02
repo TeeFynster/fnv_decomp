@@ -2323,7 +2323,7 @@ struct ImpactAudio
 
 struct ImpactHistory
 {
-    bool FUN_00853130(unsigned int auiKey, unsigned int& arTime);
+    bool Lookup(unsigned int auiKey, unsigned int& arTime);
     void FUN_00844700(unsigned int auiKey, unsigned int auiTime);
     void* FUN_004b9ba0();
     void FUN_006b7f20(void*& arIter, unsigned int& arKey, int& arTime);
@@ -2407,7 +2407,7 @@ void FUN_00837550(ImpactData* apImpact)
         ImpactSoundHandle kHandleB;
         unsigned int uiNow = DAT_011f6394.FUN_00825c00();
         unsigned int uiLastTime = 0;
-        if (DAT_011dd948.FUN_00853130(apImpact->uiKey, uiLastTime) &&
+        if (DAT_011dd948.Lookup(apImpact->uiKey, uiLastTime) &&
             uiNow - uiLastTime < (unsigned int)*DAT_011dd968.FUN_0043d4d0())
         {
             s_kTimer.FUN_004538c0();

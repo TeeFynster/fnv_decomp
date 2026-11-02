@@ -16793,7 +16793,7 @@ template <class T> struct SL
     void FUN_0063f7b0();
     ~SL();
 };
-void FUN_00401030(void*);
+void FormHeap_Free(void*);
 struct FUN_0040ecb0
 {
     virtual ~FUN_0040ecb0();

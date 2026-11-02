@@ -1079,12 +1079,12 @@ struct InterfaceManager_007160b0
 };
 
 extern TES* g_TES;
-void __cdecl FUN_007ffe00();
+void __cdecl PurgeTerminalModel();
 
 // @fnv 0x007160b0
 void __fastcall FUN_007160b0(InterfaceManager* pThis)
 {
-    FUN_007ffe00();
+    PurgeTerminalModel();
     reinterpret_cast<TileVTable_007160b0*>(reinterpret_cast<InterfaceManager_007160b0*>(pThis)->FUN_00586150())->v7();
     MapMenu::OpenMap();
     g_TES->SetTESActive(true);
@@ -2452,7 +2452,7 @@ int FUN_0070ede0();
 bool FUN_0070edf0();
 int FUN_00458030();
 void* FUN_0076bfe0();
-void FUN_00784c80();
+void ShowLevelUpMenu();
 bool FUN_0070ed10();
 void FUN_0070ed20(int);
 bool FUN_007024e0();
@@ -2693,7 +2693,7 @@ void FUN_0070c4a0_shell::UpdateInterface()
         }
         if (DAT_011d8905)
         {
-            FUN_00784c80();
+            ShowLevelUpMenu();
             DAT_011d8905 = false;
         }
         g_thePlayer->FUN_0095d090();
@@ -5582,7 +5582,7 @@ struct BSAudio
 };
 struct MenuCloser
 {
-    void FUN_007ffd50();
+    void Close();
 };
 void __fastcall FUN_0070bbc0(BSAudio*);
 void __cdecl HandleMenuKeyInput();
@@ -5610,7 +5610,7 @@ void FUN_0070ee80_shell::UpdatePipboyWaiver()
         }
         else if (InterfaceHelper::GetSelectedTargetIndex(0x421) || InterfaceHelper::GetSelectedTargetIndex(0x41f))
         {
-            (*(MenuCloser**)((char*)this + 0x16c))->FUN_007ffd50();
+            (*(MenuCloser**)((char*)this + 0x16c))->Close();
         }
         else
         {
@@ -6788,14 +6788,14 @@ void FUN_0070f6e0_shell::HandleGamepadButton(int aiButton)
 
 struct M788
 {
-    void __thiscall FUN_004ed900(void);
+    void __thiscall RemoveAll(void);
 };
 extern M788 DAT_011f3324;
 
 // @fnv 0x0070aca0
 void __cdecl FUN_0070aca0()
 {
-    DAT_011f3324.FUN_004ed900();
+    DAT_011f3324.RemoveAll();
 }
 
 namespace fnv_0070b5d0 {
@@ -8694,7 +8694,7 @@ struct SettingObj
 extern SettingObj* DAT_01184a98[];
 struct PlayerObj
 {
-    float FUN_00567400();
+    float GetScale();
 };
 extern PlayerObj* DAT_011dea3c;
 struct DebugText
@@ -9461,7 +9461,7 @@ void FUN_00710ad0_shell::DrawDebugInfo()
                     dn = (int)co.FUN_005094b0();
                     if (cy->FUN_00509450(ce))
                     {
-                        cy->FUN_00509920(dr, co.FUN_005094b0(), DAT_011dea3c->FUN_00567400());
+                        cy->FUN_00509920(dr, co.FUN_005094b0(), DAT_011dea3c->GetScale());
                         FUN_00406f60(&aai, kStr8, FUN_00509510(dn) ? kStr9 : kStr10, dn, (double)dr[0], (double)dr[1],
                                      (double)dr[2], (int)(cy->GetFurnitureHeading(dn) * DAT_0102f248),
                                      m_pReference->FUN_00567f80(ce, 1) ? kStr11 : kStr12);
@@ -12302,7 +12302,7 @@ void Context::UpdateControllerState(int unused)
 
 struct AnimationTile
 {
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
 };
 struct AnimationItem
 {
@@ -12390,8 +12390,8 @@ void __cdecl UpdateAnimationTileFade(AnimationTile* apFirstTile, AnimationTile* 
     FUN_005330e0(&inverse, 0.0f, 255.0f);
     if (apFirstTile && apSecondTile)
     {
-        apFirstTile->FUN_00a012d0(4009, inverse, true);
-        apSecondTile->FUN_00a012d0(4009, maximum, true);
+        apFirstTile->SetFloat(4009, inverse, true);
+        apSecondTile->SetFloat(4009, maximum, true);
     }
     if (apStatusTile && reference && !alternate)
     {
@@ -12400,18 +12400,18 @@ void __cdecl UpdateAnimationTileFade(AnimationTile* apFirstTile, AnimationTile* 
         FUN_005e58f0(53, DAT_011dea3c, reference->FUN_0044ddc0(), &value);
         value += ((AnimationPlayer*)DAT_011dea3c)->values.FUN_0066ef50(5);
         if (item && item->FUN_00401170() == 40 && value < item->GetField19C())
-            apStatusTile->FUN_00a012d0(4009, inverse > 128.0 ? inverse : maximum, true);
+            apStatusTile->SetFloat(4009, inverse > 128.0 ? inverse : maximum, true);
         else
-            apStatusTile->FUN_00a012d0(4009, 255.0f, true);
+            apStatusTile->SetFloat(4009, 255.0f, true);
     }
     else if (apStatusTile && reference && alternate)
     {
         AnimationItem* item = reference ? reference->FUN_0044ddc0() : 0;
         float value = ((AnimationPlayer*)DAT_011dea3c)->values.GetCurrentValue(item->GetUnk15C());
         if (item && item->FUN_00401170() == 40 && value < item->GetField1BC())
-            apStatusTile->FUN_00a012d0(4009, inverse > 128.0 ? inverse : maximum, true);
+            apStatusTile->SetFloat(4009, inverse > 128.0 ? inverse : maximum, true);
         else
-            apStatusTile->FUN_00a012d0(4009, 255.0f, true);
+            apStatusTile->SetFloat(4009, 255.0f, true);
     }
     unsigned int alpha = g_timeGlobal.GetSection();  // Current time.
     unsigned int uiDelta = alpha - DAT_011d8a64;     // Elapsed time.

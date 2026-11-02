@@ -306,7 +306,7 @@ int __cdecl FUN_00a01860(const char* s);
 struct FUN_007c04d0_sub2c
 {
     float FUN_00a011b0(int a, int b);
-    void FUN_00a012d0(int a, float b);
+    void SetFloat(int a, float b);
     void SetTraitAndReset(int a, float b);
 };
 
@@ -334,7 +334,7 @@ bool FUN_007c04d0_cls::FUN_007c04d0(int a1, int aiUnused)
     {
         if (a1 == 0xf || a1 == 0x10)
         {
-            m_2c->FUN_00a012d0(DAT_011da918,
+            m_2c->SetFloat(DAT_011da918,
                                m_2c->FUN_00a011b0(DAT_011da918, 0) + (a1 == 0xf ? DAT_0104a494 : DAT_010162c0));
             m_2c->SetTraitAndReset(FUN_00a01860(str_01070250), 1.0f);
             done = true;
@@ -520,7 +520,7 @@ bool MenuClass::FUN_007c0580()
 struct SwTile
 {
     float FUN_00a011b0(int m_uiSoundID);
-    void FUN_00a012d0(int m_uiSoundID, float fValue, bool bPropagate);
+    void SetFloat(int m_uiSoundID, float fValue, bool bPropagate);
     void FUN_00a01350(int m_uiSoundID, const char* pcString, bool bPropagate);
     SwTile* FUN_00a03da0(const char* pcName);
     struct SwMenu* FUN_00a03c90();
@@ -633,7 +633,7 @@ SwTile* __cdecl CreateSleepWaitMenu(bool bSleep)
         }
         SwAudio::GetSingleton()->FUN_00ad7550(s_szSound, 0x121, 0).FUN_00ad8830();
         if (pkTileTmp2->FUN_00a011b0(0xfa7) == 6006.0 || pkTileTmp2->FUN_00a011b0(0xfa7) == 102.0)
-            pkTileTmp2->FUN_00a012d0(0xfad, FUN_00a01530(), true);
+            pkTileTmp2->SetFloat(0xfad, FUN_00a01530(), true);
         g_pkSleepWaitMenu_011da920->m_bSleep = bSleep;
         char acVerb[0x104];
         if (bSleep)
@@ -651,7 +651,7 @@ SwTile* __cdecl CreateSleepWaitMenu(bool bSleep)
         g_pkSleepWaitMenu_011da920->unk3c->FUN_00a01350(0xfc4, g_s_011d29f4.FUN_00403df0(), true);
         g_pkSleepWaitMenu_011da920->FUN_00726070()
             ->FUN_00a03da0(s_szBackground)
-            ->FUN_00a012d0(0xfa9, *g_s_011d3174.FUN_00403e20() * 255.0, true);
+            ->SetFloat(0xfa9, *g_s_011d3174.FUN_00403e20() * 255.0, true);
         g_pkSleepWaitMenu_011da920->FUN_00a1dc20(0);
         return pkTileTmp2;
     }

@@ -320,14 +320,14 @@ void FUN_00a074d0_shell::FUN_00a074d0(int aiFlag)
 }
 
 struct FUN_00a07530_shell : public Tile {
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 
 void __cdecl FUN_00a07690(Tile*);
 
 // ORs aiFlag into the flags at offset 0x30 when aiFlag is at most 0x3ff, and calls FUN_00a07690 if the flags changed.
 // @fnv 0x00a07530
-void FUN_00a07530_shell::FUN_00a07530(int aiFlag)
+void FUN_00a07530_shell::SetChangeFlag(int aiFlag)
 {
     if ((unsigned int)aiFlag > 0x3ff)
         return;
@@ -570,7 +570,7 @@ struct ListNode_00a079d0 {
     Tile* item;
 };
 
-// Walks the linked list at this+4 and, for each Tile, calls FUN_00a07530(0x80) if IsTraitNonZero(0xfa6) is true, otherwise recurses into UpdateTileChildren.
+// Walks the linked list at this+4 and, for each Tile, calls SetChangeFlag(0x80) if IsTraitNonZero(0xfa6) is true, otherwise recurses into UpdateTileChildren.
 // @fnv 0x00a079d0
 void FUN_00a079d0_shell::UpdateTileChildren()
 {
@@ -585,7 +585,7 @@ void FUN_00a079d0_shell::UpdateTileChildren()
         kPos = kPos->next;
         pitem = *xelem;
         if (((FUN_00a01230_shell*)pitem)->IsTraitNonZero(0xfa6))
-            ((FUN_00a07530_shell*)pitem)->FUN_00a07530(0x80);
+            ((FUN_00a07530_shell*)pitem)->SetChangeFlag(0x80);
         else
             ((FUN_00a079d0_shell*)pitem)->UpdateTileChildren();
     }
@@ -2417,8 +2417,8 @@ struct UpdateTreeNode {
  const char* FUN_00a011f0(int);
  MenuDepthController* FUN_00a03c90();
  UpdateTreeNode* FUN_00a03d40();
- void FUN_00a07530(int);
- void FUN_00a012d0(int,float,bool);
+ void SetChangeFlag(int);
+ void SetFloat(int,float,bool);
  UpdateTreeNode* FUN_00a037e0(int, float, int);
 };
 // @fnv 0x00a037e0
@@ -2438,41 +2438,41 @@ UpdateTreeNode* UpdateTreeNode::FUN_00a037e0(int trait, float value, int unused)
    aBound = FUN_00a03d40();
    if (aCurrent && aBound && aBound != this && aCurrent && aLast > (aMargin = aCurrent->depth)) aCurrent->depth = (int)aLast;
   }
-  if (FUN_00a011b0(0xfa6) != 0.0) FUN_00a07530(0x80);
-  FUN_00a07530(1); return this;
+  if (FUN_00a011b0(0xfa6) != 0.0) SetChangeFlag(0x80);
+  SetChangeFlag(1); return this;
  }
  if (GetType() == 0x387 && (trait == 0xfba || trait == 0xfbb || trait == 0xfbc || trait == 0xff7 || trait == 0xfbd || trait == 0xfbe || trait == 0xfb9 || trait == 0xfb7)) {
-  FUN_00a07530(2); return this;
+  SetChangeFlag(2); return this;
  }
  if ((trait == 0xfb1 || trait == 0xfb0 || trait == 0xfc0 || trait == 0xfbf) && GetType() == 0x386) {
-  if (FUN_00a011b0(0xfa6) != 0.0) FUN_00a07530(0x80);
-  FUN_00a07530(0x10); return this;
+  if (FUN_00a011b0(0xfa6) != 0.0) SetChangeFlag(0x80);
+  SetChangeFlag(0x10); return this;
  }
- if (trait == 0xfa6 && (GetType() == 0x386 || GetType() == 0x385)) { FUN_00a07530(0x80); return this; }
+ if (trait == 0xfa6 && (GetType() == 0x386 || GetType() == 0x385)) { SetChangeFlag(0x80); return this; }
  if (trait == 0xfae && (GetType() == 0x386 || GetType() == 0x387)) {
-  FUN_00a07530(0x100);
+  SetChangeFlag(0x100);
   aOuter2 = children;
   aBipedNode = aOuter2;
   while (aBipedNode) {
    aLocation = &aBipedNode->data;
    aBipedNode = aBipedNode->next;
-   (*aLocation)->FUN_00a012d0(0xfae,FUN_00a011b0(0xfae),true);
+   (*aLocation)->SetFloat(0xfae,FUN_00a011b0(0xfae),true);
   }
   return this;
  }
- if (trait == 0xfa3) { FUN_00a07530(4); return this; }
+ if (trait == 0xfa3) { SetChangeFlag(4); return this; }
  if (trait == 0xfa9 || trait == 0xfb2 || trait == 0xfb3 || trait == 0xfb4 || trait == 0xff4 || trait == 0xff5) {
-  if (GetType() == 0x386 || GetType() == 0x387) FUN_00a07530(8);
+  if (GetType() == 0x386 || GetType() == 0x387) SetChangeFlag(8);
   return this;
  }
- if (trait == 0xfcc && GetType() == 0x386 && FUN_00a011f0(0xfcc)) { FUN_00a07530(0x20); return this; }
- if (trait == 0xfcc && GetType() == 0x388 && FUN_00a011f0(0xfcc)) { FUN_00a07530(0x40); return this; }
- if (trait == 0xfa8) { FUN_00a07530(0x200); return this; }
+ if (trait == 0xfcc && GetType() == 0x386 && FUN_00a011f0(0xfcc)) { SetChangeFlag(0x20); return this; }
+ if (trait == 0xfcc && GetType() == 0x388 && FUN_00a011f0(0xfcc)) { SetChangeFlag(0x40); return this; }
+ if (trait == 0xfa8) { SetChangeFlag(0x200); return this; }
  if (trait == 0xfaa) {
   aOther = FUN_00a03c90();
   if (aOther) aOther->SetDepth((int)value,this);
  }
- if (trait == 0xffa || trait == 0xffb || trait == 0xffc) { FUN_00a07530(1); return this; }
+ if (trait == 0xffa || trait == 0xffb || trait == 0xffc) { SetChangeFlag(1); return this; }
  return 0;
 }
 

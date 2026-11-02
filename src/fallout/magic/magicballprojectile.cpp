@@ -864,7 +864,7 @@ void ProjectileImpact::TriggerImpact(int aiUnused1, int aiUnused2, int aiUnused3
     }
 }
 
-void* FUN_00401000(unsigned int);
+void* FormHeap_Allocate(unsigned int);
 struct Mgr
 {
     void FUN_0096d470(void*, int);
@@ -6544,7 +6544,7 @@ struct CleanupReference : FUN_0092ec40, CleanupSecondary
     int unkb0, unkb4, unkb8, unkbc;
     bool detached;
     void* FUN_0043fcd0();
-    void FUN_005702e0(void*, bool);
+    void Set3D(void*, bool);
     void FUN_0092ed60(bool);
 };
 struct CleanupList
@@ -6599,7 +6599,7 @@ FUN_008cac60::~FUN_008cac60()
         }
     }
     delete data;
-    FUN_005702e0(0, true);
+    Set3D(0, true);
     if (!DAT_011c3f2c->FUN_004226e0())
         FUN_0092ed60(false);
 }

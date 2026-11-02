@@ -6094,7 +6094,7 @@ struct Actor970d50 : Actor
     int FUN_008d8520();
     void FUN_00893340(bool);
 };
-void __cdecl FUN_005ac190(Actor970d50*, void*);
+void __cdecl DoCheckScriptRunnerAndRun(Actor970d50*, void*);
 struct ProcessQueue970d50
 {
     void FUN_0096aaf0(MobileObject*, int);
@@ -6120,7 +6120,7 @@ void Lists970d50::FUN_00970d50()
             actor = (Actor970d50*)object;
         if (actor)
         {
-            FUN_005ac190(actor, actor->FUN_005d43c0());
+            DoCheckScriptRunnerAndRun(actor, actor->FUN_005d43c0());
             if (actor->FUN_00440d80() || !actor->FUN_007af430() || actor->GetActorValue((ActorValue::Index)16) <= 0)
             {
                 if (!actor->FUN_00440d80() && actor->FUN_007af430() && actor->GetActorValue((ActorValue::Index)16) <= 0)
@@ -9798,8 +9798,8 @@ struct FUN_009640b0_player
 struct FUN_0040fbf0_lock
 {
     bool FUN_0078d200();
-    void FUN_0040fbf0(char* apName);
-    void FUN_0040fba0();
+    void Wait(char* apName);
+    void Leave();
 };
 
 void __cdecl FUN_008d5bc0();
@@ -9879,19 +9879,19 @@ void FUN_0096d810_shell::FUN_0096d810()
         if (m_bUpdateLowProcesses && !FUN_00525420() && ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0078d200())
         {
             UpdateLowProcesses(0.0f, false);
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fba0();
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Leave();
         }
         if (m_bUpdateLowListProcessLists && !FUN_00525420())
         {
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fbf0(0);
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Wait(0);
             UpdateLowListProcessLists(0.0f, false);
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fba0();
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Leave();
         }
         if (m_bRunSecondProcessUpdate)
         {
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fbf0(0);
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Wait(0);
             FUN_0096b810(0.0f, false);
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fba0();
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Leave();
         }
         if (m_fCrimeListUpdateTimer <= DAT_01012060)
             UpdateCrimeLists();

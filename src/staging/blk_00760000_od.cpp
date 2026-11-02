@@ -1569,7 +1569,7 @@ class HKTile
     float FUN_00a011b0(int m_iValueId);
     void FUN_00a01350(int m_iValueId, const char* pcValue, int iFlag);
     void FUN_00700320(int m_iValueId, int iValue);
-    void FUN_00a012d0(int m_iValueId, float fValue, int iFlag);
+    void SetFloat(int m_iValueId, float fValue, int iFlag);
 };
 
 struct HKScreen
@@ -1786,8 +1786,8 @@ void HKMenu::UpdateHighlight()
     if (!bFound)
     {
         m_pkHighlight->FUN_00a01350(0x1004, acWordNext, 1);
-        m_pkHighlight->FUN_00a012d0(0x1005, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa1) + iPos * 0x11, 1);
-        m_pkHighlight->FUN_00a012d0(0x1006, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa2), 1);
+        m_pkHighlight->SetFloat(0x1005, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa1) + iPos * 0x11, 1);
+        m_pkHighlight->SetFloat(0x1006, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa2), 1);
         m_pkHighlight->FUN_00700320(0x1008, -1);
     }
 }

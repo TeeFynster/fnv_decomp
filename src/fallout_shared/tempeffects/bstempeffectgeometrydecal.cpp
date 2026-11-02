@@ -880,7 +880,7 @@ struct Obj18c
     void FUN_00685e60(void* p, int n);
 };
 void __cdecl FUN_00401460(void* dst, void* src, unsigned int n);
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 extern double DAT_01012060;
 extern void(__cdecl* DAT_00fdf0c8)();
 extern GlobalObjectO2_00a7b610 g_011f49d8;

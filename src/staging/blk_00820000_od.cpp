@@ -1882,7 +1882,7 @@ FUN_0082f6c0::~FUN_0082f6c0()
 
 extern unsigned int DAT_011dd1f4;
 
-void __cdecl FUN_00401030(unsigned int p);
+void __cdecl FormHeap_Free(unsigned int p);
 
 struct FUN_0082f9c0_obj
 {
@@ -1905,7 +1905,7 @@ void __cdecl FUN_0082f9c0()
         }
         else
         {
-            FUN_00401030(c7 - 4);
+            FormHeap_Free(c7 - 4);
             r_2 = 0;
         }
         s = r_2;

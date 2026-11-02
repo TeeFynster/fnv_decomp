@@ -7890,7 +7890,7 @@ struct AttachRef
     void* FUN_00430830();
     void FUN_00565730();
     void* FUN_005d43c0();
-    double FUN_00567400();
+    double GetScale();
     void FUN_008c4640();
     unsigned int FUN_0084e3a0();
 };
@@ -7909,8 +7909,8 @@ struct AttachContext
 };
 extern AttachContext* DAT_011ddf38;
 extern AttachRef* DAT_011dea3c;
-void __cdecl FUN_005ac190(AttachRef*, void*);
-void __cdecl FUN_005ac750(AttachRef*, void*, unsigned int);
+void __cdecl DoCheckScriptRunnerAndRun(AttachRef*, void*);
+void __cdecl MarkBaseExtraListScriptEvent(AttachRef*, void*, unsigned int);
 void __cdecl FUN_004b6dc0(void*, unsigned int);
 
 struct AttachmentHandler
@@ -8005,8 +8005,8 @@ void AttachmentHandler::FUN_00451ef0(AttachRef* ref, AttachCell* cell, AttachRef
         ref->FUN_00565730();
         if (!DAT_011ddf38->FUN_0042ce10())
         {
-            FUN_005ac190(ref, ref->FUN_005d43c0());
-            FUN_005ac750(ref, ref->FUN_005d43c0(), 4096);
+            DoCheckScriptRunnerAndRun(ref, ref->FUN_005d43c0());
+            MarkBaseExtraListScriptEvent(ref, ref->FUN_005d43c0(), 4096);
         }
         if (type == 37)
         {
@@ -8016,7 +8016,7 @@ void AttachmentHandler::FUN_00451ef0(AttachRef* ref, AttachCell* cell, AttachRef
                 TreeDimensions treeDimensions = *tree->FUN_0045bb80();
                 if (treeDimensions.x > DAT_010179e0 && treeDimensions.y > DAT_010179e0)
                 {
-                    cell->FUN_00547ad0(*ref->GetPoint((unsigned int)(tree->GetTreeScale(1.0f) * ref->FUN_00567400())));
+                    cell->FUN_00547ad0(*ref->GetPoint((unsigned int)(tree->GetTreeScale(1.0f) * ref->GetScale())));
                 }
             }
         }

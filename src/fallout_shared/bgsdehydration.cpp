@@ -2030,7 +2030,7 @@ class Script
 {
   public:
     ScriptLocals* FUN_005abf60();
-    bool FUN_005ac1e0(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    bool Execute(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
 };
 struct ExtraDataList
 {
@@ -2284,7 +2284,7 @@ bool Action::TryAddTopic(TopicInfo* pTopicInfo, TESObjectREFR* reference, int ar
                     extra->FUN_00419ed0(pScript);
                     extra->FUN_00419f80(extra->FUN_00418800()->FUN_005abf60());
                     TESObjectREFR* temporary = new FUN_0055a2f0;
-                    pScript->FUN_005ac1e0(temporary, extra->FUN_00418830(), 0, false);
+                    pScript->Execute(temporary, extra->FUN_00418830(), 0, false);
                 }
                 reinterpret_cast<ActorActions*>(actor)->AddTopic(script, extra, true);
             }
@@ -2925,7 +2925,7 @@ struct ActivateReference
     ActivateLock* FUN_00569160();
     ActivateExtra* FUN_005691f0();
     void FUN_005789b0();
-    void FUN_00573170(ActivateActor*, int, int, int);
+    void Activate(ActivateActor*, int, int, int);
     void* FUN_00567790();
 };
 struct ActivateActorAction
@@ -3202,7 +3202,7 @@ bool ActivateObject::FUN_00516dc0(ActivateReference* apTarget, TESObjectREFR* ac
                         char message[256];
                         FUN_00406d00(message, 255, DAT_011d5110.FUN_00403df0(), lock->key->name.FUN_00408da0());
                         DispatchMessageToSink(message, 0, DAT_0102b108, 0, DAT_010162c0, 0);
-                        DAT_011c92d0->FUN_00573170(DAT_011dea3c, 0, 0, 1);
+                        DAT_011c92d0->Activate(DAT_011dea3c, 0, 0, 1);
                         DAT_011c92d0 = 0;
                         return true;
                     }

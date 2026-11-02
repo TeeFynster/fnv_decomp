@@ -957,7 +957,7 @@ struct R01SceneLink
 
 struct R01Scene
 {
-    R01SceneRoot* FUN_00447080(char*, int, int, int, int, int);
+    R01SceneRoot* LoadModel(char*, int, int, int, int, int);
     void FUN_004472a0(char*, R01SceneLink*);
 };
 
@@ -1192,7 +1192,7 @@ bool R01FxPlayer::LoadFromSave()
         reinterpret_cast<R01SaveReader*>(DAT_011de45c)->FUN_008579e0(&a3_2, 2);
         if (aA4)
         {
-            R01SceneRoot* a4_2 = reinterpret_cast<R01Scene*>(DAT_011c3b3c)->FUN_00447080(aActive8, 0, 1, 0, 0, 0);
+            R01SceneRoot* a4_2 = reinterpret_cast<R01Scene*>(DAT_011c3b3c)->LoadModel(aActive8, 0, 1, 0, 0, 0);
             if (a4_2)
             {
                 m_nodeRef.FUN_0066b0d0(a4_2->FUN_00a5d680());

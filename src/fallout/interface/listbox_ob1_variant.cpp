@@ -865,7 +865,7 @@ struct VATSMenuView
 struct TileProxy
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
 };
 struct OwnerProxy
@@ -1558,7 +1558,7 @@ struct ItemS
 };
 struct TileS
 {
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
 };
 struct NodeS
 {
@@ -1851,7 +1851,7 @@ struct FUN_00a00f30_shell
 };
 struct FUN_00a07530_shell
 {
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct FUN_007254d0_t
 {
@@ -2313,7 +2313,7 @@ struct ListBoxExt
 };
 struct TileX2
 {
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct ListBoxX
 {

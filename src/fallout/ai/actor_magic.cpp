@@ -935,7 +935,7 @@ class GlobalObject_0040c150
     const char* String();
 };
 extern GlobalObject_0040c150 g_011d39fc;
-extern bool FUN_005ac750(TESForm* pForm, ExtraDataList* pExtra, unsigned int uiFlags);
+extern bool MarkBaseExtraListScriptEvent(TESForm* pForm, ExtraDataList* pExtra, unsigned int uiFlags);
 extern bool QueueUIMessage(const char* apText, int aiType, const char* apIcon, const char* apSound, float afTime,
                            bool abPriority);
 struct FUN_008c1de0_shell : public Actor
@@ -961,8 +961,8 @@ void FUN_008c1de0_shell::FUN_008c1de0(TESForm* pItem, ExtraDataList* pExtra, boo
     }
     if (!g_TESSaveLoadGame->GetLoading())
     {
-        FUN_005ac750(this, pExtra, 2);
-        FUN_005ac750(pItem, GetExtraData(), 2);
+        MarkBaseExtraListScriptEvent(this, pExtra, 2);
+        MarkBaseExtraListScriptEvent(pItem, GetExtraData(), 2);
     }
     FUN_008c1de0_comp* pComp = 0;
     if (pItem->Unk_3B())
@@ -3109,7 +3109,7 @@ struct XHost17 : public XHostVtbl17
 
     bool FUN_008bc9d0(void*, int);
 
-    void FUN_0088c650(void*, int, int, int, int, int);
+    void EquipItem(void*, int, int, int, int, int);
 
     void FUN_00891e00(XRefr17*, int, bool);
 };
@@ -3325,7 +3325,7 @@ void XHost17::FUN_00891e00(XRefr17* pRefr, int iCount, bool a2)
                 if (FUN_008bc9d0(bo2, 1))
                 {
 
-                    FUN_0088c650(FUN_0044ddc0(bo), 1, 0, 1, 0, 1);
+                    EquipItem(FUN_0044ddc0(bo), 1, 0, 1, 0, 1);
                 }
 
                 XForm17* t3 = bo;

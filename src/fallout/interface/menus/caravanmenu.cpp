@@ -1509,7 +1509,7 @@ struct FNV_74A000_Item;
 
 struct FNV_74A000_Action
 {
-    void __thiscall FUN_00a012d0();
+    void __thiscall SetFloat();
 };
 
 struct FNV_74A000_List
@@ -1556,7 +1556,7 @@ void FNV_74A000_This::FUN_0074a000(int slot, float amount)
 
     while (item && list && *list->FUN_0073ac90())
     {
-        (*list->AddEight(item, 0xfa9, amount, 1))->FUN_00a012d0();
+        (*list->AddEight(item, 0xfa9, amount, 1))->SetFloat();
         item = list->DereferenceIfNotNull(item);
     }
 }
@@ -3157,7 +3157,7 @@ struct GameList
 };
 struct GroupRegistry
 {
-    bool __thiscall FUN_00853130(void* key, GameList** result);
+    bool __thiscall Lookup(void* key, GameList** result);
     void __thiscall RemoveKey(void* key);
     void __thiscall RemoveValueFromGroup(void* key, int value);
 };
@@ -3166,7 +3166,7 @@ struct GroupRegistry
 void __thiscall GroupRegistry::RemoveValueFromGroup(void* key, int value)
 {
     GameList* entries = 0;
-    if (FUN_00853130(key, &entries))
+    if (Lookup(key, &entries))
     {
         for (unsigned int index = 0; index < entries->FUN_0044ddc0(); ++index)
         {
@@ -5174,7 +5174,7 @@ struct Node
 };
 struct Loader
 {
-    Node* FUN_00447080(const char*, int, bool, int, int, int);
+    Node* LoadModel(const char*, int, bool, int, int, int);
 };
 extern Loader* DAT_011c3b3c;
 struct Scene
@@ -5194,8 +5194,8 @@ struct TileView
     void FUN_00715c60(int, const char*);
     void FUN_00a01350(int, const char*, bool);
     float FUN_00a011b0(int, bool = true);
-    void FUN_00a012d0(int, float);
-    void FUN_00a07530(int);
+    void SetFloat(int, float);
+    void SetChangeFlag(int);
     void FUN_00700320(int, bool);
 };
 struct PlayerName
@@ -5870,8 +5870,8 @@ struct Menu
 // @fnv 0x0073d850
 void Menu::InitMenu()
 {
-    unk18c = DAT_011c3b3c->FUN_00447080(DAT_0107121c, 0, true, 0, 0, 0);
-    unk188 = DAT_011c3b3c->FUN_00447080(DAT_010711e4, 0, true, 0, 0, 0);
+    unk18c = DAT_011c3b3c->LoadModel(DAT_0107121c, 0, true, 0, 0, 0);
+    unk188 = DAT_011c3b3c->LoadModel(DAT_010711e4, 0, true, 0, 0, 0);
     DAT_011d91e4.FUN_00559450()->Attach(unk188, true);
     DAT_011d91e4.FUN_00559450()->Attach(unk18c, true);
     array164.FUN_008454f0(true);
@@ -5987,12 +5987,12 @@ void Menu::InitMenu()
     char labelText[260];
     FUN_00406d00(labelText, 260, DAT_01012058, DAT_011d3d48.FUN_00403df0(), DAT_011d2e68.FUN_00403df0());
     unk58->FUN_00a01350(4036, labelText, true);
-    unk58->FUN_00a012d0(4001, unk58->FUN_00a011b0(4001) - 150.0);
-    unk58->FUN_00a07530(1);
+    unk58->SetFloat(4001, unk58->FUN_00a011b0(4001) - 150.0);
+    unk58->SetChangeFlag(1);
     if (!FUN_004b71d0())
         unk58->FUN_00a01350(FUN_00a01860(DAT_01071358), DAT_010633a0, true);
-    unk5c->FUN_00a012d0(4001, unk5c->FUN_00a011b0(4001) - 150.0);
-    unk5c->FUN_00a07530(1);
+    unk5c->SetFloat(4001, unk5c->FUN_00a011b0(4001) - 150.0);
+    unk5c->SetChangeFlag(1);
     unk30->FUN_00700320(4003, false);
     unk34->FUN_00700320(4003, true);
     unk38->FUN_00700320(4003, false);
@@ -6005,7 +6005,7 @@ void Menu::InitMenu()
     unk64->FUN_00a01350(4036, DAT_011d354c.FUN_00403df0(), true);
     unk68->FUN_00a01350(4036, DAT_011d2784.FUN_00403df0(), true);
     unkcc->FUN_00700320(4003, false);
-    unkcc->FUN_00a07530(4);
+    unkcc->SetChangeFlag(4);
     UpdateControls();
 }
 }
@@ -6017,9 +6017,9 @@ struct TileNode
 
     double FUN_00a011b0(unsigned int, int);
 
-    void FUN_00a012d0(unsigned int, float);
+    void SetFloat(unsigned int, float);
 
-    void FUN_00a07530(unsigned int);
+    void SetChangeFlag(unsigned int);
 
     void SetTraitAndReset(int, float);
 
@@ -7554,9 +7554,9 @@ void MenuView::UpdateCaravanMenu()
         if (pGainTile != 0)
         {
 
-            pGainTile->FUN_00a012d0(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
+            pGainTile->SetFloat(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
 
-            pGainTile->FUN_00a07530(0x10);
+            pGainTile->SetChangeFlag(0x10);
         }
     }
 
@@ -7636,7 +7636,7 @@ struct IFace
 
 struct Obj6c
 {
-    int FUN_00a012d0(int id, float v, int z);
+    int SetFloat(int id, float v, int z);
     static int FUN_00a01860(const char* s);
 };
 
@@ -8600,7 +8600,7 @@ struct Mid2
 {
     double FUN_00a011b0(int id);
     static float FUN_00a01530();
-    int FUN_00a012d0(int id, float v, bool b);
+    int SetFloat(int id, float v, bool b);
     void* FUN_00a03c90();
 };
 
@@ -8717,11 +8717,11 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         }
         if (mid5->FUN_00a011b0(0xfa7) == 6006.0 || mid5->FUN_00a011b0(0xfa7) == 102.0)
         {
-            mid5->FUN_00a012d0(0xfad, (float)mid5->FUN_00a01530(), true);
+            mid5->SetFloat(0xfad, (float)mid5->FUN_00a01530(), true);
         }
         ((Obj917c*)DAT_011d917c)->RebuildCardLists();
-        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
-        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(DAT_011d9170, 12.0f, 0);
+        ((Obj917c*)DAT_011d917c)->m_6c->SetFloat(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
+        ((Obj917c*)DAT_011d917c)->m_6c->SetFloat(DAT_011d9170, 12.0f, 0);
         ((FUN_00a01290_shell*)((Obj917c*)DAT_011d917c)->m_6c)
             ->SetTraitAndReset(((Obj917c*)DAT_011d917c)->m_6c->FUN_00a01860(DAT_01070250), 1.0f);
         DAT_011d9184 = a4;
@@ -9861,7 +9861,7 @@ void ActionDispatch::HandleEvent(unsigned int event, unsigned int unused)
 struct ControlTile
 {
     float GetFloat(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct SelectedCard
 {
@@ -10838,12 +10838,12 @@ void CaravanControls::UpdateControls()
         if (cardCount < 30)
         {
             Enable(2, 1);
-            button->FUN_00a012d0(4009, 128.0f, true);
+            button->SetFloat(4009, 128.0f, true);
         }
         else
         {
             Enable(2, 0);
-            button->FUN_00a012d0(4009, 255.0f, true);
+            button->SetFloat(4009, 255.0f, true);
         }
         if (cardCount < 1)
             Enable(16, 1);
@@ -19758,7 +19758,7 @@ bool __cdecl Check_00702450(int v);
 void __cdecl UpdateCardSelection();
 void __cdecl FUN_0074a270();
 void __cdecl FUN_00717de0(int v);
-void __cdecl FUN_00703e80(const char* a1, int a2, int a3, void(__cdecl* a4)(), int a5, int a6, float a7, float a8,
+void __cdecl ShowMessageBox(const char* a1, int a2, int a3, void(__cdecl* a4)(), int a5, int a6, float a7, float a8,
                           const char* a9, const char* a10, int a11);
 struct Target7490
 {
@@ -20735,7 +20735,7 @@ bool Target7490::FUN_007490e0(int aiType, int aiUnused)
         }
         else if (Check_00702450(V13()))
         {
-            FUN_00703e80(g_011d43b4.FUN_00403df0(), 0, 0, FUN_0074a270, 0, 0x17, 0.0f, 0.0f, g_011d34f8.FUN_00403df0(),
+            ShowMessageBox(g_011d43b4.FUN_00403df0(), 0, 0, FUN_0074a270, 0, 0x17, 0.0f, 0.0f, g_011d34f8.FUN_00403df0(),
                          g_011d3684.FUN_00403df0(), 0);
             SetFlag(1, 1);
             bResult = true;
@@ -20752,17 +20752,17 @@ struct MenuTile
     void FUN_00700320(int, int);
     void FUN_00a01350(int, const char*, bool);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
     MenuTile* FUN_00a03da0(const char*);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct ModelNode
 {
 };
 struct Loader
 {
-    ModelNode* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    ModelNode* LoadModel(const char*, int, bool, bool, bool, bool);
 };
 extern Loader* DAT_011c3b3c;
 struct SettingText
@@ -21536,15 +21536,15 @@ void FUN_0073d020_Class::FUN_0073d020()
     char path[260];
     {
         FUN_00406d00(path, 260, "%sCurrency-Bill_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        billGrid = DAT_011c3b3c->FUN_00447080(path, 0, true, false, false, false);
+        billGrid = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         FUN_00406d00(path, 260, "%sCurrency-Coin_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        coinGrid = DAT_011c3b3c->FUN_00447080(path, 0, true, false, false, false);
+        coinGrid = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         for (int i = 0; i < 3; i++)
         {
             FUN_00406d00(path, 260, "%sCurrency-Bill_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            bills[i] = DAT_011c3b3c->FUN_00447080(path, 0, true, false, false, false);
+            bills[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
             FUN_00406d00(path, 260, "%sCurrency-Coin_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            coins[i] = DAT_011c3b3c->FUN_00447080(path, 0, true, false, false, false);
+            coins[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         }
         stateA = 0;
         stateB = 0;
@@ -21567,13 +21567,13 @@ void FUN_0073d020_Class::FUN_0073d020()
             int value = FUN_0044a670(name->FUN_0055d520()) - 17;
             value *= 15;
             MenuTile* extra = FUN_00a08b20(npcBet, "CBM_NPCBetValue");
-            extra->FUN_00a012d0(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
+            extra->SetFloat(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
         }
         MenuTile* info = screenA->FUN_00a03da0("CBM_InfoRect");
         if (info)
         {
-            info->FUN_00a012d0(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
-            info->FUN_00a07530(16);
+            info->SetFloat(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
+            info->SetChangeFlag(16);
         }
         npcBet->FUN_00a01350(0xfc4, name->FUN_0055d520(), true);
         npcBet->SetTraitAndReset(DAT_011d9174, 1.0f);
@@ -21632,7 +21632,7 @@ struct CMAudio
 };
 struct CMTile
 {
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
     void FUN_00700320(int trait, int value);
     float FUN_00a011b0(int trait);
     void FUN_00a01350(int trait, const char* value, bool propagate);
@@ -21994,7 +21994,7 @@ void CaravanGame::FUN_00741500()
     startTime = DAT_011f6394.FUN_00825c00();
     DAT_011d9204 = state;
     if (!active || mode == 1)
-        CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+        CMFn::FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
     if (FUN_00740f10(0x20000))
     {
         if (active)
@@ -22012,7 +22012,7 @@ void CaravanGame::FUN_00741500()
     case 23:
         if (FUN_0059bb30() != 2)
         {
-            CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+            CMFn::FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();
             DAT_011d917c = 0;
@@ -22092,14 +22092,14 @@ void CaravanGame::FUN_00741500()
             CMAVObject* sel = A_Fn::FUN_004aae30(sceneRoot, "Select1_01:0");
             ((CMNodePtr*)&g_011d91a8)->FUN_00559450()->ProjectToScreen(sel->FUN_0045bb80(), &x, &y, 1e-05f);
             x = tileWidth * x - DAT_010718b8;
-            laneTile0->FUN_00a012d0(0xfa1, x, true);
-            laneTile5->FUN_00a012d0(0xfa1, x, true);
+            laneTile0->SetFloat(0xfa1, x, true);
+            laneTile5->SetFloat(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile1->FUN_00a012d0(0xfa1, x, true);
-            laneTile4->FUN_00a012d0(0xfa1, x, true);
+            laneTile1->SetFloat(0xfa1, x, true);
+            laneTile4->SetFloat(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile2->FUN_00a012d0(0xfa1, x, true);
-            laneTile3->FUN_00a012d0(0xfa1, x, true);
+            laneTile2->SetFloat(0xfa1, x, true);
+            laneTile3->SetFloat(0xfa1, x, true);
             A_Fn::FUN_00a08b20(mainTile, "CGM_NPCTrackRect")->FUN_00700320(0xfa3, 1);
             A_Fn::FUN_00a08b20(mainTile, "CGM_PlayerTrackRect")->FUN_00700320(0xfa3, 1);
             UpdateControls();
@@ -23127,7 +23127,7 @@ void CaravanGame::FUN_00741500()
                 if (pos >= 0 && pos < wagerMax)
                 {
                     scrollPos = 1;
-                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
+                    rootTile->SetFloat(DAT_011d9170, (float)pos, false);
                     rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                     state = mx > DAT_01012060 ? 5 : 6;
                 }
@@ -23148,7 +23148,7 @@ void CaravanGame::FUN_00741500()
                         diff = diff / -step;
                         if (diff)
                         {
-                            rootTile->FUN_00a012d0(DAT_011d9170,
+                            rootTile->SetFloat(DAT_011d9170,
                                                    (float)MinInt(FUN_00647b70(wagerValue + diff, 0), wagerMax), false);
                             rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                             if (E_Fn::FUN_00ec7d40(diff) < 5)
@@ -23220,7 +23220,7 @@ void CaravanGame::FUN_00741500()
                                 int pos = (int)(rootTile->FUN_00a011b0(DAT_011d9170) + padX);
                                 if (pos >= 0 && pos < wagerMax)
                                 {
-                                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
+                                    rootTile->SetFloat(DAT_011d9170, (float)pos, false);
                                     rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                                     state = padX > 0 ? 5 : 6;
                                     scrollPos = 1;
@@ -23935,10 +23935,10 @@ void Menu_749a40::FUN_00749a40(int slot)
             ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
             if (unkaec < 30)
                 (*((Slot_749a40*)((FNV_74A000_Root*)this)->slots[slot])->list.FUN_0073ac90(4009, 128.0f, 1))
-                    ->FUN_00a012d0();
+                    ->SetFloat();
             else
                 (*((Slot_749a40*)((FNV_74A000_Root*)this)->slots[slot])->list.FUN_0073ac90(4009, 255.0f, 1))
-                    ->FUN_00a012d0();
+                    ->SetFloat();
         }
         break;
     case 9:
@@ -24140,7 +24140,7 @@ struct SceneRoot
 struct ModelLoader
 {
     void FUN_0045a5e0(const char* path);
-    SceneNode* FUN_00447080(const char* path, int a, int b, int c, int d, int e);
+    SceneNode* LoadModel(const char* path, int a, int b, int c, int d, int e);
 };
 struct UiTile
 {
@@ -24150,8 +24150,8 @@ struct UiTile
     void FUN_00715c60(int id, int value);
     UiTile* FUN_00a03da0(const char* name);
     float FUN_00a011b0(int id, int flag);
-    void FUN_00a012d0(int id, float value);
-    void FUN_00a07530(int value);
+    void SetFloat(int id, float value);
+    void SetChangeFlag(int value);
 };
 struct GameSetting
 {
@@ -24452,11 +24452,11 @@ void CaravanMenuX::FUN_0073ea90()
         {
             FUN_00406d00(szModel, 0x104, "%sPlayer_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            m_pCardNodes[iSide][iCard] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+            m_pCardNodes[iSide][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
             DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pCardNodes[iSide][iCard], 1);
             FUN_00406d00(szModel, 0x104, "%sOpponent_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            m_pCardNodes[iSide + 3][iCard] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+            m_pCardNodes[iSide + 3][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
             DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pCardNodes[iSide + 3][iCard], 1);
         }
     }
@@ -24464,22 +24464,22 @@ void CaravanMenuX::FUN_0073ea90()
     for (int iGrid = 0; iGrid < 3; iGrid++)
     {
         FUN_00406d00(szModel, 0x104, "%sPlayerGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        m_pPlayerGrid[iGrid] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+        m_pPlayerGrid[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
         FUN_00406d00(szModel, 0x104, "%sOppGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        m_pOppGrid[iGrid] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+        m_pOppGrid[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     }
 
     FUN_00406d00(szModel, 0x104, "%sSelect_Add.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    m_pSelectAdd = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+    m_pSelectAdd = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pSelectAdd, 1);
     FUN_00406d00(szModel, 0x104, "%sSelect_Remove.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    m_pSelectRemove = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+    m_pSelectRemove = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pSelectRemove, 1);
 
     FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck.NIF");
-    m_pDecks[0] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+    m_pDecks[0] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck.NIF");
-    m_pDecks[1] = DAT_011c3b3c->FUN_00447080(szModel, 0, 1, 0, 0, 0);
+    m_pDecks[1] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pDecks[0], 1);
     DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pDecks[1], 1);
 
@@ -24600,9 +24600,9 @@ void CaravanMenuX::FUN_0073ea90()
     UiTile* pInfoRect = m_pTile38->FUN_00a03da0("CGM_InfoRect");
     if (pInfoRect != 0)
     {
-        pInfoRect->FUN_00a012d0(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
-        pInfoRect->FUN_00a012d0(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
-        pInfoRect->FUN_00a07530(0x11);
+        pInfoRect->SetFloat(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
+        pInfoRect->SetFloat(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
+        pInfoRect->SetChangeFlag(0x11);
     }
 
     m_pTile88->FUN_00a01350(0xfc4, DAT_011d1fec.FUN_00403df0(), 1);

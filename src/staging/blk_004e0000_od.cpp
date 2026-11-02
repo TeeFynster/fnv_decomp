@@ -3110,7 +3110,7 @@ struct GlobalObject_0048f200
     void* tail;
     unsigned int count;
     ~GlobalObject_0048f200();
-    void FUN_004ed900();
+    void RemoveAll();
 };
 struct CleanupOwner
 {
@@ -3219,8 +3219,8 @@ FUN_004ed3e0::~FUN_004ed3e0()
         FUN_004a0ea0(owner->node.FUN_00559450())->FUN_00b6da10();
         owner->node.FUN_0066b0d0(0);
     }
-    list30.FUN_004ed900();
-    list3c.FUN_004ed900();
+    list30.RemoveAll();
+    list3c.RemoveAll();
     if (ptr58.FUN_00559450())
     {
         ((CleanupManager*)FUN_004e7ff0())->Release(ptr58.FUN_00559450());

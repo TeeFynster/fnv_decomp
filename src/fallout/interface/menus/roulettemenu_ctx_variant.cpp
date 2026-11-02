@@ -4308,7 +4308,7 @@ struct FUN_006317a0_shell
 };
 struct FUN_00a012d0_shell
 {
-    void FUN_00a012d0();
+    void SetFloat();
 };
 struct FUN_007b52d0_shell
 {

@@ -578,7 +578,7 @@ void __cdecl CopyListToTail(void* pSourceList, SoundListView* pCopyToList)
 
 struct FUN_005abe50_shell : public Script
 {
-    void FUN_005abe50(char*);
+    void SetText(char*);
 };
 
 void __cdecl Deallocate(void*);
@@ -588,7 +588,7 @@ char* __cdecl AllocateZeroed(int, int);
 
 // Frees the stored string, then copies newText into a newly allocated buffer (or clears it when newText is null).
 // @fnv 0x005abe50
-void FUN_005abe50_shell::FUN_005abe50(char* newText)
+void FUN_005abe50_shell::SetText(char* newText)
 {
     if (m_pText)
     {
@@ -627,7 +627,7 @@ ScriptLocals* FUN_005abf60_shell::FUN_005abf60()
 }
 
 // @fnv 0x005ac190
-void __cdecl FUN_005ac190(TESObjectREFR* ownerObject, ExtraDataList* apExtra)
+void __cdecl DoCheckScriptRunnerAndRun(TESObjectREFR* ownerObject, ExtraDataList* apExtra)
 {
     if (apExtra && apExtra->FUN_00418830())
     {
@@ -641,14 +641,14 @@ void __cdecl FUN_005ac190(TESObjectREFR* ownerObject, ExtraDataList* apExtra)
 
 struct FUN_005ac1e0_shell : public Script
 {
-    bool FUN_005ac1e0(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    bool Execute(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
 };
 
 extern SettingT_GameSettingCollection_ g_011cac68;
 
 // Runs the script via the script runner, decrementing a timer and resetting it from the game setting or a referenced value when the header flag is set.
 // @fnv 0x005ac1e0
-bool FUN_005ac1e0_shell::FUN_005ac1e0(TESObjectREFR* ownerObject, ScriptLocals* ownerVars,
+bool FUN_005ac1e0_shell::Execute(TESObjectREFR* ownerObject, ScriptLocals* ownerVars,
                                       TESObjectREFR* ownerContainer, bool abIsPartialScript)
 {
     if (!abIsPartialScript && GetHeader()->dataSize <= 4)
@@ -758,7 +758,7 @@ ScriptReferencedObject* FUN_005ac4f0_shell::GetNthRefByIndex(unsigned int aiInde
 
 // If apExtra has script locals, forwards apActionForm and aiFlag to the locals' FUN_005a8e20 and returns its result; otherwise returns false.
 // @fnv 0x005ac750
-bool __cdecl FUN_005ac750(TESForm* apActionForm, ExtraDataList* apExtra, unsigned int aiFlag)
+bool __cdecl MarkBaseExtraListScriptEvent(TESForm* apActionForm, ExtraDataList* apExtra, unsigned int aiFlag)
 {
     bool bres = false;
     if (apExtra && apExtra->FUN_00418830())
@@ -1830,12 +1830,12 @@ __declspec(thread) unsigned char FUN_005ac400_tls[0x269];
 
 struct ScriptCompileAndRun
 {
-    void FUN_005ac400(ScriptCompiler* compiler, COMPILER_NAME compilerIndex, TESObjectREFR* ownerObject);
+    void Run(ScriptCompiler* compiler, COMPILER_NAME compilerIndex, TESObjectREFR* ownerObject);
 };
 
 // Compiles the script with the given compiler index and owner object, and if compilation succeeds and the script has data, runs it with the owner's locals.
 // @fnv 0x005ac400
-void ScriptCompileAndRun::FUN_005ac400(ScriptCompiler* compiler, COMPILER_NAME compilerIndex,
+void ScriptCompileAndRun::Run(ScriptCompiler* compiler, COMPILER_NAME compilerIndex,
                                        TESObjectREFR* ownerObject)
 {
     AutoMemHelper tempMemContext(0x15, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESScript.cpp",

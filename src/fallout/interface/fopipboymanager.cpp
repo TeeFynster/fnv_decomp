@@ -792,11 +792,11 @@ struct VTab
 };
 struct FUN_007ffd50_shell
 {
-    void FUN_007ffd50();
+    void Close();
 };
 // Calls FUN_007ffe40, invokes VFn(1) on the parent if present, then sets procedure type 0 and calls SetRenderedMenu(0) on the FUN_004b7210 result.
 // @fnv 0x007ffd50
-void FUN_007ffd50_shell::FUN_007ffd50()
+void FUN_007ffd50_shell::Close()
 {
     VTab* parent;
     FUN_007ffe40();

@@ -2657,7 +2657,7 @@ extern Setting DAT_011cd378;
 extern const float DAT_01012054;
 extern const char DAT_011846d4, DAT_011841cc;
 Actor* FUN_00ec43fb(Reference*, int, const void*, const void*, int);
-void FUN_005ac750(Idle*, unsigned int, int);
+void MarkBaseExtraListScriptEvent(Idle*, unsigned int, int);
 Reference* FUN_00564480(int, int);
 bool FUN_005accb0(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
 // Plays an idle animation on the source actor or reference, choosing the sequence and dispatching play events, then restores the previous setting value.
@@ -2722,7 +2722,7 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
                         int unused = selected->FUN_0083c820();
                         selected->FUN_0083c850(0);
                         selected->FUN_0083c850(1);
-                        FUN_005ac750(idleVal, actor->FUN_005d43c0(), 0x40000);
+                        MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
                         delete selected;
                     }
                 }
@@ -2731,7 +2731,7 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
             }
             else if (actor->FUN_008d8520())
             {
-                FUN_005ac750(idleVal, actor->FUN_005d43c0(), 0x40000);
+                MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
                 actor->FUN_008d8520()->Clear(0);
             }
         }

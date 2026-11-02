@@ -80,9 +80,9 @@ unsigned __cdecl FUN_0044a670(const char*);
 
 unsigned __cdecl FUN_00403940(unsigned, unsigned);
 
-void* __cdecl FUN_00401000(unsigned);
+void* __cdecl FormHeap_Allocate(unsigned);
 
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 
 void __cdecl FUN_00401460(void*, const void*, unsigned);
 
@@ -687,8 +687,8 @@ struct TextTile
     float FUN_00a011b0(int);
     const char* FUN_00a011f0(int);
 
-    void FUN_00a012d0(int, float, bool);
-    void FUN_00a07530(int);
+    void SetFloat(int, float, bool);
+    void SetChangeFlag(int);
     bool IsTraitNonZero(int);
 
     TextNode* BuildTextNode();
@@ -789,7 +789,7 @@ TextNode* TextTile::BuildTextNode()
         maximumX = params.width;
         countVal = params.height;
 
-        FUN_00a012d0(0xfd5, ParseFloatValue(params.lineCount), true);
+        SetFloat(0xfd5, ParseFloatValue(params.lineCount), true);
 
         multibyte = params.multibyte;
     }
@@ -820,14 +820,14 @@ TextNode* TextTile::BuildTextNode()
 
     fontA->SetHeight((float)oldStateVal);
 
-    FUN_00a012d0(0xfb1, ParseFloatValue(maximumX), true);
+    SetFloat(0xfb1, ParseFloatValue(maximumX), true);
 
-    FUN_00a012d0(0xfb0, ParseFloatValue(countVal), true);
+    SetFloat(0xfb0, ParseFloatValue(countVal), true);
 
-    FUN_00a07530(9);
+    SetChangeFlag(9);
 
     if (IsTraitNonZero(0xfae))
-        FUN_00a07530(0x100);
+        SetChangeFlag(0x100);
 
     if (!kFirst)
         kFirst = FUN_00706d30();

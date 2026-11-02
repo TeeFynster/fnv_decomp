@@ -5690,7 +5690,7 @@ extern __declspec(thread) TLSConsoleData g_tlsData;
 
 void DebugLog(const char*, ...);
 int FUN_00ec7d40(int);
-TESContainer* __fastcall FUN_0055d310(TESObjectREFR*);
+TESContainer* __fastcall GetContainer(TESObjectREFR*);
 int __fastcall FNV_GetFormType(TESForm*);
 
 struct FUN_008256d0_list
@@ -5707,7 +5707,7 @@ bool FUN_0059d8e0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     TESForm* pobject;
     TESObjectREFR* ptarget = apRefObject;
     TESForm* pform = (TESForm*)apParam1;
-    if (!FUN_0055d310(ptarget))
+    if (!GetContainer(ptarget))
     {
         if (g_tlsData.bConsoleOutput)
             DebugLog("Calling Reference is not a Container Object");
@@ -8925,7 +8925,7 @@ struct InventoryChanges
     int GetObjectCount(TESForm*);
 };
 struct TESContainer;
-TESContainer* __fastcall FUN_0055d310(TESObjectREFR*);
+TESContainer* __fastcall GetContainer(TESObjectREFR*);
 __declspec(thread) unsigned char g_sDebugLogState[0x268 + 1];
 // Sets result to the reference's inventory count of form 15 (gold), logs it when debug logging is on, and returns true.
 // @fnv 0x0059dbe0
@@ -8937,7 +8937,7 @@ bool FUN_0059dbe0(TESObjectREFR* reference, void* arg1, void* arg2, double& resu
     if (ptarget && pform)
     {
         TESForm* pobject = pform;
-        TESContainer* pCont = FUN_0055d310(ptarget);
+        TESContainer* pCont = GetContainer(ptarget);
         if (pCont)
         {
             InventoryChanges* pchange = InventoryChanges::CreateForReference(ptarget);

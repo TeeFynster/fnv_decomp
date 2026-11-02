@@ -2315,7 +2315,7 @@ void VATSMenuView::FUN_00724dd0()
 struct TileProxy
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
 };
 struct OwnerProxy
@@ -2344,7 +2344,7 @@ void OwnerProxy::FUN_007253a0()
                 h = FUN_00647b70((int)FUN_004e4430(FUN_007267c0() * (range - p) / range) + 1, 2);
             }
             if (h > 1)
-                tile0c->FUN_00a012d0(FUN_00a01860("_scroll_delta"), (range - p) / (h - 1), true);
+                tile0c->SetFloat(FUN_00a01860("_scroll_delta"), (range - p) / (h - 1), true);
         }
         if (tile14)
             tile14->FUN_00700320(FUN_00a01860("_number_of_items"), h);
@@ -3403,7 +3403,7 @@ bool RemovalList::RemoveNode(RemovalNode* node, RemovalNode* previous)
                 FUN_004b7210()->FUN_00715860(selected, 0xfc3, 1);
         }
         if (container && (*node->GetItem())->counted)
-            container->FUN_00a012d0(FUN_00a01860(str_0106f8d0),
+            container->SetFloat(FUN_00a01860(str_0106f8d0),
                                     container->FUN_00a011b0(FUN_00a01860(str_0106f8d0)) - 1.0, true);
         delete (*node->GetItem())->tile;
         if (FUN_007242c0(1))
@@ -3654,7 +3654,7 @@ struct ItemS
 };
 struct TileS
 {
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
 };
 struct NodeS
 {
@@ -3741,7 +3741,7 @@ void OwnerS::FUN_007211e0()
     m_fGlyphExtent = 0.0f;
     if (pTile != 0)
     {
-        pTile->FUN_00a012d0(FUN_00a01860("_num_filtered"), 0.0f, true);
+        pTile->SetFloat(FUN_00a01860("_num_filtered"), 0.0f, true);
     }
     FUN_00724800();
     m10 = 0;
@@ -4773,7 +4773,7 @@ struct HighlightTile
     bool FUN_0071aa80();
     HighlightTile* FUN_00a03da0(const char*);
     void FUN_0071aa60(bool);
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
     void FUN_00700320(int, int);
 };
 HighlightTile* __cdecl FUN_00a08b20(HighlightTile*, const char*);
@@ -4811,19 +4811,19 @@ void HighlightList::FUN_00725080()
                     if (child)
                     {
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f88c);
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f884);
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f87c);
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(true);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
             else
@@ -4835,19 +4835,19 @@ void HighlightList::FUN_00725080()
                     if (child)
                     {
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f88c);
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f884);
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->FUN_00a03da0(str_0106f87c);
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(false);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
         }
@@ -4866,7 +4866,7 @@ struct FUN_00a00f30_shell
 };
 struct FUN_00a07530_shell
 {
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 struct FUN_007254d0_t
 {
@@ -4901,19 +4901,19 @@ void FUN_007254d0_t::UpdateSpeechChallengeTrait()
                     if (child)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)parent)->FUN_0071aa60(true);
-                    ((FUN_00a07530_shell*)parent)->FUN_00a07530(8);
+                    ((FUN_00a07530_shell*)parent)->SetChangeFlag(8);
                 }
             }
             else
@@ -4925,19 +4925,19 @@ void FUN_007254d0_t::UpdateSpeechChallengeTrait()
                     if (child)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)parent)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)parent)->FUN_0071aa60(false);
-                    ((FUN_00a07530_shell*)parent)->FUN_00a07530(8);
+                    ((FUN_00a07530_shell*)parent)->SetChangeFlag(8);
                 }
             }
         }
@@ -4976,7 +4976,7 @@ bool FUN_00725b70_cls::FUN_00725b70()
 namespace fnv_00726210 {
 struct FUN_00a07530_shell
 {
-    void __thiscall FUN_00a07530(int);
+    void __thiscall SetChangeFlag(int);
 };
 
 struct ListBox726210
@@ -5013,19 +5013,19 @@ void ListBox726210::FUN_00726210()
                     if (child != 0)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)box)->FUN_0071aa60(true);
-                    ((FUN_00a07530_shell*)box)->FUN_00a07530(8);
+                    ((FUN_00a07530_shell*)box)->SetChangeFlag(8);
                 }
             }
             else
@@ -5037,19 +5037,19 @@ void ListBox726210::FUN_00726210()
                     if (child != 0)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((FUN_00a07530_shell*)child)->FUN_00a07530(8);
+                        ((FUN_00a07530_shell*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)box)->FUN_0071aa60(false);
-                    ((FUN_00a07530_shell*)box)->FUN_00a07530(8);
+                    ((FUN_00a07530_shell*)box)->SetChangeFlag(8);
                 }
             }
         }
@@ -6038,7 +6038,7 @@ void ClearListBox::FUN_007a54d0()
     itemCount = 0;
     totalHeight = 0.0f;
     if (container)
-        container->FUN_00a012d0(FUN_00a01860("_num_filtered"), 0.0f, true);
+        container->SetFloat(FUN_00a01860("_num_filtered"), 0.0f, true);
     FUN_007a8580();
     selected = 0;
     UpdateHighlight();
@@ -6168,7 +6168,7 @@ namespace fnv_007a5e70 {
 struct HighlightTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void SetTraitAndReset(int, float);
 };
 void FNV_Warning(const char*);
@@ -6194,7 +6194,7 @@ void HighlightList::FUN_007a5e70()
         {
             int previous = above ? -1 : 1;
             float direction = scrollbar->FUN_00a011b0(FUN_00a01860("_current_value"));
-            scrollbar->FUN_00a012d0(FUN_00a01860("_current_value"), direction + previous, false);
+            scrollbar->SetFloat(FUN_00a01860("_current_value"), direction + previous, false);
             if (direction == scrollbar->FUN_00a011b0(FUN_00a01860("_current_value")))
             {
                 FNV_Warning(
@@ -6300,7 +6300,7 @@ namespace fnv_007a6920 {
 struct ScrollTile
 {
     float FUN_00a011b0(unsigned int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
 };
 struct ScrollList
@@ -6327,7 +6327,7 @@ void ScrollList::FUN_007a6920()
             if (totalHeight > count)
                 height = FUN_00647b70((int)FUN_004e4430(FUN_007a86e0() * (totalHeight - count) / totalHeight) + 1, 2);
             if (height > 1)
-                container->FUN_00a012d0(FUN_00a01860("_scroll_delta"), (totalHeight - count) / (height - 1), true);
+                container->SetFloat(FUN_00a01860("_scroll_delta"), (totalHeight - count) / (height - 1), true);
         }
         if (scrollbar)
             scrollbar->FUN_00700320(FUN_00a01860("_number_of_items"), height);
@@ -6348,7 +6348,7 @@ struct HighlightTile
     bool GetSpeechChallengeFailure();
     HighlightTile* GetNamedChild(const char* name);
     void FUN_0071aa60(bool value);
-    void FUN_00a07530(int flags);
+    void SetChangeFlag(int flags);
     void Set(int trait, int value);
 };
 struct HighlightList
@@ -6385,19 +6385,19 @@ void HighlightList::FUN_007a73e0()
                     if (child)
                     {
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("bottom");
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("left");
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("right");
                         child->FUN_0071aa60(true);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(true);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
             else
@@ -6409,19 +6409,19 @@ void HighlightList::FUN_007a73e0()
                     if (child)
                     {
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("bottom");
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("left");
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                         child = box->GetNamedChild("right");
                         child->FUN_0071aa60(false);
-                        child->FUN_00a07530(8);
+                        child->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(false);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
         }
@@ -7042,7 +7042,7 @@ void ListBoxExt::UpdateHighlightBox()
 
 struct TileX2
 {
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
 };
 
 struct ListBoxX
@@ -7079,19 +7079,19 @@ void ListBoxX::FUN_007d97a0()
                     if (child != 0)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(true);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)box)->FUN_0071aa60(true);
-                    ((TileX2*)box)->FUN_00a07530(8);
+                    ((TileX2*)box)->SetChangeFlag(8);
                 }
             }
             else
@@ -7103,19 +7103,19 @@ void ListBoxX::FUN_007d97a0()
                     if (child != 0)
                     {
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f88c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f884);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                         child = ((Tile_GetChildByName_helper*)box)->GetNamedChild(str_0106f87c);
                         ((Tile_FUN_0071aa60_helper*)child)->FUN_0071aa60(false);
-                        ((TileX2*)child)->FUN_00a07530(8);
+                        ((TileX2*)child)->SetChangeFlag(8);
                     }
                     ((Tile_FUN_0071aa60_helper*)box)->FUN_0071aa60(false);
-                    ((TileX2*)box)->FUN_00a07530(8);
+                    ((TileX2*)box)->SetChangeFlag(8);
                 }
             }
         }
@@ -7154,7 +7154,7 @@ struct FUN_004ee7d0_node
 struct TileCX
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct IMObjX
 {
@@ -7162,7 +7162,7 @@ struct IMObjX
 };
 void* FUN_004b7210();
 int __cdecl FUN_00a01860(const char*);
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 
 struct LBThis
 {
@@ -7196,7 +7196,7 @@ bool LBThis::RemoveItemNode(FUN_004ee7d0_node* pNodeToRemove, FUN_004ee7d0_node*
         }
         if (container && (*pNodeToRemove->FUN_006815c0())->f8)
         {
-            container->FUN_00a012d0(FUN_00a01860("_num_filtered"),
+            container->SetFloat(FUN_00a01860("_num_filtered"),
                                     container->FUN_00a011b0(FUN_00a01860("_num_filtered")) - 1.0, true);
         }
         selTmp = (*pNodeToRemove->FUN_006815c0())->f0;
@@ -7209,7 +7209,7 @@ bool LBThis::RemoveItemNode(FUN_004ee7d0_node* pNodeToRemove, FUN_004ee7d0_node*
             (void)(elemA ? elemA->FUN_004459e0(1) : 0);
         }
         itemB = *pNodeToRemove->FUN_006815c0();
-        FUN_00401030(itemB);
+        FormHeap_Free(itemB);
         if (pNodeToRemove == (this ? &head : 0))
         {
             if (head.next)
@@ -7541,7 +7541,7 @@ struct TileZ
     void FUN_00a09410(int i);
     TileZ* FUN_00a03da0(const char* pcName);
     void FUN_0071aa60(bool b);
-    void FUN_00a07530(int i);
+    void SetChangeFlag(int i);
     void FUN_00700320(int m_uiSoundID, int iVal);
 };
 struct ItemZ
@@ -7580,19 +7580,19 @@ void ListBoxZ::FUN_0071a740()
                     if (pkSide)
                     {
                         pkSide->FUN_0071aa60(true);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("bottom");
                         pkSide->FUN_0071aa60(true);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("left");
                         pkSide->FUN_0071aa60(true);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("right");
                         pkSide->FUN_0071aa60(true);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                     }
                     pkBox->FUN_0071aa60(true);
-                    pkBox->FUN_00a07530(8);
+                    pkBox->SetChangeFlag(8);
                 }
             }
             else
@@ -7604,19 +7604,19 @@ void ListBoxZ::FUN_0071a740()
                     if (pkSide)
                     {
                         pkSide->FUN_0071aa60(false);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("bottom");
                         pkSide->FUN_0071aa60(false);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("left");
                         pkSide->FUN_0071aa60(false);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                         pkSide = pkBox->FUN_00a03da0("right");
                         pkSide->FUN_0071aa60(false);
-                        pkSide->FUN_00a07530(8);
+                        pkSide->SetChangeFlag(8);
                     }
                     pkBox->FUN_0071aa60(false);
-                    pkBox->FUN_00a07530(8);
+                    pkBox->SetChangeFlag(8);
                 }
             }
         }

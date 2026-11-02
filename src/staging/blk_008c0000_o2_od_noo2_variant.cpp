@@ -466,7 +466,7 @@ extern Ref8* DAT_011dea3c;
 extern float DAT_01085910, DAT_01085c58, DAT_010231a0, DAT_010162c0, DAT_0102226c, DAT_01047224;
 extern double DAT_010356f0, DAT_01011590;
 void FUN_00458620(void*, const void*);
-void FUN_005ac750(int, void*, int);
+void MarkBaseExtraListScriptEvent(int, void*, int);
 float RemapValueBySettings(float, int);
 void FUN_00cb9650(Node8*);
 void FUN_00c6a350(Node8*, int, int, int, int);
@@ -513,7 +513,7 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         state->victim = victim;
         if (victim)
             victim->CallProcessAt778();
-        FUN_005ac750(FUN_007af430(), state->victim->FUN_005d43c0(), 0x100);
+        MarkBaseExtraListScriptEvent(FUN_007af430(), state->victim->FUN_005d43c0(), 0x100);
         if (actor)
         {
             if (actor != DAT_011dea3c && !actor->FUN_00493bb0())

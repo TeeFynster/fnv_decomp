@@ -1874,7 +1874,7 @@ extern Pointer90 DAT_011d90bc;
 extern int DAT_011f36ac;
 struct Loader90
 {
-    Node90* FUN_00447080(const char*, int, int, int, int, int);
+    Node90* LoadModel(const char*, int, int, int, int, int);
 };
 extern Loader90* DAT_011c3b3c;
 Node90* __cdecl FUN_004aae30(Node90*, const char*);
@@ -2804,9 +2804,9 @@ struct Menu90
 // @fnv 0x00732540
 void Menu90::InitBlackjackScene()
 {
-    rootdb8 = DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand1.NIF", 0, 1, 0, 0, 0);
-    rootdbc = DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand2.NIF", 0, 1, 0, 0, 0);
-    rootdc0 = DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Dealer.NIF", 0, 1, 0, 0, 0);
+    rootdb8 = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand1.NIF", 0, 1, 0, 0, 0);
+    rootdbc = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand2.NIF", 0, 1, 0, 0, 0);
+    rootdc0 = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Dealer.NIF", 0, 1, 0, 0, 0);
     Node90* root8 = rootdb4;
     DAT_011d90bc.FUN_0066b0d0(FUN_004aae30(rootdb4, "object1"));
     ((Pointer90*)&DAT_011d9098)->FUN_0066b0d0(new Node90(0));
@@ -3037,7 +3037,7 @@ struct Casino129
 struct Tile129
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
     void FUN_00a01350(int, const char*, bool);
     void SetTraitAndReset(int, float);
     void FUN_00700320(int, int);
@@ -3251,7 +3251,7 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
             return 0;
         }
         if (pTile->FUN_00a011b0(0xfa7) == DAT_010704f0 || pTile->FUN_00a011b0(0xfa7) == DAT_010704e8)
-            pTile->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            pTile->SetFloat(0xfad, FUN_00a01530(1));
         FUN_00453a70()->FUN_00ad7550(DAT_01070bc0, 0x121).FUN_00ad8830(false);
         ((Menu129*)DAT_011d9050)->setting = ((Player129*)DAT_011dea3c)->mode.FUN_0066ef20(11);
         ((Menu129*)DAT_011d9050)->bet = DAT_0119fe40;
@@ -4506,7 +4506,7 @@ template <class T> class NiTPointerList
 };
 struct FUN_00a012d0_t
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct Entry738c
 {
@@ -4519,7 +4519,7 @@ struct Table738c
     Entry738c* m_apEntries[1];
 };
 
-// Iterates the reference list of entry iIndex in table DAT_011d9050 and calls FUN_00a012d0(0xfa9, fValue, true) on each element.
+// Iterates the reference list of entry iIndex in table DAT_011d9050 and calls SetFloat(0xfa9, fValue, true) on each element.
 // @fnv 0x00738c30
 void FUN_00738c30_shell::FUN_00738c30(int iIndex, float fValue)
 {
@@ -4527,7 +4527,7 @@ void FUN_00738c30_shell::FUN_00738c30(int iIndex, float fValue)
     NiTPointerList<TESObjectREFR*>* pkList = &((Table738c*)DAT_011d9050)->m_apEntries[iIndex]->m_kList;
     while (pos && pkList && *pkList->FUN_0073ac90())
     {
-        ((FUN_00a012d0_t*)pkList->AddEight(pos))->FUN_00a012d0(0xfa9, fValue, true);
+        ((FUN_00a012d0_t*)pkList->AddEight(pos))->SetFloat(0xfa9, fValue, true);
         pos = pkList->DereferenceIfNotNull(pos);
     }
 }

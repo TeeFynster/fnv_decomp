@@ -4845,7 +4845,7 @@ float __cdecl FUN_007177c0();
 float __cdecl FUN_00717820();
 float __cdecl FUN_00408840(float);
 void __cdecl FUN_00773190(RefX*);
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 int __cdecl FUN_00458030();
 extern bool DAT_011d96c5, DAT_011d97c0;
 extern float DAT_011d979c;
@@ -5060,7 +5060,7 @@ void HUDUpdate::FUN_00770430()
                     if (*((HUDSubtitleList*)m_kSubtitleArray)->FUN_00877a30(k) == m_pCurrentSubtitle)
                         FUN_00775670();
                     HUDSubtitle* j = *((HUDSubtitleList*)m_kSubtitleArray)->FUN_00877a30(k);
-                    FUN_00401030(j);
+                    FormHeap_Free(j);
                     ((HUDSubtitleList*)m_kSubtitleArray)->FUN_006bf8f0(k, true);
                     --k;
                 }
@@ -5128,7 +5128,7 @@ struct Tile772
     void StartFade(int, float, float);
     void FUN_00715c60(int, int);
     void RemoveFadeItemsForTile(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 // @fnv 0x00772aa0
 void __cdecl UpdateMapMarkerHUD(MarkerEvent772* event)
@@ -5150,7 +5150,7 @@ void __cdecl UpdateMapMarkerHUD(MarkerEvent772* event)
                 ((Tile772*)HUDMainMenu_pme->m_pTiles[16])->FUN_00715c60(0x1004, g_timeGlobal.GetSection());
             }
             ((Tile772*)HUDMainMenu_pme->m_pTiles[15])->RemoveFadeItemsForTile(0xfa9);
-            ((Tile772*)HUDMainMenu_pme->m_pTiles[15])->FUN_00a012d0(0xfa9, 0.0f, true);
+            ((Tile772*)HUDMainMenu_pme->m_pTiles[15])->SetFloat(0xfa9, 0.0f, true);
         }
     }
     else if (!event->active && event->reference == DAT_011d9af0)
@@ -5227,7 +5227,7 @@ struct FUN_00a01230_shell : Tile
 };
 struct FUN_00a07530_shell : Tile
 {
-    void FUN_00a07530(int flags);
+    void SetChangeFlag(int flags);
 };
 struct TargetHealthTile : Tile
 {
@@ -5272,10 +5272,10 @@ void __cdecl UpdateTargetHealthHUD(HealthActor* target, unsigned char enabled)
                     HUDMainMenu_pme->m_pTiles[23]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[23]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[62]->Set(4084, isHostile ? 2 : 1);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[21])->FUN_00a07530(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[22])->FUN_00a07530(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->FUN_00a07530(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->FUN_00a07530(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[21])->SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[22])->SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->SetChangeFlag(8);
                     ((TargetHealthHUD*)HUDMainMenu_pme)->UpdateTargetInfo(actor);
                 }
             }
@@ -5549,7 +5549,7 @@ void FUN_00773190(EnemyRefV* pkRef)
 struct RadiationTile
 {
     double FUN_00a011b0(int trait);
-    void FUN_00a012d0(int trait, float value, int propagate);
+    void SetFloat(int trait, float value, int propagate);
     void FUN_00700320(int trait, int enabled);
 };
 struct RandomGenerator
@@ -5565,8 +5565,8 @@ void HUDMainMenuS::FUN_007737c0(float afDrinkinRads, float afStandinRads)
     if (afDrinkinRads > _gModifierZero)
     {
         reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])
-            ->FUN_00a012d0(0x100a, (float)((double)g_011f6394.FUN_00825c00() + DAT_01073490), 1);
-        reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a012d0(0x1009, totalRads, 1);
+            ->SetFloat(0x100a, (float)((double)g_011f6394.FUN_00825c00() + DAT_01073490), 1);
+        reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->SetFloat(0x1009, totalRads, 1);
         reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00700320(0x100b, 1);
     }
     else if (afStandinRads > _gModifierZero)
@@ -5574,7 +5574,7 @@ void HUDMainMenuS::FUN_007737c0(float afDrinkinRads, float afStandinRads)
         if (reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a011b0(0x100a) <=
             (double)g_011f6394.FUN_00825c00())
         {
-            reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a012d0(0x1009, totalRads, 1);
+            reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->SetFloat(0x1009, totalRads, 1);
         }
     }
 }
@@ -5723,7 +5723,7 @@ struct RadTile
     bool FUN_00a07fc0(int);
     bool IsTraitNonZero(int);
     void StartFade(int, float, float, float, int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void Set(int, int);
     void Set(int, const char*, bool);
 };
@@ -5860,7 +5860,7 @@ void RadHUD::UpdateRadMeter()
         {
             DAT_011a0120 = 8;
             ((RadTile*)HUDMainMenu_pme->m_pTiles[18])
-                ->FUN_00a012d0(0xfa1, FUN_0040ebd0(low ? currentAngle : active, unused), true);
+                ->SetFloat(0xfa1, FUN_0040ebd0(low ? currentAngle : active, unused), true);
             HUDMainMenu_pme->m_pTiles[61]->Set(0xfa3, 1);
             ((RadTile*)HUDMainMenu_pme->m_pTiles[17])
                 ->StartFade(0xfa9, ((RadTile*)HUDMainMenu_pme->m_pTiles[17])->FUN_00a011b0(0xfa9), DAT_011d979c, 0.25f,
@@ -5877,12 +5877,12 @@ void RadHUD::UpdateRadMeter()
         }
         else if (low)
         {
-            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a012d0(0xfa1, FUN_0040ebd0(currentAngle, unused), true);
+            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->SetFloat(0xfa1, FUN_0040ebd0(currentAngle, unused), true);
         }
         if (showing)
         {
             HUDMainMenu_pme->m_pTiles[19]->Set(0x100b, 0);
-            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a012d0(0x1004, FUN_0040ebd0(currentAngle, unused), true);
+            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->SetFloat(0x1004, FUN_0040ebd0(currentAngle, unused), true);
             float duration = LinearInterpolate(1.5f, 3.0f, 0.0f, 50.0f, FUN_0040ebd0(50.0f, change));
             float start = ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0xfa1);
             float finish = FUN_00404010(((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0x1004), high);
@@ -6347,7 +6347,7 @@ float LinearInterpolate(float, float, float, float, float);
 struct Tile179
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
 };
 // @fnv 0x00778c20
@@ -6383,11 +6383,11 @@ void FUN_00778c20(Tile179* tile, float value, float limit)
                      : 0.0;
     else if (alpha == 3.0)
         middle = DAT_011d979c;
-    tile->FUN_00a012d0(4009, middle, true);
+    tile->SetFloat(4009, middle, true);
     high = tile->FUN_00a011b0(4009);
     if (high > limit)
     {
-        tile->FUN_00a012d0(4009, limit, true);
+        tile->SetFloat(4009, limit, true);
         tile->FUN_00700320(trait, 3);
     }
     else if (high < 0.0)
@@ -6399,9 +6399,9 @@ void FUN_00778c20(Tile179* tile, float value, float limit)
         else
             delay = LinearInterpolate((float)*g_011d24f0.FUN_0043d4d0(), (float)*g_011d46cc.FUN_0043d4d0(),
                                       (float)actual, (float)low, value);
-        tile->FUN_00a012d0(4009, 0.0f, true);
+        tile->SetFloat(4009, 0.0f, true);
         tile->FUN_00700320(trait, 0);
-        tile->FUN_00a012d0(4110, DAT_011f6394.GetTimeStamp() + delay, true);
+        tile->SetFloat(4110, DAT_011f6394.GetTimeStamp() + delay, true);
     }
     else if (tile->FUN_00a011b0(4110) < DAT_011f6394.GetTimeStamp() && alpha == 3.0)
     {
@@ -6879,7 +6879,7 @@ struct AnimatedTile
     TileList children;
     float FUN_00a011b0(int id);
     const char* FUN_00a011f0(int id);
-    void FUN_00a012d0(int id, float value, bool propagate);
+    void SetFloat(int id, float value, bool propagate);
     void FUN_00700320(int id, int value);
     void FUN_00707e10(const char* name);
     void StartFade(int id, float start, float end, float duration, int mode);
@@ -6906,7 +6906,7 @@ void TileAnimationUpdater::UpdateTileAnimations(AnimatedTile* pRootTile)
             pChild = ((AnimatedTile*)HUDMainMenu_pme->m_pTiles[13])->children.GetNext(tile);
             if (pChild)
             {
-                pChild->FUN_00a012d0(0xfa9, 0.0f, true);
+                pChild->SetFloat(0xfa9, 0.0f, true);
                 pChild->FUN_00700320(FUN_00a01860(str_01073724), 0);
             }
         }
@@ -7930,7 +7930,7 @@ struct xSize
 struct xTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
     bool IsTraitNonZero(int);
@@ -8078,7 +8078,7 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
                 qQMZREG->FUN_00700320(xFa01860(s_szIsReminder), qJDuOZ);
                 qDdzMIp->FUN_00a01350(0xfcc, s_szSquare, true);
             }
-            qDdzMIp->FUN_00a012d0(0xfa1, qQMZREG->FUN_00a011b0(0xfa1) - 20.0, true);
+            qDdzMIp->SetFloat(0xfa1, qQMZREG->FUN_00a011b0(0xfa1) - 20.0, true);
             qDdzMIp->FUN_00700320(0xfa3, 1);
             qQMZREG->FUN_00700320(0xfb9, 7);
             qQMZREG->FUN_00700320(0xfa3, 1);
@@ -8394,7 +8394,7 @@ struct AmmoTile
 {
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct AmmoHUD
 {
@@ -8529,7 +8529,7 @@ void AmmoHUD::UpdateAmmoHUD()
             }
             else
                 timer = flashTime_;
-            tiles[10]->FUN_00a012d0(4009, timer, true);
+            tiles[10]->SetFloat(4009, timer, true);
             if (ammoLastCondition != conditionA)
             {
                 float value5 = extra9->FUN_004bcdb0(0);
@@ -9317,7 +9317,7 @@ class VisibilityTile
 {
   public:
     void FUN_00700320(int trait, int value);
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
     float FUN_00a011b0(int trait);
 };
 class NiNode
@@ -9652,12 +9652,12 @@ void __cdecl FUN_00771700(int aiMenuMode)
     if (state == 6)
     {
         float scopeY = ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a011b0(4103);
-        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a012d0(4002, scopeY - DAT_01073488, true);
+        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->SetFloat(4002, scopeY - DAT_01073488, true);
     }
     else
     {
         float normalY = ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a011b0(4103);
-        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a012d0(4002, normalY, true);
+        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->SetFloat(4002, normalY, true);
     }
     if (HUDMainMenu_pme->m_eHudMenuMode != 23 && state == 23)
         SetHudVisible(true);
@@ -10129,7 +10129,7 @@ void HUDHotkeys::FUN_0077da60()
 class Tile_traitSetter
 {
   public:
-    void FUN_00a012d0(int aiTrait, float afValue, bool abPropagate);
+    void SetFloat(int aiTrait, float afValue, bool abPropagate);
 };
 
 struct HUDMainMenuEx : public HUDMainMenu
@@ -10171,7 +10171,7 @@ void __cdecl FUN_0077e430(float afScale)
             case 58:
                 break;
             default:
-                ((Tile_traitSetter*)HUDMainMenu_pSingleton->m_pTiles[i])->FUN_00a012d0(4009, afScale * 255.0, true);
+                ((Tile_traitSetter*)HUDMainMenu_pSingleton->m_pTiles[i])->SetFloat(4009, afScale * 255.0, true);
                 break;
             }
         }
@@ -12010,7 +12010,7 @@ void HUDInteraction::FUN_007732d0()
 class ClearMessagesTile
 {
   public:
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetFloat(int trait, float value, bool propagate);
     void FUN_00a01350(int trait, const char* text, bool propagate);
 };
 struct ClearMessagesList
@@ -12020,7 +12020,7 @@ struct ClearMessagesList
     ClearMessagesList* FUN_00726070();
     void FUN_00470470();
 };
-void __cdecl FUN_00401030(void*);
+void __cdecl FormHeap_Free(void*);
 extern HUDMainMenu* HUDMainMenu_pme;
 struct HUDClearMessages : HUDMainMenu
 {
@@ -12035,14 +12035,14 @@ void HUDClearMessages::FUN_00775920()
     while (list && !list->FUN_008256d0())
     {
         void* message = *list->FUN_006815c0();
-        FUN_00401030(message);
+        FormHeap_Free(message);
         list = list->FUN_00726070();
     }
     ((ClearMessagesList*)m_kMessageList)->FUN_00470470();
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[27])->FUN_00a012d0(4009, 0.0f, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[27])->SetFloat(4009, 0.0f, true);
     ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->FUN_00a01350(4036, g_011d31e0_arg1, true);
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->FUN_00a012d0(4009, 0.0f, true);
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[25])->FUN_00a012d0(4009, 0.0f, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->SetFloat(4009, 0.0f, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[25])->SetFloat(4009, 0.0f, true);
     FUN_00775670();
 }
 

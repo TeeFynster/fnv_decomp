@@ -748,7 +748,7 @@ bool FUN_007877a0_Object::FUN_007877a0(LevelOption* option)
 struct LevelValue
 {
     float __thiscall FUN_00a011b0(unsigned int property);
-    void __thiscall FUN_00a012d0(int property, float value, int doUpdate);
+    void __thiscall SetFloat(int property, float value, int doUpdate);
     void __thiscall FUN_00700320(int property, int value);
 };
 struct FUN_007879f0_helper
@@ -794,7 +794,7 @@ void LevelMenuView::FUN_007880a0()
             }
             if (count > 1)
             {
-                meter0c->FUN_00a012d0(FUN_00a01860(str_0106f90c), (maximum20 - current) / (count - 1), 1);
+                meter0c->SetFloat(FUN_00a01860(str_0106f90c), (maximum20 - current) / (count - 1), 1);
             }
         }
         if (count14)
@@ -933,7 +933,7 @@ struct SkillTile
 {
     void SetName(const char*);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
 };
 struct SkillList
 {
@@ -1393,7 +1393,7 @@ void SkillsMenu::UpdateSkillsAndPerks()
             SkillTile* tile = skills.AddListEntry(iSkillId, FUN_0066e950(iSkillId), 0, 0);
             tile->SetName(FUN_0066e950(iSkillId));
             tile->FUN_00700320(0xfaa, 11);
-            tile->FUN_00a012d0(DAT_011d9ff0, 0.0f, 1);
+            tile->SetFloat(DAT_011d9ff0, 0.0f, 1);
             tile->FUN_00700320(DAT_011d9fe4, DAT_011dea3c->values.GetValue(iSkillId));
             iTotalSkillValue += DAT_011dea3c->values.GetValue(iSkillId);
             ++count;
@@ -1823,7 +1823,7 @@ extern int DAT_011d9ff0;
 struct FUN_00a011b0_cls
 {
     double FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
 };
 
 // @fnv 0x00786170
@@ -1833,7 +1833,7 @@ void __cdecl FUN_00786170(Tile* apTile, int a2)
     reinterpret_cast<VT_b9166*>(DAT_011dea3c)
         ->v229(a2, (float)(reinterpret_cast<VT_b9166*>(DAT_011dea3c)->v291(a2, flag) -
                            reinterpret_cast<FUN_00a011b0_cls*>(apTile)->FUN_00a011b0(DAT_011d9ff0)));
-    reinterpret_cast<FUN_00a011b0_cls*>(apTile)->FUN_00a012d0(DAT_011d9ff0, 0.0f, 1);
+    reinterpret_cast<FUN_00a011b0_cls*>(apTile)->SetFloat(DAT_011d9ff0, 0.0f, 1);
     reinterpret_cast<FUN_007866e0_shell*>(DAT_011d9fdc)->UpdateDisplayValue((const char*)apTile);
 }
 
@@ -2249,7 +2249,7 @@ struct IMStandIn
 };
 struct FUN_00a012d0_t
 {
-    void FUN_00a012d0(int aiTrait, float afValue, bool abFlag);
+    void SetFloat(int aiTrait, float afValue, bool abFlag);
 };
 struct FUN_00a01290_shell
 {
@@ -2300,7 +2300,7 @@ void FUN_00787600_shell::UpdateScrollTile(bool abFlag)
     FUN_00787600_Tile* pTile = 0;
     if (m_pFourthMenuObject && pScrollTile)
     {
-        pScrollTile->FUN_00a012d0(FUN_00a01860("_current_value"), fValue, false);
+        pScrollTile->SetFloat(FUN_00a01860("_current_value"), fValue, false);
         ((FUN_00a01290_shell*)pScrollTile)->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
         pTile = Unk_05((unsigned int)FUN_0040ebd0(fScrollPos, (float)FUN_007879f0(0) - 1.0));
         ((IMStandIn*)FUN_004b7210())->FUN_00715860((int)pTile, 0xfc3, abFlag);
@@ -3302,7 +3302,7 @@ struct HighlightTile : LevelValue
     bool FUN_0071aa80();
     HighlightTile* FUN_00a03da0(const char* name);
     void FUN_0071aa60(bool value);
-    void FUN_00a07530(int flags);
+    void SetChangeFlag(int flags);
 };
 HighlightTile* __cdecl FUN_00a08b20(HighlightTile*, const char*);
 struct SkillHighlight
@@ -3339,19 +3339,19 @@ void SkillHighlight::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(true);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(true);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
             else
@@ -3363,19 +3363,19 @@ void SkillHighlight::UpdateHighlight()
                     if (edge)
                     {
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("bottom");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("left");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                         edge = box->FUN_00a03da0("right");
                         edge->FUN_0071aa60(false);
-                        edge->FUN_00a07530(8);
+                        edge->SetChangeFlag(8);
                     }
                     box->FUN_0071aa60(false);
-                    box->FUN_00a07530(8);
+                    box->SetChangeFlag(8);
                 }
             }
         }
@@ -3729,7 +3729,7 @@ struct TileMenuO
 };
 struct FUN_00a012d0_t
 {
-    void FUN_00a012d0(int, float);
+    void SetFloat(int, float);
 };
 struct FUN_00a01290_shell
 {
@@ -3852,7 +3852,7 @@ static const char s_curpage[] = "_CurrentPage";
 static const char s_endpage[] = "_EndPage";
 // Loads levelup_menu.xml, initialises the menu, sets up condition lists, and returns the menu pointer or 0 on failure.
 // @fnv 0x00784c80
-int FUN_00784c80()
+int ShowLevelUpMenu()
 {
     void* objB = FUN_00a09030(0x403);
     void* menu;
@@ -3871,7 +3871,7 @@ int FUN_00784c80()
         }
         if (((TileMenuO*)menu)->FUN_00a011b0(0xfa7) == 6006.0 || ((TileMenuO*)menu)->FUN_00a011b0(0xfa7) == 102.0)
         {
-            ((FUN_00a012d0_t*)menu)->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            ((FUN_00a012d0_t*)menu)->SetFloat(0xfad, FUN_00a01530(1));
         }
         ((MgrObj*)((char*)FUN_004b7210() + 0x4d4))->FUN_00718630(0x10, FUN_00785180(), 0x200);
         {
@@ -4025,7 +4025,7 @@ void __cdecl FUN_00786240(LevelValue* apTile, int aiMatchValue)
             if (apTile->FUN_00a011b0(overflowTrait2) != DAT_01012060)
             {
                 g_011da050.GetItem(i)->unk00 += (int)apTile->FUN_00a011b0(overflowTrait2);
-                apTile->FUN_00a012d0(overflowTrait2, 0.0f, 1);
+                apTile->SetFloat(overflowTrait2, 0.0f, 1);
             }
 
             if (total + g_011da050.GetItem(i)->unk00 > apTile->FUN_00a011b0(FUN_00a01860("_MaxValue")))
@@ -4043,7 +4043,7 @@ void __cdecl FUN_00786240(LevelValue* apTile, int aiMatchValue)
                 g_011da050.GetItem(i)->unk00 -= diff;
             }
 
-            apTile->FUN_00a012d0(DAT_011d9fec,
+            apTile->SetFloat(DAT_011d9fec,
                                  (float)(apTile->FUN_00a011b0(DAT_011d9fec) + g_011da050.GetItem(i)->unk00), 1);
         }
     }

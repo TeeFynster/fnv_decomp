@@ -627,7 +627,7 @@ struct LockTile
     void FUN_00a01350(int aiID, const char* apString, bool abPropagate);
     void FUN_00700320(int aiID, int aiValue);
     float FUN_00a011b0(int aiID, bool abFlag);
-    void FUN_00a012d0(int aiID, float afValue);
+    void SetFloat(int aiID, float afValue);
     LockTile* FUN_00a03eb0(int aiIndex);
 };
 
@@ -769,8 +769,8 @@ void LockPickMenuImpl::HandleLockPickAction(int aiCode, int aiUnused)
         for (int i = 0; i < 6; i++)
         {
             LockTile* pTile = unk64->FUN_00a03eb0(i + 0x11);
-            pTile->FUN_00a012d0(0xfb1, pTile->FUN_00a011b0(0xfb1, true) + iDelta);
-            pTile->FUN_00a012d0(0xfa1, pTile->FUN_00a011b0(0xfa1, true) - iDelta / 2);
+            pTile->SetFloat(0xfb1, pTile->FUN_00a011b0(0xfb1, true) + iDelta);
+            pTile->SetFloat(0xfa1, pTile->FUN_00a011b0(0xfa1, true) - iDelta / 2);
         }
         break;
     }
@@ -792,8 +792,8 @@ void LockPickMenuImpl::HandleLockPickAction(int aiCode, int aiUnused)
         for (int j = 1; j < 6; j++)
         {
             LockTile* pTile2 = unk64->FUN_00a03eb0(j + 0x11);
-            pTile2->FUN_00a012d0(0xfb1, pTile2->FUN_00a011b0(0xfb1, true) + 2.0 * j * iDeltaX / 5.0);
-            pTile2->FUN_00a012d0(0xfa1, pTile2->FUN_00a011b0(0xfa1, true) - j * iDeltaX / 5.0);
+            pTile2->SetFloat(0xfb1, pTile2->FUN_00a011b0(0xfb1, true) + 2.0 * j * iDeltaX / 5.0);
+            pTile2->SetFloat(0xfa1, pTile2->FUN_00a011b0(0xfa1, true) - j * iDeltaX / 5.0);
         }
         break;
     }
@@ -869,7 +869,7 @@ struct TileList
 struct ArgObj
 {
     float __thiscall FUN_00a011b0(int arg);
-    void __thiscall FUN_00a012d0(int id, float v, bool b);
+    void __thiscall SetFloat(int id, float v, bool b);
 };
 struct Obj64 : ArgObj
 {
@@ -932,7 +932,7 @@ void __thiscall C::FUN_007908f0()
     {
         BSAudioS_::GetSingleton()->GetSoundHandleByEditorID(&DAT_0107462c, 0x101).Play(false);
     }
-    m_68->FUN_00a012d0((int)DAT_011da1fc, kVal, true);
+    m_68->SetFloat((int)DAT_011da1fc, kVal, true);
     DAT_011da2c0 = RunSeventhVirtualOperation;
     UpdateLockRotation(kVal);
     float x9 = (float)FUN_00408820(kVal - m_84);
@@ -957,9 +957,9 @@ void __thiscall C::FUN_007908f0()
         {
             m_90 = (float)((1.0 - (((ArgObj*)(void*)res4)->FUN_00a011b0(0xfaa) - DAT_010356f8) / DAT_01034208) *
                            DAT_01066808);
-            m_68->FUN_00a012d0(0xfb2, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb2), true);
-            m_68->FUN_00a012d0(0xfb3, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb3), true);
-            m_68->FUN_00a012d0(0xfb4, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb4), true);
+            m_68->SetFloat(0xfb2, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb2), true);
+            m_68->SetFloat(0xfb3, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb3), true);
+            m_68->SetFloat(0xfb4, ((ArgObj*)(void*)res4)->FUN_00a011b0(0xfb4), true);
         }
     }
     else
@@ -968,16 +968,16 @@ void __thiscall C::FUN_007908f0()
         resultB_2 = (float)(((double)m_88 + x9 - m_64->FUN_00a011b0(0xfb1)) /
                             ((double)m_88 * DAT_01011590 - m_64->FUN_00a011b0(0xfb1)));
         m_90 = (float)(resultB_2 * DAT_01015a38);
-        m_68->FUN_00a012d0(0xfb2, m_64->FUN_00a011b0(0xfb2), true);
-        m_68->FUN_00a012d0(0xfb3, m_64->FUN_00a011b0(0xfb3), true);
-        m_68->FUN_00a012d0(0xfb4, m_64->FUN_00a011b0(0xfb4), true);
+        m_68->SetFloat(0xfb2, m_64->FUN_00a011b0(0xfb2), true);
+        m_68->SetFloat(0xfb3, m_64->FUN_00a011b0(0xfb3), true);
+        m_68->SetFloat(0xfb4, m_64->FUN_00a011b0(0xfb4), true);
     }
 }
 
 // InitLockInterface v1 worker20: faithful transcription from capstone ORIG
 struct ModelLoader
 {
-    void* FUN_00447080(const char* path, int a, bool b, bool c, bool d, bool e);
+    void* LoadModel(const char* path, int a, bool b, bool c, bool d, bool e);
 };
 extern ModelLoader* DAT_011c3b3c;
 struct SetHelper
@@ -1238,9 +1238,9 @@ struct ThisCls
 void ThisCls::InitLockInterface()
 {
     void* pin;
-    pin = DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\LockInterface01.NIF", 0, true, false, false, false);
+    pin = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\LockInterface01.NIF", 0, true, false, false, false);
     void* idx;
-    idx = DAT_011c3b3c->FUN_00447080("Meshes\\Terminals\\BobbyPin01.NIF", 0, true, false, false, false);
+    idx = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\BobbyPin01.NIF", 0, true, false, false, false);
     *(Mat9*)&m_b4 = *(Mat9*)&DAT_011a9448;
     {
         SetHelper n;
@@ -1330,7 +1330,7 @@ struct PickTile
     void FUN_00a01350(int, const char*, bool);
     float FUN_00a011b0(int);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct PickTemplate
 {
@@ -1394,12 +1394,12 @@ void PickMenu::UpdateSweetSpot()
     {
         PickTile* tile = FUN_00726070(unk64, "LPM_SweetSpotTemplate", 0)->FUN_00639b40()->FUN_00a1ddb0();
         tile->FUN_00700320(0xfaa, i + 17);
-        tile->FUN_00a012d0(0xfb1, (unk84 - range) * 2.0f, true);
+        tile->SetFloat(0xfb1, (unk84 - range) * 2.0f, true);
         tile->FUN_00700320(0xfa1, range);
         tile->FUN_00700320(0xfad, start);
-        tile->FUN_00a012d0(0xfb2, (float)(count.r * 255.0), true);
-        tile->FUN_00a012d0(0xfb3, (float)(count.g * 255.0), true);
-        tile->FUN_00a012d0(0xfb4, (float)(count.b * 255.0), true);
+        tile->SetFloat(0xfb2, (float)(count.r * 255.0), true);
+        tile->SetFloat(0xfb3, (float)(count.g * 255.0), true);
+        tile->SetFloat(0xfb4, (float)(count.b * 255.0), true);
         range -= g_iDriverAngle_011da20c / 5;
         start--;
         count = end.AddDelta(color.FUN_00532ec0(end).ScaleVector4((float)((i + 1) / 5.0)));
@@ -1432,7 +1432,7 @@ class LKTile
 {
   public:
     float FUN_00a011b0(int m_iValueId);
-    void FUN_00a012d0(int m_iValueId, float fValue, int iFlag);
+    void SetFloat(int m_iValueId, float fValue, int iFlag);
     void FUN_00a01350(int m_iValueId, const char* pcValue, int iFlag);
     void SetTraitAndReset(int m_iValueId, float fValue);
     void FUN_00700320(int m_iValueId, int iValue);
@@ -1566,7 +1566,7 @@ LKTile* CreateLockpickMenu(LockRef* pkLockRef, int aiLockLevel, bool bDebug)
             return 0;
         }
         if (pkMenuTileNew->FUN_00a011b0(0xfa7) == 6006.0 || pkMenuTileNew->FUN_00a011b0(0xfa7) == 102.0)
-            pkMenuTileNew->FUN_00a012d0(0xfad, FUN_00a01530(), 1);
+            pkMenuTileNew->SetFloat(0xfad, FUN_00a01530(), 1);
         DAT_011da204->m_pkLockRef = pkLockRef;
         DAT_011da204->m_iLockLevel = iLockLevelNum;
         DAT_011da204->FUN_00726070()->FUN_00700320(FUN_00a01860("_DebugMode"), bDebug);
@@ -1737,7 +1737,7 @@ extern xNodePtr xg_spNode_11da24c;
 struct xTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
 };
@@ -1831,7 +1831,7 @@ struct xRef : xForm
     xForm* FUN_00567790();
     void FUN_005692a0();
     xForm* FUN_007af430();
-    bool FUN_00573170(xPlayer*, int, int, int);
+    bool Activate(xPlayer*, int, int, int);
 };
 struct xCrimeMgr
 {
@@ -2269,7 +2269,7 @@ void xLockPickMenu::FUN_0078eb50()
             return;
     }
     if (!qpqRa)
-        xF4b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+        xF4b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
     int qsSDDgz = 0;
     int qfTOqo = 0x7fff;
     if (xF4b7210()->FUN_004b71d0())
@@ -2437,7 +2437,7 @@ void xLockPickMenu::FUN_0078eb50()
                             xg_player_11dea3c->m_20c = true;
                         if (m_6c->FUN_007af430() && m_6c->FUN_007af430()->FUN_00401170() == 0x1b)
                             xF75b6e0(1);
-                        m_6c->FUN_00573170(xg_player_11dea3c, 0, 0, 1);
+                        m_6c->Activate(xg_player_11dea3c, 0, 0, 1);
                         if (m_6c->FUN_00401170() == 0x1c)
                             xg_player_11dea3c->m_20c = false;
                         xF78e0d0();
@@ -2498,7 +2498,7 @@ void xLockPickMenu::FUN_0078eb50()
                 xAudio::FUN_00453a70()->FUN_00ad7550(s_szBreak, 0x101).FUN_00ad8830(false);
                 if (m_6c)
                     xg_player_11dea3c->RemoveItem(xg_pLockpick_11ca268, 0, 1, 0, 0, 0, 0, 0, 1, 0);
-                m_30->FUN_00a012d0(xg_iTileId_11da1f8, m_30->FUN_00a011b0(xg_iTileId_11da1f8) - 1.0, true);
+                m_30->SetFloat(xg_iTileId_11da1f8, m_30->FUN_00a011b0(xg_iTileId_11da1f8) - 1.0, true);
                 m_a4->FUN_0047b220(m_ac, 0.0f);
                 m_a4->FUN_0047aab0(m_b0, 0, 1, 1.0f, 0.0f, 0);
                 xg_os_11dea0c->FUN_00877720()->ResetTargetState();
@@ -2523,7 +2523,7 @@ void xLockPickMenu::FUN_0078eb50()
             m_94 = 1.0f + m_78 * *xg_f_11d0de0.FUN_00403e20();
             m_8c = 0.0f;
             AdvanceSequence(0.0f);
-            m_68->FUN_00a012d0(xg_iTileId2_11da1fc, m_64->FUN_00a011b0(0xfb1) / 2.0, true);
+            m_68->SetFloat(xg_iTileId2_11da1fc, m_64->FUN_00a011b0(0xfb1) / 2.0, true);
             xg_spNode_11da24c.FUN_00559450()->FUN_0043b4a0(1)->FUN_00440460(m_d8);
             xg_spNode_11da24c.FUN_00559450()->FUN_0043b4a0(1)->FUN_0043fa80(m_b4);
             m_a4->FUN_0048fef0(0.0f);
@@ -2550,7 +2550,7 @@ void xLockPickMenu::FUN_0078eb50()
     case 7:
         if (FUN_0059bb30() != 2)
         {
-            xF4b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+            xF4b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
             xF4b7210()->FUN_00718930(1);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();

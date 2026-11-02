@@ -871,7 +871,7 @@ extern unsigned int DAT_011c3c00;
 
 extern void *DAT_01202d98, *DAT_011c3b3c, *DAT_01202df4, *DAT_011c3f2c, *DAT_011de45c;
 
-extern void* __cdecl FUN_00401000(unsigned int);
+extern void* __cdecl FormHeap_Allocate(unsigned int);
 
 extern void* __cdecl FUN_00aa13e0(unsigned int);
 
@@ -1446,7 +1446,7 @@ struct StubCallees
     void* FUN_00500940();
     void* FUN_005d43c0(int a, int b);
     int FUN_00418830();
-    void FUN_005ac1e0(void* a, int b);
+    void Execute(void* a, int b);
     void MarkAsRefusal();
     bool FUN_0061aef0();
     void LoadRecord(void* a);
@@ -1468,7 +1468,7 @@ void FUN_0061f170_cls::FUN_0061f170(void* a1, ArgObj* a2)
     void* obj = ((StubCallees*)this)->FUN_0061eb60(a1);
     if (FUN_005ac740() && obj != 0 && ((NodeRef*)((StubCallees*)obj)->FUN_00500940())->m_08 != 0)
     {
-        ((StubCallees*)obj)->FUN_005ac1e0(a2, ((StubCallees*)((StubCallees*)a2)->FUN_005d43c0(0, 1))->FUN_00418830());
+        ((StubCallees*)obj)->Execute(a2, ((StubCallees*)((StubCallees*)a2)->FUN_005d43c0(0, 1))->FUN_00418830());
     }
     ((StubCallees*)this)->MarkAsRefusal();
     if (((StubCallees*)this)->FUN_0061aef0())
@@ -6279,7 +6279,7 @@ struct ExtObj
 };
 void __cdecl FUN_005b5e40(const char* msg);
 void __cdecl FUN_00868d70(int arg);
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 
 struct FUN_0093bea0_cls
 {
@@ -7514,7 +7514,7 @@ bool FUN_0093bea0_cls::FUN_0093bea0()
         }
         FUN_00868d70(1);
         kOld = m_pPositionRequest;
-        FUN_00401030(kOld);
+        FormHeap_Free(kOld);
         m_pPositionRequest = 0;
     }
     if (ok5)
@@ -15488,7 +15488,7 @@ struct ActorAnimation : TESObjectREFR
 };
 extern int DAT_011dea3c;
 extern void* __cdecl FUN_004bf220(ActorAnimation*);
-extern void* __cdecl FUN_00401000(unsigned int);
+extern void* __cdecl FormHeap_Allocate(unsigned int);
 struct NextState
 {
     void FUN_006ecd40();
@@ -20077,7 +20077,7 @@ struct Obj117
     void* FUN_00621440();
     void FUN_0094c380();
     Obj117* FUN_00950bb0(int);
-    float FUN_00567400();
+    float GetScale();
     void SyncHolderValue();
     void FUN_0094a0c0(V117&, V117&, bool);
     Obj117* FUN_008b70d0();
@@ -20312,7 +20312,7 @@ void Obj117::FUN_0094ae40(bool force, bool skip)
                 DAT_011e08fc -= 6.2831854820251465;
             rotation52.FUN_004a0c90(v2bc(0) + DAT_011e08fc);
             temp29.FUN_00524ac0(DAT_011e08f4);
-            base6.z += FUN_00567400() * 100.0;
+            base6.z += GetScale() * 100.0;
         }
         else
         {
@@ -20320,7 +20320,7 @@ void Obj117::FUN_0094ae40(bool force, bool skip)
             FUN_00b54000(fov2);
             rotation52.FUN_004a0c90(DAT_011e076c + DAT_011e0b60);
             temp29.FUN_00524ac0(DAT_011e0764 + DAT_011e0b58);
-            base6.z += (height698 * DAT_011a3b64) * FUN_00567400();
+            base6.z += (height698 * DAT_011a3b64) * GetScale();
             float height = DAT_011e07d0->FUN_0045bb80().z - DAT_011e07d4->FUN_0045bb80().z;
             base6.z += height;
         }
@@ -21109,7 +21109,7 @@ struct SmartNode
 };
 struct Loader
 {
-    Node* FUN_00447080(const char*, int, bool, bool, bool, bool);
+    Node* LoadModel(const char*, int, bool, bool, bool, bool);
     void* FUN_00447330(const char*, int, int, int);
     void FUN_00447850(void*);
 };
@@ -22529,11 +22529,11 @@ struct View
     Controller* FUN_009306d0();
     void FUN_009697c0(bool);
     SmartBiped* FUN_00950b00(bool);
-    Node* FUN_0094e1d0(bool);
+    Node* GenerateNiNode(bool);
 };
 // Loads the first-person model and the FUN_0087e060 node, looks up Camera1st, Bip and Camera3rd nodes, creates biped and animation objects, and returns the node.
 // @fnv 0x0094e1d0
-Node* View::FUN_0094e1d0(bool arg)
+Node* View::GenerateNiNode(bool arg)
 {
     MemScope localValue5(0x34, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\PlayerCharacter.cpp",
                          0x2458);
@@ -22595,7 +22595,7 @@ Node* View::FUN_0094e1d0(bool arg)
         }
     }
     Node* localValue11 =
-        g_modelLoader->FUN_00447080(FUN_00464f30(g_011cdd78.FUN_00403df0(), false), 3, true, false, false, false);
+        g_modelLoader->LoadModel(FUN_00464f30(g_011cdd78.FUN_00403df0(), false), 3, true, false, false, false);
     localValue11->SetTaskFlag(true);
     firstPerson.FUN_0066b0d0(localValue11);
     DAT_011e07cc = firstPerson.FUN_00559450()->Find(FUN_0094ead0());
@@ -23655,10 +23655,10 @@ struct PlayerView
     unsigned int unkd6c;
     unsigned int unkd70;
     char animationState[96];
-    void FUN_005702e0(NiNode*, bool);
+    void Set3D(NiNode*, bool);
     void FUN_0094eb40(NiNode*, bool);
 };
-// Calls FUN_005702e0 and, if object is null, deletes first and second and clears node, DAT_011e07d0-d8 and animationState; may warn instead.
+// Calls Set3D and, if object is null, deletes first and second and clears node, DAT_011e07d0-d8 and animationState; may warn instead.
 // @fnv 0x0094eb40
 void PlayerView::FUN_0094eb40(NiNode* apNode, bool force)
 {
@@ -23668,7 +23668,7 @@ void PlayerView::FUN_0094eb40(NiNode* apNode, bool force)
     }
     else
     {
-        FUN_005702e0(apNode, force);
+        Set3D(apNode, force);
         if (!apNode)
         {
             delete first;
@@ -26910,8 +26910,8 @@ class FUN_00620850
 
 struct Lock950
 {
-    void FUN_0040fbf0(char* pcName);
-    void FUN_0040fba0();
+    void Wait(char* pcName);
+    void Leave();
 };
 extern Lock950 DAT_011f11a0;
 
@@ -27078,7 +27078,7 @@ void FUN_00950660_shell::FUN_00950660(int a, int b, int c)
 {
     f4ac = 0.0f;
     FUN_00704e10(0x10);
-    DAT_011f11a0.FUN_0040fbf0(0);
+    DAT_011f11a0.Wait(0);
     delete pkProcess;
     pkProcess = new FUN_00906dc0;
     Proc950* pkHigh = new FUN_008d7510;
@@ -27087,7 +27087,7 @@ void FUN_00950660_shell::FUN_00950660(int a, int b, int c)
     delete pkProcess;
     pkProcess = pkHigh;
     DAT_011e0e80.FUN_0096d470(this, FUN_00931850());
-    DAT_011f11a0.FUN_0040fba0();
+    DAT_011f11a0.Leave();
     v113();
     Owner950* pkOwner = FUN_009306d0();
     if (pkOwner)
@@ -31062,12 +31062,12 @@ struct PlayerCharacterStandIn
     BSSimpleList<BGSQuestObjective*> currentObjectiveList;
     BSSimpleList<RegionObjectEntry*> currentTargetList;
 
-    BSSimpleList<RegionObjectEntry*>* FUN_00952ba0();
+    BSSimpleList<RegionObjectEntry*>* GetCurrentQuestTargets();
 };
 
 // Returns the player's current quest target list, refreshing it from the active quest when the flag is set or the quest has no targets.
 // @fnv 0x00952ba0
-BSSimpleList<RegionObjectEntry*>* PlayerCharacterStandIn::FUN_00952ba0()
+BSSimpleList<RegionObjectEntry*>* PlayerCharacterStandIn::GetCurrentQuestTargets()
 {
     if (pQuest == 0)
         return 0;
@@ -31101,12 +31101,12 @@ struct PlayerOps
 {
     void FUN_00952d60(void*, void*, int);
 };
-TESContainer* __fastcall FUN_0055d310(TESObjectREFR*);
+TESContainer* __fastcall GetContainer(TESObjectREFR*);
 
 struct FUN_00952c30_shell : PlayerCharacter
 {
     void FUN_00952c30(TESObjectREFR* apMovingRef);
-    BSSimpleList<TESQuestTargetX*>* FUN_00952ba0();
+    BSSimpleList<TESQuestTargetX*>* GetCurrentQuestTargets();
 };
 
 // Sets a flag when the moving reference is the player or matches a quest target, or when the target's container holds the target's form ID.
@@ -31119,7 +31119,7 @@ void FUN_00952c30_shell::FUN_00952c30(TESObjectREFR* apMovingRef)
             ((PlayerOps*)this)->FUN_00952d60(*(void**)((char*)this + 0x6f4), (char*)this + 0x6f8, 0);
         *((bool*)this + 0x206) = true;
     }
-    BSSimpleList<TESQuestTargetX*>* pList = FUN_00952ba0();
+    BSSimpleList<TESQuestTargetX*>* pList = GetCurrentQuestTargets();
     TESQuestTargetX* pTarget = 0;
     while (pList && *((QTNode*)pList)->_ref_006815c0() && !*((bool*)this + 0x206))
     {
@@ -31128,9 +31128,9 @@ void FUN_00952c30_shell::FUN_00952c30(TESObjectREFR* apMovingRef)
         TESObjectREFR* ptargref = (TESObjectREFR*)((TgtOps*)pTarget)->GetReference(true);
         if (ptargref == apMovingRef)
             *((bool*)this + 0x206) = true;
-        if (ptargref && FUN_0055d310(ptargref))
+        if (ptargref && GetContainer(ptargref))
         {
-            TESContainer* pContainer = FUN_0055d310(ptargref);
+            TESContainer* pContainer = GetContainer(ptargref);
             if (pContainer)
             {
                 InventoryChanges* pInventoryChanges = InventoryChanges::CreateForReference(ptargref);
@@ -38275,7 +38275,7 @@ extern ResetSetting DAT_0120315c, DAT_01203168;
 extern ResetList DAT_011e0ae8;
 extern ResetHandler* DAT_011c3f2c;
 void SetTreeValue(void*, int);
-void FUN_00401030(void*);
+void FormHeap_Free(void*);
 void FUN_00806ba0(ResetFlagState*, void*);
 void SortTopicList(int, void*);
 void FUN_005aae20(ResetFlagState*);
@@ -39913,7 +39913,7 @@ struct GObj
 struct PlayerShell
 {
     int GetAtIfValid(int value);
-    void FUN_0088c650(TESBoundObject* obj, int value, ExtraDataList* extra, bool b1, bool b2, bool b3);
+    void EquipItem(TESBoundObject* obj, int value, ExtraDataList* extra, bool b1, bool b2, bool b3);
     unsigned short FUN_00897910(int value, int a2, int a3, Animation* anim);
     void FUN_008a73e0(int value, BSAnimGroupSequence* seq);
 };
@@ -39989,7 +39989,7 @@ bool Host95::FUN_0095d450(TESObjectWEAP* apWeapon, int sel, unsigned char b10, u
             q = m_pBaseProcess->GetRef83()->FUN_00726070() + 1;
         if (b14)
             q = h7;
-        ((PlayerShell*)this)->FUN_0088c650(a, q, 0, true, false, false);
+        ((PlayerShell*)this)->EquipItem(a, q, 0, true, false, false);
         return true;
         break;
     }
@@ -41779,7 +41779,7 @@ class SpellProc
     int m638;
     int m63c;
 
-    double FUN_00567400();
+    double GetScale();
     void FUN_0095f930(int a, int b, float c);
     void FUN_00960520(float v);
     void FUN_00961280();
@@ -41795,7 +41795,7 @@ bool SpellProc::FUN_009613c0(float afValue)
         VirtualInterface* p = (VirtualInterface*)FUN_00877720(DAT_011dea0c);
         if (sub634.FUN_00559450() == 0)
         {
-            FUN_0095f930(m638, 2, (float)(FUN_00567400() * *FUN_00403e20((void*)&DAT_011d0628)));
+            FUN_0095f930(m638, 2, (float)(GetScale() * *FUN_00403e20((void*)&DAT_011d0628)));
         }
         if (sub634.FUN_00559450() != 0)
         {
@@ -44962,7 +44962,7 @@ struct FUN_00963bf0_glob
 };
 
 extern double DAT_01012060;
-void FUN_00401030(void* p);
+void FormHeap_Free(void* p);
 
 struct FUN_00963bf0_cls
 {
@@ -45370,7 +45370,7 @@ void FUN_00963bf0_cls::RemoveExpiredItems()
         {
             node->Remove(obj);
             FUN_00963bf0_item* tmp = obj;
-            FUN_00401030(tmp);
+            FormHeap_Free(tmp);
             node = m_60c;
         }
         else
@@ -58387,7 +58387,7 @@ struct Player
     int unk86c;
     float angle, previousAngle;
     Controller* FUN_009306d0();
-    float FUN_00567400();
+    float GetScale();
     void GetCameraPosAndDir(V3*, V3*, bool);
     Filter* FUN_00931ed0(int*);
     Cell* FUN_008d6f30();
@@ -58409,7 +58409,7 @@ bool Player::FUN_009614b0(Bound* object, V3* output, bool search, bool rotate)
 {
     float size = object->FUN_0050ebf0() * DAT_01011590;
     float height = FUN_004587d0(DAT_011dea3c->FUN_009306d0()->GetSettingFloat());
-    float distance = FUN_00567400() * *DAT_011d0628.FUN_00403e20();
+    float distance = GetScale() * *DAT_011d0628.FUN_00403e20();
     V3 origin, direction;
     GetCameraPosAndDir(&origin, &direction, true);
     Mat rotation;
@@ -59231,7 +59231,7 @@ struct InputReference
     virtual void r185();
     virtual bool Busy();
     bool FUN_00568680();
-    bool FUN_00573170(InputPlayer*, int, int, int);
+    bool Activate(InputPlayer*, int, int, int);
     InputProcess* FUN_008d8520();
 };
 struct InputCharacter : InputReference
@@ -60139,10 +60139,10 @@ void InputPlayer::FUN_009466d0(float dt, bool paused)
             if (!prevent)
             {
                 FUN_007062e0(0, 0, 0);
-                if (reference && reference->FUN_00573170(this, 0, 0, 1))
+                if (reference && reference->Activate(this, 0, 0, 1))
                     fallback5 = false;
                 if (fallback5 && process->Interaction())
-                    process->Interaction()->FUN_00573170(this, 0, 0, 1);
+                    process->Interaction()->Activate(this, 0, 0, 1);
             }
             changed = true;
         }

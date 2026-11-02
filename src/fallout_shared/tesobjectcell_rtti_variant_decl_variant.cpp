@@ -224,7 +224,7 @@ extern CellSaveLoad* DAT_011de45c;
 class CellModelLoader
 {
   public:
-    void FUN_00444850(RefView* pkRef, int iCell);
+    void QueueReference(RefView* pkRef, int iCell);
 };
 extern CellModelLoader* DAT_011c3b3c;
 class CellProcessLists

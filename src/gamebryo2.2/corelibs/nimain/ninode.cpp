@@ -1717,7 +1717,7 @@ struct Bnd
 {
     P3 c;
     float r;
-    void FUN_00a7f3f0(const Bnd* b);
+    void Merge(const Bnd* b);
     void Set(const P3& cc, float rr)
     {
         c = cc;
@@ -1776,7 +1776,7 @@ void Node2::UpdateWorldBoundFromChildren()
                 {
                     AV* pOtherChild = m_pBase[i];
                     if (pOtherChild && pOtherChild->m_pWorldBound && pOtherChild->m_pWorldBound->r != 0.0f)
-                        m_pWorldBound->FUN_00a7f3f0(pOtherChild->m_pWorldBound);
+                        m_pWorldBound->Merge(pOtherChild->m_pWorldBound);
                     i++;
                 }
             }

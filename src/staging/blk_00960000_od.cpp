@@ -5999,7 +5999,7 @@ struct ActorDecomp
     virtual void vf1EC();
     virtual void vf1F0();
     virtual ActorPoint3* vf1F4();
-    float FUN_00567400();
+    float GetScale();
     ActorPoint3* FUN_00430830();
 
     int unk004;
@@ -6526,7 +6526,7 @@ unsigned char ActorDecomp::FUN_00961e30(unsigned char value)
     if (state)
     {
         this->unk7E8 = *this->vf1F4();
-        this->unk7E8.z = this->FUN_00567400() * this->unk698 + this->unk7E8.z;
+        this->unk7E8.z = this->GetScale() * this->unk698 + this->unk7E8.z;
         this->unk7E0 = this->FUN_00430830()->z;
         this->unk7E4 = this->FUN_00430830()->x;
     }

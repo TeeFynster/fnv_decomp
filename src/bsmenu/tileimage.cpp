@@ -763,7 +763,7 @@ struct TileImageShim
     bool IsTraitNonZero(unsigned int);
     float FUN_00a011b0(unsigned int, int);
     void FUN_00a037e0(unsigned int, float);
-    void FUN_00a07530(unsigned int);
+    void SetChangeFlag(unsigned int);
     NiNode* FUN_00a1fd50();
 };
 // Builds a quad geometry object, attaches it beneath a node returned by FUN_00a089c0() or a fallback, and returns the containing node.
@@ -842,8 +842,8 @@ NiNode* TileImageShim::FUN_00a1fd50()
 
     FUN_00a037e0(0xfad, FUN_00a011b0(0xfad, 0));
     if (IsTraitNonZero(0xfae))
-        FUN_00a07530(0x100);
-    FUN_00a07530(0x3d);
+        SetChangeFlag(0x100);
+    SetChangeFlag(0x3d);
     return (NiNode*)m_pRenderedNodeEntry;
 }
 

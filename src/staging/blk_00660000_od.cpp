@@ -1197,7 +1197,7 @@ struct FUN_006665c0_Entry
     FUN_006665c0_Item* m_item;
 };
 
-void __cdecl FUN_00401030(void* p);
+void __cdecl FormHeap_Free(void* p);
 void __cdecl FUN_0044e360(void* p);
 
 struct FUN_006665c0_cls
@@ -1225,7 +1225,7 @@ void FUN_006665c0_cls::FUN_006665c0()
             (void)((pItemCopy != 0) ? pItemCopy->Dispose(1) : 0);
         }
         pEntries = m_08;
-        FUN_00401030(pEntries);
+        FormHeap_Free(pEntries);
     }
     FUN_0044e360(m_04);
 }
@@ -1844,7 +1844,7 @@ void DetClassExtended::ClearAndReset()
     while (m_04 && !reinterpret_cast<SaveNodeExtended*>(m_04)->FUN_008256d0())
     {
         SaveItemCls* item = *m_04->FUN_006815c0();
-        FUN_00401030(item);
+        FormHeap_Free(item);
         reinterpret_cast<SaveNodeExtended*>(m_04)->FUN_0063f7b0();
     }
 

@@ -2443,7 +2443,7 @@ bool Target::FindTriangleZ(const NiPoint3& point, float above, float below, floa
 
 struct FUN_006986d0_cls;
 
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 
 struct b9_big
 {
@@ -2451,7 +2451,7 @@ struct b9_big
     int m_30, m_34, m_38, m_3c, m_40, m_44, m_48, m_4c, m_50, m_54, m_58;
     static void* operator new(unsigned int size)
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
     static void operator delete(void*, unsigned int);
     b9_big();

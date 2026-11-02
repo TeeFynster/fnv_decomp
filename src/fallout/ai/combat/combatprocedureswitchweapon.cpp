@@ -416,8 +416,8 @@ struct Actor
     BaseProcess* FUN_008d8520();
     void FUN_008a6840(bool);
     int FUN_00575610(TESForm*);
-    void FUN_0088c650(TESForm*, int, ExtraDataList*, bool, bool, bool);
-    void FUN_0088c790(TESForm*, ExtraDataList*, bool, bool, bool, bool);
+    void EquipItem(TESForm*, int, ExtraDataList*, bool, bool, bool);
+    void UnequipItem(TESForm*, ExtraDataList*, bool, bool, bool, bool);
 };
 struct CombatController
 {
@@ -464,11 +464,11 @@ void CombatProcedureSW::UpdateWeaponDraw()
             int count = 1;
             if (FUN_004c0bf0(pWeapon))
                 count = actor->FUN_00575610(pWeapon);
-            actor->FUN_0088c650(pWeapon, count, 0, true, false, true);
+            actor->EquipItem(pWeapon, count, 0, true, false, true);
         }
         else
         {
-            actor->FUN_0088c790(weap, entry->FUN_00726070(), false, false, false, true);
+            actor->UnequipItem(weap, entry->FUN_00726070(), false, false, false, true);
         }
         m_ucWeaponState = true;
     }

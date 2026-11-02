@@ -1517,11 +1517,11 @@ struct AtlasShader : NiMemObjectAllocation {
 };
 struct AtlasPropertyPointer { AtlasShader* pointer;AtlasPropertyPointer(AtlasShader*);~AtlasPropertyPointer();AtlasPropertyPointer& FUN_006e5cc0(const AtlasPropertyPointer&); };
 struct AtlasPropertyNode { AtlasPropertyNode* next;AtlasPropertyNode* previous;AtlasPropertyPointer value; };
-struct AtlasPoolLock {void FUN_0040fbf0(bool);void FUN_0040fba0();};
+struct AtlasPoolLock {void Wait(bool);void Leave();};
 extern AtlasPoolLock DAT_011c5f80;
 extern AtlasPropertyNode* DAT_011c5f58;
 void FUN_0043a080();
-struct AtlasNodeAllocator { unsigned count;AtlasPropertyNode* Allocate() { DAT_011c5f80.FUN_0040fbf0(false);if(!DAT_011c5f58)FUN_0043a080();AtlasPropertyNode* node=DAT_011c5f58;DAT_011c5f58=DAT_011c5f58->next;node->value.pointer=0;node->next=0;node->previous=0;DAT_011c5f80.FUN_0040fba0();return node;} };
+struct AtlasNodeAllocator { unsigned count;AtlasPropertyNode* Allocate() { DAT_011c5f80.Wait(false);if(!DAT_011c5f58)FUN_0043a080();AtlasPropertyNode* node=DAT_011c5f58;DAT_011c5f58=DAT_011c5f58->next;node->value.pointer=0;node->next=0;node->previous=0;DAT_011c5f80.Leave();return node;} };
 struct AtlasPropertyList { AtlasPropertyNode* head;AtlasPropertyNode* tail;AtlasNodeAllocator allocator;
  AtlasPropertyNode* NewNode(){return allocator.Allocate();}
  void FUN_0049fa20(AtlasPropertyNode*);

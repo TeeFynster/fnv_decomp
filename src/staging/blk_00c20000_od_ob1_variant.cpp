@@ -1822,7 +1822,7 @@ struct LockX
 {
     int m_iOwner;
     int m_iArrayLength;
-    void FUN_0040fbf0(int i);
+    void Wait(int i);
     void Unlock()
     {
         if (--m_iArrayLength == 0)
@@ -1843,7 +1843,7 @@ struct ListQ
 bool ListQ::FUN_00c3f960(SPX pSceneObject)
 {
     bool bFound = false;
-    m_kLock.FUN_0040fbf0(0);
+    m_kLock.Wait(0);
     for (unsigned int i = 0; i < m_uiCount && !bFound; i++)
         bFound = Test(i, pSceneObject);
     m_kLock.Unlock();
@@ -2593,9 +2593,9 @@ struct List_c0 : List_c0_base
 {
     inline ~List_c0()
     {
-        FUN_004ed900();
+        RemoveAll();
     }
-    void FUN_004ed900();
+    void RemoveAll();
     void DeleteItem(ListItem*);
 };
 
@@ -2637,7 +2637,7 @@ inline void List_b4::FUN_00b71300()
     head = 0;
     tail = 0;
 }
-inline void List_c0::FUN_004ed900()
+inline void List_c0::RemoveAll()
 {
     ListItem* current = head;
     while (current)
@@ -2704,7 +2704,7 @@ class FUN_00c39770 : public Base_00c46af0
 FUN_00c39770::~FUN_00c39770()
 {
     m_b4.FUN_00b71300();
-    m_c0.FUN_004ed900();
+    m_c0.RemoveAll();
     m_d0.FUN_00c3a2e0();
     m_dc.FUN_00b5af80(true);
     if (m_c0.unk0C)
@@ -2986,7 +2986,7 @@ struct Bound144
         float x, y, z;
     } center;
     float radius;
-    void FUN_00a7f3f0(const Bound144&);
+    void Merge(const Bound144&);
 };
 extern Bound144 DAT_011f4288;
 struct BoundProvider144
@@ -3163,7 +3163,7 @@ void Node144::FUN_00c39d50()
                     a2_3 = a1c8->provider;
                     aAa = a2_3;
                     aAa->GetBound(aA);
-                    bound->FUN_00a7f3f0(aA);
+                    bound->Merge(aA);
                 }
             }
             first = false;
@@ -3200,7 +3200,7 @@ void Node144::FUN_00c39d50()
             if (a7 && ((a7->bound && ((aAcoustic = a7->bound->radius), (double)aAcoustic != 0.0)) ? 1 : 0))
             {
                 a0 = a7->bound ? a7->bound : &DAT_011f4288;
-                bound->FUN_00a7f3f0(*a0);
+                bound->Merge(*a0);
             }
         }
     }
@@ -3213,7 +3213,7 @@ struct S00c3a180_cls
     unsigned int unk08;
     unsigned int unk0C;
 
-    void FUN_004ed900();
+    void RemoveAll();
     void FUN_00c3a180();
 };
 
@@ -3232,7 +3232,7 @@ struct S00c3a180_Scope
 void S00c3a180_cls::FUN_00c3a180()
 {
     S00c3a180_Scope s;
-    FUN_004ed900();
+    RemoveAll();
 }
 
 struct ScopeGuardA3a1
@@ -4790,7 +4790,7 @@ struct LockObj
 {
     void* owner;
     int count;
-    void __thiscall FUN_0040fbf0(const char* name);
+    void __thiscall Wait(const char* name);
     __forceinline void Unlock()
     {
         count = count - 1;
@@ -4817,7 +4817,7 @@ bool Owner::FUN_00c3f160(int a, int b, int c)
     int local4, local5, local6, receiver, answer;
     int extra14, done, status, extra4, extra5;
     int slot2, spare4, spare5, spare6, spare8, spare9, extra15;
-    lock.FUN_0040fbf0(0);
+    lock.Wait(0);
     H* node = FUN_00c3f750();
     bool found = pass(node, a, b, c);
     lock.Unlock();
@@ -5743,7 +5743,7 @@ struct F1f0Lock
 {
     unsigned int m_pOwnerObject;
     unsigned int m_lLockCount;
-    void __thiscall FUN_0040fbf0(unsigned int);
+    void __thiscall Wait(unsigned int);
     void Unlock()
     {
         m_lLockCount = m_lLockCount - 1;
@@ -5794,7 +5794,7 @@ struct F1f0Cls
 // @fnv 0x00c3f1f0
 bool F1f0Cls::FUN_00c3f1f0(int a1, int a2, int a3, bool a4)
 {
-    m_lock.FUN_0040fbf0(0);
+    m_lock.Wait(0);
     Dead34();
     bool r = FUN_00c3f750()->Test(a1, a2, a3, a4);
     m_lock.Unlock();
@@ -5809,7 +5809,7 @@ struct SpinLockS
 {
     unsigned int owningThread;
     unsigned int lockCount;
-    void __thiscall FUN_0040fbf0(const char* name)
+    void __thiscall Wait(const char* name)
     {
         unsigned int threadID = FUN_0040fc90();
         if (owningThread == threadID)
@@ -5863,7 +5863,7 @@ static __forceinline void Dead35()
 // @fnv 0x00c3f430
 bool ManagerS::FUN_00c3f430(int a, int b, int c, int d, unsigned char e)
 {
-    lock.FUN_0040fbf0(0);
+    lock.Wait(0);
     bool result = FUN_00c3f750()->FUN_00c3ffb0(a, b, c, d, e);
     Dead35();
     lock.Unlock();

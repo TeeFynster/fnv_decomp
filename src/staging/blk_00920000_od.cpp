@@ -5090,7 +5090,7 @@ struct RV5 : VSlot<RV4, 1>
 };
 struct TickRef : VSlot<RV5, 0>
 {
-    bool FUN_00573170(TickPlayer*, bool, void*, int);
+    bool Activate(TickPlayer*, bool, void*, int);
     bool FUN_00568680();
     TickProc* FUN_008d8520();
     int GetExtraDataShort();
@@ -6227,7 +6227,7 @@ extern char DAT_011a28e0, DAT_011841cc;
 extern "C" void FUN_00709c40(int);
 void FUN_007d0a70();
 void FUN_00961d50();
-extern "C" void FUN_00703e80(const char*, int, int, void (*)(), int, int, float, float, const char*, const char*, int);
+extern "C" void ShowMessageBox(const char*, int, int, void (*)(), int, int, float, float, const char*, const char*, int);
 extern "C" TickShadow* FUN_00450b80(int);
 extern "C" bool FUN_00702360();
 extern "C" TickRef* FUN_00703350();
@@ -6566,7 +6566,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
     }
     if (GetField688())
     {
-        GetField688()->FUN_00573170(this, false, 0, 1);
+        GetField688()->Activate(this, false, 0, 1);
         SetField688(0);
         return;
     }
@@ -6727,7 +6727,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
             vf2a0();
             FUN_00709c40(0);
             if (DAT_011de134->IsField5Set())
-                FUN_00703e80(DAT_011d4b40.FUN_00403df0(), 0, 0, FUN_00961d50, 1, 0x17, 0.0f, 0.0f,
+                ShowMessageBox(DAT_011d4b40.FUN_00403df0(), 0, 0, FUN_00961d50, 1, 0x17, 0.0f, 0.0f,
                              DAT_011d400c.FUN_00403df0(), DAT_011d4528.FUN_00403df0(), 0);
             else
                 FUN_007d0a70();
@@ -6844,14 +6844,14 @@ void TickPlayer::FUN_0093e860(float elapsed)
                             if (!BuildActionMenu(&list, target))
                             {
                                 int count = target->GetExtraDataShort();
-                                if (target->FUN_00573170(this, false, 0, count))
+                                if (target->Activate(this, false, 0, count))
                                     activateFallback = false;
                             }
                         }
                         else
                         {
                             int count = target->GetExtraDataShort();
-                            if (target->FUN_00573170(this, false, 0, count))
+                            if (target->Activate(this, false, 0, count))
                                 activateFallback = false;
                         }
                     }
@@ -6859,7 +6859,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
                         failed = true;
                     if (activateFallback && unk68->vf4c8())
                     {
-                        if (!unk68->vf4c8()->FUN_00573170(this, false, 0, 1))
+                        if (!unk68->vf4c8()->Activate(this, false, 0, 1))
                             failed = true;
                         else
                             failed = false;
@@ -7544,14 +7544,14 @@ axesDone:
                     if (!BuildActionMenu(&list, target))
                     {
                         int count = target->GetExtraDataShort();
-                        if (target->FUN_00573170(this, false, 0, count))
+                        if (target->Activate(this, false, 0, count))
                             activateFallback = false;
                     }
                 }
                 else
                 {
                     int count = target->GetExtraDataShort();
-                    if (target->FUN_00573170(this, false, 0, count))
+                    if (target->Activate(this, false, 0, count))
                         activateFallback = false;
                     else if (target->FUN_00569160() && target->FUN_00569160()->FUN_004309e0(target) != 5 &&
                              !target->FUN_0057b460())
@@ -7562,7 +7562,7 @@ axesDone:
                 failed = true;
             if (activateFallback && unk68->vf4c8())
             {
-                if (!unk68->vf4c8()->FUN_00573170(this, false, 0, 1))
+                if (!unk68->vf4c8()->Activate(this, false, 0, 1))
                     failed = true;
                 else
                     failed = false;

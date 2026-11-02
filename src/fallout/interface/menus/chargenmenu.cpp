@@ -455,7 +455,7 @@ void MenuX::HandleTileClick(int id, TileX* tile)
 namespace fnv_007539a0 {
 struct UITile
 {
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     void FUN_00700320(int, int);
 };
 struct List
@@ -890,7 +890,7 @@ void Context::InitMenu()
     if (!enabled)
         maximum -= 7;
     list.FUN_0075a0d0(tile30, DAT_01071c88);
-    tile30->FUN_00a012d0(4002, DAT_01071c84, true);
+    tile30->SetFloat(4002, DAT_01071c84, true);
     FUN_004b7210(12, GetMenuValue(500))->animation.FUN_00718630();
     for (unsigned int i = 0; i < FUN_0066ecf0(0); ++i)
     {
@@ -899,7 +899,7 @@ void Context::InitMenu()
         int c = DAT_011dea3c->values.GetValue(e);
         j->FUN_00700320(4010, 8);
         j->FUN_00700320(DAT_011d9210, c);
-        j->FUN_00a012d0(DAT_011d9224, 0.0f, true);
+        j->SetFloat(DAT_011d9224, 0.0f, true);
         UpdateValueString(j);
         if (!enabled)
             current += c - 1;
@@ -1953,7 +1953,7 @@ void FUN_007545a0_shell::UpdateValueString(Tile* apTile)
 struct SkTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
     SkTile* FUN_0045cd60();
 };
 struct SkPerkList
@@ -2031,7 +2031,7 @@ void SkillMenu::HandleSkillMenuCommand(int aiID, SkTile* apTile)
             (selected && (!bLimit || !g_skMgr_11dea3c->FUN_00884350()->FUN_005a5f40(pItemData))))
         {
             list.FUN_00754930(apTile);
-            apTile->FUN_00a012d0(DAT_011d9224, list.FUN_00754950(apTile) ? *g_skSetting_11ccf5c.FUN_00403e20() : 0.0f,
+            apTile->SetFloat(DAT_011d9224, list.FUN_00754950(apTile) ? *g_skSetting_11ccf5c.FUN_00403e20() : 0.0f,
                                  1);
             FUN_00706f30(3);
             m_iPointsUsed += selected ? -1 : 1;
@@ -2047,7 +2047,7 @@ void SkillMenu::HandleSkillMenuCommand(int aiID, SkTile* apTile)
         int delta = aiID != 10 ? 1 : -1;
         m_iPointsUsed += delta;
         FUN_00726070(DAT_011d9218, m_iPointsUsed)->FUN_00700320();
-        apTile->FUN_0045cd60()->FUN_00a012d0(DAT_011d9224, apTile->FUN_0045cd60()->FUN_00a011b0(DAT_011d9224) + delta,
+        apTile->FUN_0045cd60()->SetFloat(DAT_011d9224, apTile->FUN_0045cd60()->FUN_00a011b0(DAT_011d9224) + delta,
                                              1);
         UpdateValueString(apTile->FUN_0045cd60());
         UpdatePointsDisplay();

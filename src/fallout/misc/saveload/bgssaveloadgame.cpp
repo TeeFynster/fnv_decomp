@@ -3982,7 +3982,7 @@ void ReconstructLoadContext::FUN_00848e70(BGSSaveLoadChangesMap* changes, TESFil
 
 struct FUN_00853130_shell
 {
-    bool FUN_00853130(unsigned int key, unsigned int& value);
+    bool Lookup(unsigned int key, unsigned int& value);
 };
 
 struct FUN_0084aa90_shell
@@ -3997,12 +3997,12 @@ struct FUN_0084aa90_shell
     unsigned int FUN_0084aa90(unsigned int aiOldFormID);
 };
 
-// Calls FUN_00853130 with aiOldFormID and returns its output value on success, or 0 on failure.
+// Calls Lookup with aiOldFormID and returns its output value on success, or 0 on failure.
 // @fnv 0x0084aa90
 unsigned int FUN_0084aa90_shell::FUN_0084aa90(unsigned int aiOldFormID)
 {
     unsigned int value = 0;
-    if (unk18->FUN_00853130(aiOldFormID, value))
+    if (unk18->Lookup(aiOldFormID, value))
         return value;
     return 0;
 }

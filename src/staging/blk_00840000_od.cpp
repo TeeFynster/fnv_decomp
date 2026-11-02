@@ -2533,7 +2533,7 @@ void* SaveLoadCleanup::FUN_008451a0(unsigned int flags)
     return this;
 }
 
-void* __cdecl FUN_00401000(unsigned int size);
+void* __cdecl FormHeap_Allocate(unsigned int size);
 
 struct Obj_b9971
 {
@@ -2544,7 +2544,7 @@ struct Obj_b9971
     Obj_b9971();
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00401000(size);
+        return FormHeap_Allocate(size);
     }
 };
 
@@ -3643,7 +3643,7 @@ void ReferenceSaveContext::SaveReferenceState(TESObjectREFR* reference, int firs
     }
 }
 
-extern "C" void __cdecl FUN_00401030(void* data);
+extern "C" void __cdecl FormHeap_Free(void* data);
 struct FnvMap
 {
     void* FUN_004b9ba0();
@@ -3690,7 +3690,7 @@ void FUN_0085f5d0_class::ProcessMapEntries()
             }
             reinterpret_cast<FUN_0085f6c0_Class*>(this)->FUN_0085f6c0((int)refObject, (int)data);
         }
-        FUN_00401030(data);
+        FormHeap_Free(data);
         reinterpret_cast<FnvState*>(this)->unk64->RemoveKey(key);
     }
 }
@@ -5080,7 +5080,7 @@ struct List859
 };
 struct Map859
 {
-    bool FUN_00853130(unsigned, List859*&);
+    bool Lookup(unsigned, List859*&);
     bool RemoveKey(unsigned);
 };
 struct Cell859
@@ -5111,7 +5111,7 @@ bool Manager859::FUN_00859690(Cell859* cell)
     if (cell->FUN_00425fd0())
     {
         List859* list8;
-        bool found8 = interiors->FUN_00853130(cell->FUN_0084e3a0(), list8);
+        bool found8 = interiors->Lookup(cell->FUN_0084e3a0(), list8);
         if (!found8)
             return result5;
         List859* node2 = list8;
@@ -5132,7 +5132,7 @@ bool Manager859::FUN_00859690(Cell859* cell)
     else
     {
         List859* listExterior;
-        bool foundExterior = worlds->FUN_00853130(cell->FUN_0054ddd0()->FUN_0084e3a0(), listExterior);
+        bool foundExterior = worlds->Lookup(cell->FUN_0054ddd0()->FUN_0084e3a0(), listExterior);
         if (!foundExterior)
             return result5;
         List859* nodeExterior8 = listExterior;
@@ -5637,7 +5637,7 @@ void StQ::FUN_0085f2e0()
             }
             FUN_0085f3d0(pRef_zaxvzc, pData_zbax);
         }
-        FUN_00401030(pData_zbax);
+        FormHeap_Free(pData_zbax);
         pMap->RemoveKey(uiID);
     }
 }
@@ -6800,7 +6800,7 @@ struct Mgr10
 };
 struct Mgr3c
 {
-    void FUN_00444850(Actor*, int, int);
+    void QueueReference(Actor*, int, int);
 };
 struct Owner
 {
@@ -6920,7 +6920,7 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
             FUN_00451010()->FUN_00c66300();
         DAT_011dea10->FUN_00459920();
         if (!((VObj*)DAT_011dea3c)->FUN_00950bb0(0))
-            DAT_011c3b3c->FUN_00444850((Actor*)DAT_011dea3c, 0, 0);
+            DAT_011c3b3c->QueueReference((Actor*)DAT_011dea3c, 0, 0);
         DAT_01202d98->FUN_00456520();
         DAT_01202d98->FUN_008495b0();
         if (node1)

@@ -8421,7 +8421,7 @@ struct PoolNode
 struct LockObj
 {
     unsigned int value;
-    void FUN_0040fbf0(char*);
+    void Wait(char*);
 };
 extern LockObj DAT_011c5f80;
 extern unsigned int DAT_011c5f84;
@@ -8434,7 +8434,7 @@ struct Com
 };
 struct ListCleanup
 {
-    void FUN_004ed900();
+    void RemoveAll();
 };
 void _delete(void*, unsigned int);
 struct Target

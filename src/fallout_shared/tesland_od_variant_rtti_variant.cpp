@@ -2597,8 +2597,8 @@ struct Worker53
     void FUN_005374f0();
     void FUN_0053a090(bool update, int unused);
 };
-void* __cdecl FUN_00401000(unsigned int size);
-void __cdecl FUN_00401030(void* memory);
+void* __cdecl FormHeap_Allocate(unsigned int size);
+void __cdecl FormHeap_Free(void* memory);
 struct LayerOwner53a940 : Owner53ace0
 {
     void FUN_0053abb0(unsigned char quadrant, unsigned short layer);

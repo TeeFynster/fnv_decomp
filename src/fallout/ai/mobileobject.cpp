@@ -9432,7 +9432,7 @@ struct WorkerSaveLoad
 extern WorkerSaveLoad* DAT_011de45c;
 struct WorkerSpinLock
 {
-    void FUN_0040fbf0(const char*);
+    void Wait(const char*);
     void Unlock();
 };
 extern WorkerSpinLock DAT_011f11a0;
@@ -9468,7 +9468,7 @@ void WorkerMobile::FUN_00932750(unsigned int flags)
     if (DAT_011de45c->FUN_0055f5b0() && DAT_011de45c->FUN_0047c850() && m_pBaseProcess &&
         (FUN_00440da0() || FUN_00440d80()))
     {
-        DAT_011f11a0.FUN_0040fbf0(0);
+        DAT_011f11a0.Wait(0);
         ((WorkerDeleteQueue*)&DAT_011e0e80)->FUN_0096d470(this, FUN_00931850());
         delete m_pBaseProcess;
         m_pBaseProcess = 0;

@@ -1206,7 +1206,7 @@ class Script
 {
   public:
     ScriptLocals* FUN_005abf60();
-    void FUN_005ac1e0(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    void Execute(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
 };
 struct ItemExtra
 {
@@ -1268,7 +1268,7 @@ void ContainerOperation::FUN_004821a0(TESObjectREFR* target, bool silent)
                             extra->FUN_00419f80(script->FUN_005abf60());
                             TESObjectREFR* ref = new TESObjectREFR;
                             ref->FUN_00484490();
-                            script->FUN_005ac1e0(ref, extra->FUN_00418830(), 0, false);
+                            script->Execute(ref, extra->FUN_00418830(), 0, false);
                             delete ref;
                             if (item->extra)
                                 item->extra->FUN_0040ea20(extra, GetHealthForm(item->form));

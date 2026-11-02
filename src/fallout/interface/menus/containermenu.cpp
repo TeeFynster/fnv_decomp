@@ -491,7 +491,7 @@ struct ContainerLikeObj
     void FUN_00707e10(char*);
     void* FUN_00a011f0(int, int);
     void* FUN_007b5370(int);
-    void FUN_00a012d0(int, float, int);
+    void SetFloat(int, float, int);
 };
 
 // @fnv 0x0075d160
@@ -514,7 +514,7 @@ void __cdecl FUN_0075d160(void* param1, void* param2)
     ((ContainerLikeObj*)param1)->FUN_00707e10(((ContainerLikeObj*)param2)->GetTargetFullName());
     (*(ContainerLikeObj**)((ContainerLikeObj*)((char*)param1 + 4))->FUN_007b5370(0xfc4))
         ->FUN_00a01350(((ContainerLikeObj*)param1)->FUN_00a011f0(0xfc4, 1));
-    ((ContainerLikeObj*)param1)->FUN_00a012d0(0xfb0, 0.0f, 1);
+    ((ContainerLikeObj*)param1)->SetFloat(0xfb0, 0.0f, 1);
 }
 
 struct FUN_0075d430_base
@@ -4724,7 +4724,7 @@ struct MenuForm
 };
 struct MenuTileValue
 {
-    void FUN_00a012d0(float, bool);
+    void SetFloat(float, bool);
 };
 struct MenuTileHolder
 {
@@ -4928,7 +4928,7 @@ void InventoryMenu::FUN_0075c280(MenuForm* filter)
             MenuEntry* tile2 = 0;
             FUN_00406f60(&name, DAT_01012058, DAT_011d3f70.FUN_00403df0(), entry2->GetTargetFullName());
             tile2 = otherList.FUN_0071a320(entry2, name.FUN_00559450(), 0, 0);
-            (*tile2->tile.FUN_007b5370(0xfa9))->FUN_00a012d0(DAT_0101e704, true);
+            (*tile2->tile.FUN_007b5370(0xfa9))->SetFloat(DAT_0101e704, true);
         }
     }
     if (container && container->IsActor() && container->IsDead(0))
@@ -5011,7 +5011,7 @@ struct InvChg
 struct Loader
 {
     void FUN_0045a5e0(char* name);
-    void* FUN_00447080(char* name, int a1, int a2, int a3, int a4, int a5);
+    void* LoadModel(char* name, int a1, int a2, int a3, int a4, int a5);
 };
 struct PlayerObj
 {
@@ -5068,7 +5068,7 @@ void ThiS::FUN_007019e0(ObjRef* apObjRef)
         if (d == 0)
             d = dynamic_cast<TESModelTextureSwap*>(apObjRef->FUN_0044ddc0());
         if (d != 0)
-            DAT_011c3b3c->FUN_00447080(d->GetSwapName(), 0, 1, 0, 0, 0);
+            DAT_011c3b3c->LoadModel(d->GetSwapName(), 0, 1, 0, 0, 0);
     }
     FUN_007017b0();
     ((PlayerObj*)DAT_011dea3c)->PlayActorSound(apObjRef->FUN_0044ddc0(), 1, 0);

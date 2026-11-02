@@ -1040,7 +1040,7 @@ struct S_009a6770_Ref
     virtual void vfunc1D8();
     virtual S_009a6770_Pt* GetPos(S_009a6770_Pt* out);
     float FUN_008be420();
-    float FUN_00567400();
+    float GetScale();
 };
 float __cdecl FUN_009a6770(S_009a6770_Ref* a, S_009a6770_Ref* b);
 struct A6830Actor : A69C0Actor
@@ -2289,7 +2289,7 @@ struct S_009a8460_Actor
     float __thiscall FUN_008854d0(int p);
     float __thiscall GetActorHeight();
     bool __thiscall FUN_00579670();
-    float __thiscall FUN_00567400();
+    float __thiscall GetScale();
 };
 float __cdecl FUN_009a8460(S_009a8460_Actor* actor, int type, bool flag);
 extern float DAT_011a5594;

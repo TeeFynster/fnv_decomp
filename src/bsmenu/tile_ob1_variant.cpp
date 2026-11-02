@@ -317,11 +317,11 @@ struct TileValueOwner_00a01000 {
     TileValue_00a0a270* GetOrCreateTraitValue(int aiTrait);
 };
 struct FUN_00a012d0_t {
-    void FUN_00a012d0(int aiTrait, float afValue, bool abClearActions);
+    void SetFloat(int aiTrait, float afValue, bool abClearActions);
 };
 
 // @fnv 0x00a012d0
-void FUN_00a012d0_t::FUN_00a012d0(int aiTrait, float afValue, bool abClearActions)
+void FUN_00a012d0_t::SetFloat(int aiTrait, float afValue, bool abClearActions)
 {
     TileValue_00a0a270* pvalue = ((TileValueOwner_00a01000*)this)->GetOrCreateTraitValue(aiTrait);
     if (pvalue != 0)
@@ -1142,7 +1142,7 @@ TileTemplate_00a0ae70* Storage_00a0ae70::FUN_00a0ae70(const char* apName)
 
 struct NiTexture;
 struct TileShaderProperty { void FUN_00bb7a10(NiTexture* apTexture); };
-struct FUN_00a07530_shell { void FUN_00a07530(int); };
+struct FUN_00a07530_shell { void SetChangeFlag(int); };
 struct A0B020Child {
     virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07();
 };
@@ -1177,7 +1177,7 @@ void A0B020Tile::FUN_00a0b020()
             if (pkProp)
             {
                 pkProp->FUN_00bb7a10(0);
-                ((FUN_00a07530_shell*)this)->FUN_00a07530(0x20);
+                ((FUN_00a07530_shell*)this)->SetChangeFlag(0x20);
             }
         }
     }
@@ -1393,7 +1393,7 @@ void TileV::FUN_00a0b420(TileValueV* pValues, float fValue)
     {
     int iValue3 = (int)f;
     if (HasValue(pValues, iValue3))
-        FUN_00a07530(8);
+        SetChangeFlag(8);
     }
     TileItemV* pkIter = GetHeadPos();
     while (pkIter)
@@ -1470,10 +1470,10 @@ struct TileWork {
  float ReadTrait(int);
  bool ReadBooleanTrait(int);
  void WriteTrait(int,float,bool);
- void FUN_00a0b520();
+ void ApplyRotationOnChildren();
 };
 // @fnv 0x00a0b520
-void TileWork::FUN_00a0b520() {
+void TileWork::ApplyRotationOnChildren() {
  float local37;
  float local35;
  bool valid_31;
@@ -1539,7 +1539,7 @@ void TileWork::FUN_00a0b520() {
  }
  }
  }
- childVal5->FUN_00a0b520();
+ childVal5->ApplyRotationOnChildren();
  }
  }
 }
@@ -1747,8 +1747,8 @@ struct S009ff340_Base04 {
     int unk00;
     int unk04;
     S009ff340_Empty e;
-    void FUN_004ed900();
-    ~S009ff340_Base04() { FUN_004ed900(); }
+    void RemoveAll();
+    ~S009ff340_Base04() { RemoveAll(); }
 };
 inline void S009ff340_Detach(S009ff340_RefObj* p) { int scratch[10]; FUN_00c45830(p); }
 
@@ -2602,7 +2602,7 @@ struct UpdateTreeNode {
     unsigned char changed;
     bool FUN_00a04640(bool);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void SetFloat(int, float, bool);
 };
 struct UpdateManager {
     void FUN_00713da0(UpdateTreeNode*);
@@ -2636,9 +2636,9 @@ void __cdecl FUN_00a04200(bool update)
             DAT_011d8a80->FUN_00713da0(pTile);
         if (pTile->GetParent() == FUN_00706cd0()) {
             if (pTile->FUN_00a011b0(0xfa7) == 102.0)
-                pTile->FUN_00a012d0(0xfa7, 6006.0f, true);
+                pTile->SetFloat(0xfa7, 6006.0f, true);
             else if (pTile->FUN_00a011b0(0xfa7) == 103.0)
-                pTile->FUN_00a012d0(0xfa7, 6007.0f, true);
+                pTile->SetFloat(0xfa7, 6007.0f, true);
         }
     }
     if (DAT_011f32c9) {
@@ -3067,7 +3067,7 @@ public:
 
 class TileB35 {
 public:
-    void FUN_00a07530(int);
+    void SetChangeFlag(int);
     void FUN_00a0b350(int iValue, float fDefault);
 
     void* m_pVTable;
@@ -3082,7 +3082,7 @@ void TileB35::FUN_00a0b350(int iValue, float fDefault)
     if (fValue == _gModifierZero)
         fValue = fDefault;
     if ((float)iValue == fValue)
-        FUN_00a07530(8);
+        SetChangeFlag(8);
 
     NiTListItem<TileB35*>* pkPos = m_kChildList.GetHeadPos();
     while (pkPos)
@@ -3091,8 +3091,8 @@ void TileB35::FUN_00a0b350(int iValue, float fDefault)
 
 unsigned int __cdecl FUN_0044a670(const char* text);
 unsigned int __cdecl FUN_00403940(unsigned int a, unsigned int b);
-void* __cdecl FUN_00401000(unsigned int size);
-void __cdecl FUN_00401030(void* p);
+void* __cdecl FormHeap_Allocate(unsigned int size);
+void __cdecl FormHeap_Free(void* p);
 void* __cdecl FUN_00401460(void* dst, const void* src, unsigned int size);
 
 template <> inline void BSStringT<char>::SetLength(unsigned int length)
@@ -3119,7 +3119,7 @@ template <> inline bool BSStringT<char>::Set(const char* text, unsigned int leng
     unsigned int maxLen = MaxLength();
     if (newLen > maxLen) {
         char* oldString = pString;
-        char* newString = (char*)FUN_00401000(newLen + 1);
+        char* newString = (char*)FormHeap_Allocate(newLen + 1);
         pString = newString;
         if (text)
             FUN_00401460(pString, text, srcLen + 1);
@@ -3127,7 +3127,7 @@ template <> inline bool BSStringT<char>::Set(const char* text, unsigned int leng
             *pString = 0;
         if (oldString) {
             char* p = oldString;
-            FUN_00401030(p);
+            FormHeap_Free(p);
         }
         SetMaxLength(newLen);
     } else if (newLen) {
@@ -3138,7 +3138,7 @@ template <> inline bool BSStringT<char>::Set(const char* text, unsigned int leng
     } else {
         if (pString) {
             char* p = pString;
-            FUN_00401030(p);
+            FormHeap_Free(p);
         }
         pString = 0;
         newLen = 0;
@@ -3538,7 +3538,7 @@ struct S_00a04150_List {
         kPos = ((S_00a04150_Node*)kPos)->m_pkNext;
         return element;
     }
-    void FUN_004ed900() {
+    void RemoveAll() {
         S_00a04150_Node* pkDel;
         S_00a04150_Node* pkNext;
         S_00a04150_Node* pkPrev;
@@ -3574,7 +3574,7 @@ void S_00a04150_Class::FUN_00a04150()
     while (kPos) {
         delete m_kNode.GetNext(kPos);
     }
-    m_kNode.FUN_004ed900();
+    m_kNode.RemoveAll();
 }
 
 namespace fnv_00a01b00 {
@@ -3726,10 +3726,10 @@ extern "C" int __cdecl sscanf(const char*, const char*, ...);
 
 inline unsigned int __cdecl FUN_0044a670(const char* value) { return strlen(value); }
 unsigned int __cdecl FUN_00403940(unsigned int, unsigned int);
-void* __cdecl FUN_00401000(unsigned int);
-void __cdecl FUN_00401030(void*);
+void* __cdecl FormHeap_Allocate(unsigned int);
+void __cdecl FormHeap_Free(void*);
 inline void* __cdecl FUN_00401460(void* d, const void* s, unsigned n) { return memcpy(d,s,n); }
-inline void ReleaseParsedString(void* pointer) { FUN_00401030(pointer); }
+inline void ReleaseParsedString(void* pointer) { FormHeap_Free(pointer); }
 extern double DAT_01094ba8, DAT_01012060, DAT_01094ce8, DAT_01094ca0, DAT_01094c98, DAT_01094c90, DAT_01094c88, DAT_01073490, DAT_01094c80;
 extern const char DAT_01011584[], DAT_01094cf0[], DAT_01094ca8[], DAT_01094c58[];
 
@@ -3810,7 +3810,7 @@ struct ParsedToken {
     }
 };
 struct ParsedNode {
-    static void* operator new[](unsigned int bytes) { return FUN_00401000(bytes); }
+    static void* operator new[](unsigned int bytes) { return FormHeap_Allocate(bytes); }
     ParsedNode* next;
     ParsedNode* previous;
     ParsedToken* value;
@@ -3822,7 +3822,7 @@ unsigned int FUN_0043b460(volatile unsigned int*, unsigned int, unsigned int);
 struct ParsedPoolLock {
     volatile unsigned int owner;
     unsigned int recursion;
-    void FUN_0040fbf0(int) {
+    void Wait(int) {
         unsigned int thread = FUN_0040fc90();
         if (owner == thread) ++recursion;
         else {
@@ -3836,7 +3836,7 @@ struct ParsedPoolLock {
             recursion = 1;
         }
     }
-    void FUN_0040fba0() {
+    void Leave() {
         FUN_0040fbe0();
         --recursion;
         if (!recursion) owner = 0;
@@ -3867,23 +3867,23 @@ inline void FUN_0043a080() {
 struct ParsedAllocator {
     unsigned count;
     ParsedNode* FUN_0043a010() {
-        DAT_011c5f80.FUN_0040fbf0(0);
+        DAT_011c5f80.Wait(0);
         if (!DAT_011c5f58) FUN_0043a080();
         ParsedNode* node = DAT_011c5f58;
         DAT_011c5f58 = DAT_011c5f58->next;
         node->value = 0;
         node->next = 0;
         node->previous = 0;
-        DAT_011c5f80.FUN_0040fba0();
+        DAT_011c5f80.Leave();
         return node;
     }
     void FUN_0045cee0(ParsedNode* node) {
-        DAT_011c5f80.FUN_0040fbf0(0);
+        DAT_011c5f80.Wait(0);
         ParsedNode* item = node;
         item->previous = 0;
         item->next = DAT_011c5f58;
         DAT_011c5f58 = item;
-        DAT_011c5f80.FUN_0040fba0();
+        DAT_011c5f80.Leave();
     }
 };
 struct ParsedList {
@@ -4171,7 +4171,7 @@ struct FadeTile {
     int field04; int field08; int field0c; int field10; int field14; int field18; int field1c;
     int field20; int field24; FadeTile* parent; NiAVObject* model;
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int,float,bool);
+    void SetFloat(int,float,bool);
     void FUN_00a08720(NiAVObject*,float);
 };
 struct FadePtr { FadeTile* ptr; inline FadeTile* operator->() const { return ptr; } };
@@ -4243,7 +4243,7 @@ void __cdecl FUN_00a080d0()
             if (static_cast<FadeTile* volatile&>(local1->item->tile)->GetType() == 0x388 && trait2 == 0xfa9) {
                 local1->item->tile->FUN_00a08720(modelOf(local1->item->tile),(start13+(local11-start13)*fraction5)/255.0);
             }
-            local1->item->tile->FUN_00a012d0(trait2,start13+(local11-start13)*fraction5,true);
+            local1->item->tile->SetFloat(trait2,start13+(local11-start13)*fraction5,true);
             if (fraction5 >= 1.0) local2.AddToHead(local1->item);
             break;
         }
@@ -4258,36 +4258,36 @@ void __cdecl FUN_00a080d0()
                     fraction5=0.0f;
                 }
                 if (type2==2 || type2==3) {
-                    local1->item->tile->FUN_00a012d0(FUN_00a01860("_FlashCount"),count1+1.0,true);
-                    if (type2==2 && count1 > 3.0) local1->item->tile->FUN_00a012d0(trait2,local11,true);
+                    local1->item->tile->SetFloat(FUN_00a01860("_FlashCount"),count1+1.0,true);
+                    if (type2==2 && count1 > 3.0) local1->item->tile->SetFloat(trait2,local11,true);
                     else if (type2==3 && count1>total5) {
-                        local1->item->tile->FUN_00a012d0(trait2,start13,true);
+                        local1->item->tile->SetFloat(trait2,start13,true);
                         local2.AddToHead(local1->item);
                     }
                 }
             }
             if (type2==2 && count1 >= 3.0) {
                 valueA9 = start13+(local11-start13)*fraction5;
-                local1->item->tile->FUN_00a012d0(trait2,valueA9 > local11 ? local11:valueA9,true);
+                local1->item->tile->SetFloat(trait2,valueA9 > local11 ? local11:valueA9,true);
                 if (valueA9 >= local11) local2.AddToHead(local1->item);
             } else {
                 blend = 1.0f-(float)fabs((double)(float)(fraction5*DAT_01011590-1.0));
                 valueB6 = start13+(local11-start13)*blend;
-                local1->item->tile->FUN_00a012d0(trait2,valueB6,true);
+                local1->item->tile->SetFloat(trait2,valueB6,true);
             }
             break;
         }
         case 4: {
             fraction5=(tick()-local1->item->time)/local1->item->duration;
             if (fraction5 < 0.16665999591350555) {
-                local1->item->tile->FUN_00a012d0(trait2,linear(fraction5,0.0f,DAT_01094c18,start13,local11),true);
+                local1->item->tile->SetFloat(trait2,linear(fraction5,0.0f,DAT_01094c18,start13,local11),true);
             } else if (fraction5 < 0.8333399891853333) {
-                local1->item->tile->FUN_00a012d0(trait2,local11,true);
+                local1->item->tile->SetFloat(trait2,local11,true);
             } else if (fraction5 >= 1.0) {
-                local1->item->tile->FUN_00a012d0(trait2,start13,true);
+                local1->item->tile->SetFloat(trait2,start13,true);
                 local2.AddToHead(local1->item);
             } else {
-                local1->item->tile->FUN_00a012d0(trait2,linear(fraction5,DAT_01094c0c,1.0f,local11,start13),true);
+                local1->item->tile->SetFloat(trait2,linear(fraction5,DAT_01094c0c,1.0f,local11,start13),true);
             }
             break;
         }
@@ -4374,7 +4374,7 @@ struct R_Menu {
 
 struct R_Tile;
 
-struct R_SetF { void FUN_00a012d0(int, float, bool); };
+struct R_SetF { void SetFloat(int, float, bool); };
 
 struct R_SetS { void FUN_00a01350(int, const char*, bool); };
 
@@ -4386,12 +4386,12 @@ struct R_P09 { void FUN_00a09130(int, void*, int); };
 
 struct R_P04 { void FUN_00a09410(bool); };
 
-struct R_P08 { void FUN_00a07530(int); };
+struct R_P08 { void SetChangeFlag(int); };
 
 struct R_HeapManager : FUN_00a0d220_pool { void* FUN_00aa3e40(unsigned); };
 inline R_HeapManager* FUN_00401020(){return static_cast<R_HeapManager*>(&DAT_011f6238);}
-inline void* FUN_00401000(unsigned n){return FUN_00401020()->FUN_00aa3e40(n);}
-inline void FUN_00401030(void*p){FUN_00401020()->FUN_00aa4060(p);}
+inline void* FormHeap_Allocate(unsigned n){return FUN_00401020()->FUN_00aa3e40(n);}
+inline void FormHeap_Free(void*p){FUN_00401020()->FUN_00aa4060(p);}
 inline void* FUN_00401460(void*dst,const void*src,unsigned n){return memcpy(dst,src,n);}
 extern "C" unsigned strlen(const char*);
 
@@ -4408,15 +4408,15 @@ struct R_SH {
         if(len<=FUN_004039a0()) {
             if(len)FUN_00401460(pString,src.FUN_00559450(),len+1);
             else {
-                if(pString){char* deleted=pString;FUN_00401030(deleted);}
+                if(pString){char* deleted=pString;FormHeap_Free(deleted);}
                 pString=0;len=0;FUN_00403a00(len);
             }
         } else {
             old=pString;
-            char* allocated=(char*)FUN_00401000(len+1);
+            char* allocated=(char*)FormHeap_Allocate(len+1);
             pString=allocated;
             FUN_00401460(pString,src.FUN_00559450(),len+1);
-            if(old){char* deletedOld=old;FUN_00401030(deletedOld);}
+            if(old){char* deletedOld=old;FormHeap_Free(deletedOld);}
             FUN_00403a00(len);
         }
         FUN_004039c0(len);
@@ -4528,7 +4528,7 @@ void C00a033b0::FUN_00a033b0(R_Menu* a1)
 
                 aw = ad;
 
-            ((R_P08*)ad)->FUN_00a07530(0x10000);
+            ((R_P08*)ad)->SetChangeFlag(0x10000);
 
         }
 
@@ -4586,7 +4586,7 @@ void C00a033b0::FUN_00a033b0(R_Menu* a1)
 
             {
 
-                ((R_SetF*)ad)->FUN_00a012d0(ao->m10, ao->fvalue, true);
+                ((R_SetF*)ad)->SetFloat(ao->m10, ao->fvalue, true);
 
             }
 
@@ -4608,7 +4608,7 @@ void C00a033b0::FUN_00a033b0(R_Menu* a1)
 
                     ((R_SetS*)ad)->FUN_00a01350(ao->m10, ao->str.FUN_00559450(), true);
 
-                    ((R_P08*)ad)->FUN_00a07530(0x20);
+                    ((R_P08*)ad)->SetChangeFlag(0x20);
 
                 }
 

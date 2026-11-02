@@ -9338,7 +9338,7 @@ struct MotionActor
     virtual void slot134();
     virtual bool disabled();
     bool FUN_004938e0();
-    float FUN_00567400();
+    float GetScale();
 };
 void FUN_00a582f0(const MotionMatrix*, const MotionPoint*, int, const MotionPoint*, MotionPoint*);
 struct MovementAnimation
@@ -9379,10 +9379,10 @@ bool MovementAnimation::GetMovement(MotionPoint* apMovement, MotionActor* actor,
     if (!actor->disabled() && actor->FUN_004938e0() && sequences[1] &&
         sequences[1]->FUN_0048f7f0()->FUN_005f2420() >= 3 && sequences[1]->FUN_0048f7f0()->FUN_005f2420() <= 16)
     {
-        speed2 = sequences[1]->FUN_0048f7f0()->FUN_005f4c70() * moveSpeed * deltaTime7 * owner->FUN_00567400();
+        speed2 = sequences[1]->FUN_0048f7f0()->FUN_005f4c70() * moveSpeed * deltaTime7 * owner->GetScale();
         if (sequences[4] && sequences[4]->FUN_008041a0() == 1)
         {
-            alternate = sequences[4]->FUN_0048f7f0()->FUN_005f4c70() * attackSpeed * deltaTime7 * owner->FUN_00567400();
+            alternate = sequences[4]->FUN_0048f7f0()->FUN_005f4c70() * attackSpeed * deltaTime7 * owner->GetScale();
             if (alternate > speed2)
                 speed2 = alternate;
         }
@@ -9411,7 +9411,7 @@ bool MovementAnimation::GetMovement(MotionPoint* apMovement, MotionActor* actor,
         case 5:
         case 8:
         case 10: {
-            scale4 = actor->FUN_00567400();
+            scale4 = actor->GetScale();
             delta3.x /= scale4;
             delta3.y /= scale4;
             break;

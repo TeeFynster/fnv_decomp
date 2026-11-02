@@ -187,7 +187,7 @@ extern int FUN_004b5820(int handle);
 extern EventEntity* FUN_0056f930(int handle);
 extern int FUN_004b5950(int handle);
 extern EventEntity* FUN_004b5a80(int form);
-extern void FUN_005ac750(Controller* player, void* sound, int flags);
+extern void MarkBaseExtraListScriptEvent(Controller* player, void* sound, int flags);
 extern bool FUN_0043b300(FormTypeDescriptor* descriptor, EventEntity* entity);
 extern EventEntity* FUN_004b5260(int handle);
 struct ParentEntity : EventEntity
@@ -242,9 +242,9 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                         (entity2->FUN_0043b4f0(&filterA)->FUN_0043b4d0() == 0x17 ||
                          entity2->FUN_0043b4f0(&filterB)->FUN_0043b4d0() == 0x18))
                     {
-                        FUN_005ac750(player, reference->FUN_005d43c0(), 0x80);
+                        MarkBaseExtraListScriptEvent(player, reference->FUN_005d43c0(), 0x80);
                         if (player->FUN_00476c90() != 0)
-                            FUN_005ac750(player->FUN_00476c90(), reference->FUN_005d43c0(), 0x100);
+                            MarkBaseExtraListScriptEvent(player->FUN_00476c90(), reference->FUN_005d43c0(), 0x100);
                     }
                     unsigned int filterC;
                     if (FUN_0043b300(&DAT_01268444, entity2) ||

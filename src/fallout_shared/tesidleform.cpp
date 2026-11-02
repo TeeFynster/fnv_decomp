@@ -700,7 +700,7 @@ void FUN_005fe470_shell::CopyFromIdleForm(TESForm* apForm)
 
 struct FormCopyMap
 {
-    bool FUN_00853130(TESForm* key, TESForm*& value);
+    bool Lookup(TESForm* key, TESForm*& value);
 };
 struct IdleArrayMethods
 {
@@ -735,12 +735,12 @@ TESIdleForm* IdleCopy::CopyIdleForm(unsigned char flag, FormCopyMap* map)
     TESForm* k;
     i = dynamic_cast<TESIdleForm*>(FUN_004867a0(flag, map));
     h = 0;
-    if (!map->FUN_00853130(m_pParentIdleForm, h) || !h)
+    if (!map->Lookup(m_pParentIdleForm, h) || !h)
         h = m_pParentIdleForm;
     s = static_cast<TESIdleForm*>(h);
     static_cast<IdleCopy*>(i)->FUN_008d8040(s);
     h = 0;
-    if (!map->FUN_00853130(m_pIdleForm, h) || !h)
+    if (!map->Lookup(m_pIdleForm, h) || !h)
         h = m_pIdleForm;
     p = static_cast<TESIdleForm*>(h);
     static_cast<IdleCopy*>(i)->FUN_00673400(p);

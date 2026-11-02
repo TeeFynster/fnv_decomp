@@ -202,7 +202,7 @@ struct MenuTileField
 {
     void __thiscall FUN_00a01350(unsigned int property, char* text, int forceUpdate);
     void __thiscall FUN_00700320(unsigned int property, int matched);
-    void __thiscall FUN_00a012d0(void* value, float fade, int flags);
+    void __thiscall SetFloat(void* value, float fade, int flags);
 };
 extern char str_010702d8[];
 extern "C" void* __cdecl FUN_00a00940(const char* descriptor, int index);
@@ -248,7 +248,7 @@ void TutorialMenuView::ApplyRecordToTiles(MenuRecord* record)
     }
     if (text40 != 0)
     {
-        text40->FUN_00a012d0(FUN_00a00940(str_010702d8, -1), 0.0f, 0);
+        text40->SetFloat(FUN_00a00940(str_010702d8, -1), 0.0f, 0);
     }
 }
 

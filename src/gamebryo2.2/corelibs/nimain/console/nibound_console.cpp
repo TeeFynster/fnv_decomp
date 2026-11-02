@@ -523,12 +523,12 @@ struct Sphere
 {
     NiPt3 center;
     float radius;
-    void FUN_00a7f3f0(const Sphere& other);
+    void Merge(const Sphere& other);
 };
 
 // Sets this sphere to the other when it contains this; otherwise adjusts center and radius to enclose both.
 // @fnv 0x00a7f3f0
-void Sphere::FUN_00a7f3f0(const Sphere& other)
+void Sphere::Merge(const Sphere& other)
 {
     NiPt3 vDelta = center - other.center;
     float distSq = vDelta.SqrLength();

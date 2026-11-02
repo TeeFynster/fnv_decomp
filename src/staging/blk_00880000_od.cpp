@@ -2325,7 +2325,7 @@ struct Refr
     Cell* __thiscall FUN_008d6f30();
     World* __thiscall FUN_00575d70();
     float __thiscall FUN_008a0b10();
-    float __thiscall FUN_00567400();
+    float __thiscall GetScale();
     unsigned int __thiscall GetVtbl20Result();
     void __thiscall FUN_008855f0(float* a, float b, float c);
 };
@@ -2349,7 +2349,7 @@ void __thiscall Refr::FUN_008855f0(float* pfValue, float b, float c)
         float f7 = FUN_00643f90(b);
         float fd0 = AddRuntimeFloatSetting(b);
         float scale = obj3->fn64() ? obj3->FUN_008a0b10() : 0.0f;
-        scale = (obj3->FUN_00567400() / FUN_00567400()) * scale;
+        scale = (obj3->GetScale() / GetScale()) * scale;
         int mask9 = 0x20f;
         bool flag = (GetVtbl20Result() & mask9) == mask9;
         float out28 = *pfValue * (flag ? *DAT_011cd744.FUN_00403e20() : *DAT_011cd9b4.FUN_00403e20());

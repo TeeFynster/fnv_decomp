@@ -102,7 +102,7 @@ struct InventoryChanges
     static InventoryChanges* __cdecl CreateForReference(TESObjectREFR*);
     void FUN_004d1960();
 };
-TESContainer* __fastcall FUN_0055d310(TESObjectREFR*);
+TESContainer* __fastcall GetContainer(TESObjectREFR*);
 TESBoundObject* __fastcall _FNV_GetObjectReference(TESObjectREFR*);
 Script* FUN_004826d0(TESBoundObject*);
 struct ExtraScript
@@ -247,7 +247,7 @@ void FUN_00565730_shell::FUN_00565730()
         ((FUN_00419ed0_shell*)((XActor*)this)->GetExtra())->FUN_00419ed0(pScript);
         ((FUN_00419f80_shell*)((XActor*)this)->GetExtra())->FUN_00419f80(pScript->GetOrCreateScriptLocals());
     }
-    pCont = FUN_0055d310(this);
+    pCont = GetContainer(this);
     if (pCont)
     {
         pinventory = InventoryChanges::CreateForReference(this);

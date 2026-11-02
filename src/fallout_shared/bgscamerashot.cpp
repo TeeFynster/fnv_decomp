@@ -505,7 +505,7 @@ struct NodePtrObj
 };
 struct ModelLoader
 {
-    int FUN_00447080(const char*, int, int, int, int, int);
+    int LoadModel(const char*, int, int, int, int, int);
     int FUN_0045a5e0(const char*);
 };
 extern ModelLoader* g_modelLoader;
@@ -685,7 +685,7 @@ void ShotThis::SetupCamera(void* param1, int iMode)
     void* myFoundPtr;
     if (model.FUN_0048cee0())
     {
-        m_spPositionNode.FUN_0066b0d0((void*)g_modelLoader->FUN_00447080(model.vfn_14(), 0, 1, 1, 0, 0));
+        m_spPositionNode.FUN_0066b0d0((void*)g_modelLoader->LoadModel(model.vfn_14(), 0, 1, 1, 0, 0));
     }
     myFoundPtr = m_spPositionNode.FUN_00559450()
                      ? FUN_00653270(&DAT_011f4a18, (void*)m_spPositionNode.FUN_00559450()->FUN_0045bc00(0))

@@ -1408,7 +1408,7 @@ struct S_009a6770_Ref
     virtual void vfunc1D8();
     virtual S_009a6770_Pt* GetPos(S_009a6770_Pt* out);
     float FUN_008be420();
-    float FUN_00567400();
+    float GetScale();
 };
 // Sums a's Y position times its scale (or FUN_008be420 if IsX) with b's same value when b is non-null, returning the total.
 // @fnv 0x009a6770
@@ -1426,7 +1426,7 @@ float __cdecl FUN_009a6770(S_009a6770_Ref* pRefA, S_009a6770_Ref* pRefB)
     }
     else
     {
-        total2 = pRefA->GetPos(&pt5)->y * pRefA->FUN_00567400();
+        total2 = pRefA->GetPos(&pt5)->y * pRefA->GetScale();
     }
     if (pRefB)
     {
@@ -1437,7 +1437,7 @@ float __cdecl FUN_009a6770(S_009a6770_Ref* pRefA, S_009a6770_Ref* pRefB)
         }
         else
         {
-            total2 = pRefB->GetPos(&pt3)->y * pRefB->FUN_00567400() + total2;
+            total2 = pRefB->GetPos(&pt3)->y * pRefB->GetScale() + total2;
         }
     }
     return total2;
@@ -2948,7 +2948,7 @@ struct S_009a8460_Actor
     float __thiscall FUN_008854d0(int p);
     float __thiscall GetActorHeight();
     bool __thiscall FUN_00579670();
-    float __thiscall FUN_00567400();
+    float __thiscall GetScale();
 };
 
 // @fnv 0x009a8460
@@ -2989,7 +2989,7 @@ float __cdecl FUN_009a8460(S_009a8460_Actor* actor, int type, bool flag)
     {
         NiPoint3 p2;
         NiPoint3 p1;
-        return (actor->vfn_01dc(&p2)->z - actor->vfn_01d8(&p1)->z) * actor->FUN_00567400() * 0.5f;
+        return (actor->vfn_01dc(&p2)->z - actor->vfn_01d8(&p1)->z) * actor->GetScale() * 0.5f;
     }
 
     return 0.0f;

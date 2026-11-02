@@ -1754,7 +1754,7 @@ struct ActivateObject
     void FUN_005789b0();
     ActivateProcess* FUN_008d8520();
     bool FUN_00891db0(ActivateKey*, int, int, int, unsigned*);
-    bool FUN_00573170(ActivateObject*, int, int, int);
+    bool Activate(ActivateObject*, int, int, int);
     bool FUN_0094df60();
     const char* FUN_0084e3a0();
     bool FUN_00575d10();
@@ -1936,7 +1936,7 @@ bool DoorActivation::ActivateDoor(ActivateObject* reference, ActivateObject* act
                                  lockA->key->name.FUN_00408da0());
                     DispatchMessageToSink(message, 0, "Interface\\Icons\\Message Icons\\glow_message_key.dds", 0, 2.0f,
                                           0);
-                    ((ActivateObject*)DAT_011c9350)->FUN_00573170((ActivateObject*)DAT_011dea3c, 0, 0, 1);
+                    ((ActivateObject*)DAT_011c9350)->Activate((ActivateObject*)DAT_011dea3c, 0, 0, 1);
                     DAT_011c9350 = 0;
                     return true;
                 }

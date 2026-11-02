@@ -3671,7 +3671,7 @@ extern "C" __declspec(dllimport) void __stdcall fnv_Import_LeaveCriticalSection(
 class GameLockA {
 public:
     bool FUN_0078d200();
-    void FUN_0040fbf0(int a);
+    void Wait(int a);
 };
 
 class GameLockB {
@@ -3707,7 +3707,7 @@ void __cdecl FUN_00c459d0(unsigned char a1)
     if (a1 != 0) {
         flag = DAT_01202e40.FUN_0078d200();
     } else {
-        DAT_01202e40.FUN_0040fbf0(0);
+        DAT_01202e40.Wait(0);
     }
     if (flag) {
         got = fnv_Import_TryEnterCriticalSection(&DAT_011f4380) ? true : false;
@@ -9902,7 +9902,7 @@ void E70Owner::FUN_00c46e70(StrArr* stream)
 struct Bound47250 {
     struct XYZ { unsigned int m_00, m_04, m_08; } m_00;
     float m_0c;
-    void FUN_00a7f3f0(const Bound47250*);
+    void Merge(const Bound47250*);
 };
 extern Bound47250 DAT_011f4288;
 struct Provider47250 {
@@ -9928,7 +9928,7 @@ struct Node47250 {
     void FUN_00c47250();
 };
 struct Pad47250 { unsigned int m_00,m_04,m_08; };
-// Fills m_20 via the m_ac provider if present, else copies the first child bound with nonzero m_0c and merges later such bounds via FUN_00a7f3f0.
+// Fills m_20 via the m_ac provider if present, else copies the first child bound with nonzero m_0c and merges later such bounds via Merge.
 // @fnv 0x00c47250
 void Node47250::FUN_00c47250() {
     const Bound47250* local14;
@@ -9981,7 +9981,7 @@ void Node47250::FUN_00c47250() {
             if (local167) {
                 if (local167->m_20 && (local35 = local167->m_20->m_0c) != 0.0 ? 1 : 0) {
                     local14 = local167->m_20 ? local167->m_20 : &DAT_011f4288;
-                    m_20->FUN_00a7f3f0(local14);
+                    m_20->Merge(local14);
                 }
             }
         }

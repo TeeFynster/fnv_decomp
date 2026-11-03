@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-initial-unresolved-code-pool-policy",
+  "policy_id": "unresolved-code-pool-v1",
+  "proposal_sha256": "6cebda8327da0afafd6779682fef4c56b6cf90cd40060b0b23fc34f61f15250b",
+  "directives": [
+    "/DEFAULTLIB:\"LIBCMT\"",
+    "/DEFAULTLIB:\"OLDNAMES\""
+  ],
+  "members": [
+    {
+      "recipe_id": "0000-674cf48524ad6cf3",
+      "recipe_index": 0,
+      "source": "src/NiRenderedTexture.cpp",
+      "source_sha256": "fb8590bc8cc30dd2591c9588233a487b230b427b9453044bba77dc2f4dae8b04",
+      "object_sha256": "4c82eab96222de5e1494f2cedafcfe5f09d727c364e3cbd93d267ad63e14fc39",
+      "selected": {
+        "symbol": "?FUN_00be0b90@FnvCpu_FUN_00be0b90_CpuObject@@QAEHXZ",
+        "section": 13,
+        "value": 0,
+        "size": 4,
+        "original_address": "0x00be0b90",
+        "symbol_index": 46
+      },
+      "literal_sections": [],
+      "expected_eligible": true,
+      "expected_fields": [],
+      "required_blocker": null
+    },
+    {
+      "recipe_id": "0703-3a582158246b390e",
+      "recipe_index": 703,
+      "source": "src/fallout_shared/combatformulas.cpp",
+      "source_sha256": "64e0d987b3b5c12e7327e698d51e390a3801f8cf2d1686e2655b164de80f32ec",
+      "object_sha256": "211a7bcbb50adc39d9aad96dba73f2229609d53cd93a0e2f44470fe0c99cbb31",
+      "selected": {
+        "symbol": "?GetWeaponHealthConditionMultiplier@@YAMM@Z",
+        "section": 24,
+        "value": 0,
+        "size": 55,
+        "original_address": "0x00646d00",
+        "symbol_index": 143
+      },
+      "literal_sections": [
+        25,
+        26
+      ],
+      "expected_eligible": true,
+      "expected_fields": [
+        {
+          "offset": 9,
+          "symbol_index": 149,
+          "kind": 6,
+          "base": "0x0101de30",
+          "original_target": "0x0101de30",
+          "addend": 0
+        },
+        {
+          "offset": 31,
+          "symbol_index": 149,
+          "kind": 6,
+          "base": "0x0101de30",
+          "original_target": "0x0101de30",
+          "addend": 0
+        },
+        {
+          "offset": 37,
+          "symbol_index": 146,
+          "kind": 6,
+          "base": "0x01051680",
+          "original_target": "0x01051680",
+          "addend": 0
+        }
+      ],
+      "required_blocker": null
+    },
+    {
+      "recipe_id": "2734-15835374a1b91660",
+      "recipe_index": 2734,
+      "source": "src/staging/blk_00aa0000_o2.cpp",
+      "source_sha256": "01663b0100edd275dbfdc48bbf198ecb71593e48c7d400ff33cda9e2cf5d90bf",
+      "object_sha256": "10c9d726dbf44ac2258f10eecf1f3bbbeef95df9759de18d585756873643c1c1",
+      "selected": {
+        "symbol": "?FUN_00aa13e0@@YAXH@Z",
+        "section": 41,
+        "value": 0,
+        "size": 62,
+        "original_address": "0x00aa13e0",
+        "symbol_index": 141
+      },
+      "literal_sections": [],
+      "expected_eligible": false,
+      "expected_fields": [
+        {
+          "offset": 23,
+          "symbol_index": 142,
+          "kind": 6,
+          "base": "0x011f6080",
+          "original_target": "0x011f6080",
+          "addend": 0
+        }
+      ],
+      "required_blocker": "WEAK_OR_COMMON_RECORD"
+    },
+    {
+      "recipe_id": "1264-84849a360cbb59fe",
+      "recipe_index": 1264,
+      "source": "src/gamebryo2.2/corelibs/nianimation/nirotkey.cpp",
+      "source_sha256": "9134a34b9d81951d72ffa2bcde18b2c3be348399ffb090fc9cf975302057fe10",
+      "object_sha256": "89e780f4b8dfcb2e7a17e761da8bf556e67162b0603b22dfd542bcef9ea31f8f",
+      "selected": {
+        "symbol": "?InterpolatePosition@TimedRotationKey@@SA?AUNiQuaternion@@MPAU1@W4KeyType@AnimationKey@@IAAIE@Z",
+        "section": 3,
+        "value": 0,
+        "size": 614,
+        "original_address": "0x00a28740",
+        "symbol_index": 8
+      },
+      "literal_sections": [],
+      "expected_eligible": true,
+      "expected_fields": [
+        {
+          "offset": 19,
+          "symbol_index": 13,
+          "kind": 6,
+          "base": "0x010241b0",
+          "original_target": "0x010241b0",
+          "addend": 0
+        },
+        {
+          "offset": 105,
+          "symbol_index": 12,
+          "kind": 6,
+          "base": "0x011f3cc0",
+          "original_target": "0x011f3cc0",
+          "addend": 0
+        },
+        {
+          "offset": 557,
+          "symbol_index": 12,
+          "kind": 6,
+          "base": "0x011f3cc0",
+          "original_target": "0x011f3cc0",
+          "addend": 0
+        }
+      ],
+      "required_blocker": null
+    },
+    {
+      "recipe_id": "0802-87f974b83dab6f45",
+      "recipe_index": 802,
+      "source": "src/fallout_shared/modelloader.cpp",
+      "source_sha256": "93fba6b335addd4607a7faff409958111f8ed989d405cb8b39f293c5275adf97",
+      "object_sha256": "678bb9bf0aad418bdd58cb1e252282bad07537b24037e3ae7f2ff97145b52cc0",
+      "selected": {
+        "symbol": "??0FUN_0043fd40@@QAE@HH@Z",
+        "section": 792,
+        "value": 0,
+        "size": 166,
+        "original_address": "0x0043fd40",
+        "symbol_index": 3548
+      },
+      "literal_sections": [],
+      "expected_eligible": false,
+      "expected_fields": [
+        {
+          "offset": 6,
+          "symbol_index": 3564,
+          "kind": 6,
+          "base": "0x00eec1b9",
+          "original_target": "0x00eec1b9",
+          "addend": 0
+        },
+        {
+          "offset": 19,
+          "symbol_index": 113,
+          "kind": 6,
+          "base": "0x011c16bc",
+          "original_target": "0x011c16bc",
+          "addend": 0
+        },
+        {
+          "offset": 46,
+          "symbol_index": 3563,
+          "kind": 20,
+          "base": "0x00c3c590",
+          "original_target": "0x00c3c590",
+          "addend": 0
+        },
+        {
+          "offset": 62,
+          "symbol_index": 3562,
+          "kind": 6,
+          "base": "0x01016ba4",
+          "original_target": "0x01016ba4",
+          "addend": 0
+        },
+        {
+          "offset": 84,
+          "symbol_index": 3559,
+          "kind": 20,
+          "base": "0x00528cb0",
+          "original_target": "0x00528cb0",
+          "addend": 0
+        },
+        {
+          "offset": 101,
+          "symbol_index": 3558,
+          "kind": 20,
+          "base": "0x00633c90",
+          "original_target": "0x00633c90",
+          "addend": 0
+        },
+        {
+          "offset": 118,
+          "symbol_index": 3558,
+          "kind": 20,
+          "base": "0x00633c90",
+          "original_target": "0x00633c90",
+          "addend": 0
+        },
+        {
+          "offset": 135,
+          "symbol_index": 3559,
+          "kind": 20,
+          "base": "0x00528cb0",
+          "original_target": "0x00528cb0",
+          "addend": 0
+        }
+      ],
+      "required_blocker": "SAME_PARENT_EH_OR_UNKNOWN_ASSOCIATION"
+    },
+    {
+      "recipe_id": "1401-50cd6090ff456b83",
+      "recipe_index": 1401,
+      "source": "src/gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator.cpp",
+      "source_sha256": "36a0fde7e9010dca9552434cc5730d82657b2b37036ab57649ee523f842264e6",
+      "object_sha256": "92507eef126a952346cccf5452fe5c204a97b18e02e7583249e41b4daa9d9570",
+      "selected": {
+        "symbol": "??0NiBackToFrontAccumulator@@QAE@XZ",
+        "section": 3,
+        "value": 0,
+        "size": 25,
+        "original_address": "0x00aa0fc0",
+        "symbol_index": 8
+      },
+      "literal_sections": [],
+      "expected_eligible": false,
+      "expected_fields": [
+        {
+          "offset": 4,
+          "symbol_index": 9,
+          "kind": 20,
+          "base": "0x00a5d3a0",
+          "original_target": "0x00a5d3a0",
+          "addend": 0
+        }
+      ],
+      "required_blocker": "ORIGINAL_MISSING_RELOCATION"
+    }
+  ],
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "link_ready": false,
+  "expected_counts": {
+    "assessed": 6,
+    "emitted": 3,
+    "quarantined": 3,
+    "checked_code_bytes": 673,
+    "retained_literal_bytes": 16
+  },
+  "proposal_adjustment": "Root retained conservative whole-object hidden-index policy: allocator is assessed and quarantined for unrelated weak/auxiliary records; no root-unreachable weak-drop adapter is approved."
+}

@@ -22,6 +22,8 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [CRT provider contract](CRT-PROVIDER.md) and [original data fixture](DATA-FIXTURE.md): reviewed bounded experiments, not game provider or data adoption.
 - [EH ownership](EH-OWNERSHIP.md): hash-bound metadata observations and unresolved alternatives.
 - [Original EH fixture probe](EH-FIXTURE-PROBE.md): independently reviewed fixture execution, not game EH closure.
+- [CRT bootstrap contract](CRT-BOOTSTRAP-CONTRACT.md), [EH type overlay](EH-TYPE-OVERLAY.md) and [game TLS component](GAME-TLS-COMPONENT.md): bounded reviewed experiments, not game startup.
+- [Runtime code pool](RUNTIME-CODE-POOL.md), [pool proposal](RUNTIME-CODE-POOL-PROPOSAL.md) and [inventory](RUNTIME-CODE-INVENTORY.md): bounded archive serialization and all-size assessments, not runtime readiness.
 - [Runtime audit](RUNTIME-AUDIT.md): startup, ABI and runtime findings and unknowns.
 - [Startup closure](STARTUP-CLOSURE.md): evidence and remaining startup blockers.
 - [Narrow COFF rewrite](COFF-REWRITE.md) and [extraction](COFF-EXTRACT.md): constrained object-copy operations and validation limits.

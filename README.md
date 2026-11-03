@@ -41,8 +41,22 @@ What to expect:
   address; see what differs with your own copy of the game:
   `python3 tools/build_and_match.py --image <your FalloutNV.exe> --only <unit>`.
 - **Needs a maintainer:** changes outside `src/`, `include/`, the names in `build/units.json` and Markdown files
-  (the tools, the rest of the build recipe, the workflow). The check marks these, and a maintainer verifies them
-  against the game before merging.
+  (the tools, the rest of the build recipe, the workflow). The check fails on these; open an issue instead. Changes
+  to the tools and the workflow are made by the repository owner and verified against the game.
+
+### Review and merging
+
+A pull request is merged when the check passes and two reviewers have approved it:
+
+- Nobody can skip the check, the repository owner included.
+- Two approvals are needed. An approval is dropped when new commits arrive, and the last push has to be approved by
+  someone other than the person who made it.
+- The pull request has to be up to date with `main`. If `main` moves first, use "Update branch" and the check runs
+  again on the combined code.
+
+After every change to `main`, the whole of `main` is also built against the game's executable on the project's own
+machine. That build proves `main` still matches the game byte for byte, not only that it compiles the same as
+before.
 
 ### Renaming a function
 

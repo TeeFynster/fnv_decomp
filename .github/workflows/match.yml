@@ -31,8 +31,9 @@ concurrency:
 
 env:
   PYTHONDONTWRITEBYTECODE: 1
-  # a push to main is already trusted: changes to the check's own files there build nothing
-  TRUSTED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && '--trusted' || '' }}
+  # a push to main, or a pull request the repository owner opened, may also change .github/ and tools/ (the owner
+  # verifies those against the game; main is built against the game after every change)
+  TRUSTED: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request_target' && github.event.pull_request.author_association == 'OWNER')) && '--trusted' || '' }}
   # SHA-256 over the unpacked compilers (.github/ci/compilers.sh --digest): a cached copy must still be Microsoft's
   MSVC_SP1_DIGEST: 8d83bb2bcb5682604d10f3ed2d23bca83d6375a1b5976b79ef178ed611a93a25
   MSVC_RTM_DIGEST: 3ac1c851b4d7eb3705d2401c965c28356bd7fe37ac03831e7ef331bec5f2191c

@@ -17,11 +17,12 @@ build/units.json gets the new decorated names at the same addresses; changing wh
                                       the verdict (on one shard's units with --only-shard); exit 0 only when the
                                       rules hold and everything checked is identical
 
-The rules (plan): only src/, include/, build/units.json and *.md files may change (on a push to main, --trusted, also
-.github/ and this tool, which build nothing). In build/units.json only decorated
-names may change: every unit keeps its source, compiler, flags, function addresses and sizes, EH tails and the
-addresses its symbols bind. Anything else (tools/, .github/, build/image_check.json, third_party/, patches/, a new
-unit) needs a maintainer and a full build_and_match.py run.
+The rules (plan): only src/, include/, build/units.json and *.md files may change. With --trusted (a push to main, or
+a pull request opened by the repository owner) .github/ and tools/ may change as well: this check cannot vouch for
+them, the owner verifies them with a full build_and_match.py run, and main is built against the game after every
+change. In build/units.json only decorated names may change: every unit keeps its source, compiler, flags, function
+addresses and sizes, EH tails and the addresses its symbols bind. Anything else (build/image_check.json,
+third_party/, patches/, a new unit) needs a maintainer.
 
 A file whose change is only in comments and whitespace inside lines (nothing else moves) cannot change any function,
 so its includers are not rebuilt; __LINE__ is used only to name static-assert typedefs, and a change that adds a new
@@ -175,8 +176,8 @@ def plan(base, head, shard_size, max_shards, trusted=False):
     changed = sorted(k for k in set(fa) | set(fb) if fa.get(k) != fb.get(k))
     problems = []
     for f in changed:
-        if trusted and (f.startswith('.github/') or f == 'tools/compare_builds.py'):
-            continue   # a push to main: this check's own files build nothing
+        if trusted and f.startswith(('.github/', 'tools/')):
+            continue   # the owner's own change: verified against the game, not by this check
         if not (f.startswith(('src/', 'include/')) or f == RECIPE or (f.endswith('.md') and not f.startswith('.github/'))):
             problems.append('%s: outside what this check can vouch for (src/, include/, build/units.json, *.md)' % f)
     ra = json.loads(Path(base, RECIPE).read_text())
@@ -404,7 +405,7 @@ def main():
     sub = ap.add_subparsers(dest='command', required=True)
     p = sub.add_parser('plan'); p.add_argument('base'); p.add_argument('head'); p.add_argument('--out', required=True)
     p.add_argument('--shard-size', type=int, default=300); p.add_argument('--max-shards', type=int, default=10)
-    p.add_argument('--trusted', action='store_true', help='a push to main: changes to .github/ and this tool are fine')
+    p.add_argument('--trusted', action='store_true', help='a push to main or the owner\'s pull request: .github/ and tools/ may change')
     s = sub.add_parser('shard'); s.add_argument('repo'); s.add_argument('base_sha'); s.add_argument('head_sha')
     s.add_argument('--plan', required=True); s.add_argument('--shard', type=int, required=True)
     s.add_argument('--out', required=True); s.add_argument('--jobs', type=int, default=os.cpu_count() or 2)

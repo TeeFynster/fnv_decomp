@@ -1,50 +1,26 @@
 # Rebuild guide
 
-This work is developing a separate source-built runtime. The current repository is a byte-matching reference, not a runnable game. A private-machine retained-object build has compiled all 2,988 recipe entries; full inventory has reconciled all entries and the independent full reference comparison passed on separately compiled temporary objects. Direct retained-object verification reports original parity across 68,667 recipe rows and 1,954 EH entries, with 95 local EH notes; strict local EH and runtime closure remain false. One four-byte game leaf ran 7,168 calls across seven values; link and game runtime gates remain open.
+This project is developing a separate source-built runtime. The repository currently produces byte-matching reference objects; **it is not a playable game**. A private full build compiled all 2,988 recipe entries. Separate reference and retained-object checks reported parity for 68,667 recipe rows and 1,954 EH entries. The 95 local EH notes and unresolved provider, data, startup and link contracts remain open.
 
-Start with the root [README](../../README.md) for the existing matching workflow, compiler versions and owned input requirements, and read [LICENSE](../../LICENSE). Then use these documents:
+Start with the root [README](../../README.md) for the matching workflow, compatible owned input and compiler versions, and read [LICENSE](../../LICENSE). The [roadmap](ROADMAP.md) shows milestones and next gates; the [work ledger](AGENT-WORK.md) records active ownership and review status. [Evidence history](EVIDENCE-HISTORY.md) preserves prior shared progress records, while each phase document records its own scope and receipts.
 
-- [Roadmap](ROADMAP.md): milestone order and evidence required.
-- [Build and toolchain](BUILD.md): native compiler setup, retained-object build, reports and separate original comparison.
-- [COFF link inventory](LINK-INVENTORY.md): inventory of private objects and interpretation limits.
-- [Canonical candidate plan](CANONICAL-PLAN.md): unselected address-provider candidates and evidence boundaries.
-- [Data strategy](DATA-STRATEGY.md), [data coverage plan](DATA-PLAN.md) and [runtime gaps](RUNTIME-GAPS.md): persistent-data evidence and unresolved fixups.
-- [Generated code gaps](GENERATED-CODE-GAPS.md): bounded metadata reconciliation and unresolved generated-code ownership.
-- [Binding fixture](BINDING-FIXTURE.md): reviewed original symbol-binding mechanism, not game mappings.
-- [Relocation audit](RELOCATION-AUDIT.md) and [absolute-address triage](ABSOLUTE-ADDRESS-TRIAGE.md): field geometry and unresolved missing fields.
-- [Runtime binding plan](RUNTIME-BIND-PLAN.md) and [source overlay pilot](SOURCE-OVERLAY.md): read-only identities and one compile-only relocation experiment, with no provider approval.
-- [Game component candidate](GAME-COMPONENT-CANDIDATE.md) and [scalar component](GAME-SCALAR-COMPONENT.md): one bounded source-built scalar execution and its limits.
-- [TLS owner proposal](TLS-OWNER-PROPOSAL.md), [original TLS fixture](TLS-OWNER-FIXTURE.md) and [CRT integration proposal](CRT-INTEGRATION-PROPOSAL.md): reviewed evidence, without game provider or runtime approval.
-- [Runtime data owner proposal](RUNTIME-DATA-OWNER-PROPOSAL.md) and [data-owner ledger](RUNTIME-DATA-OWNERS.md): reconciled metadata, without materialization or fixup approval.
-- [EH diagnostic triage](EH-DIAGNOSTIC-TRIAGE.md): local diagnostic evidence and remaining uncertainty.
-- [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
-- [Function selection](FUNCTION-SELECTION.md) and [import plan](IMPORT-PLAN.md): reviewed ownership choices and import metadata, without runtime approval.
-- [CRT provider contract](CRT-PROVIDER.md) and [original data fixture](DATA-FIXTURE.md): reviewed bounded experiments, not game provider or data adoption.
-- [EH ownership](EH-OWNERSHIP.md): hash-bound metadata observations and unresolved alternatives.
-- [Original EH fixture probe](EH-FIXTURE-PROBE.md): independently reviewed fixture execution, not game EH closure.
-- [CRT bootstrap contract](CRT-BOOTSTRAP-CONTRACT.md), [EH type overlay](EH-TYPE-OVERLAY.md) and [game TLS component](GAME-TLS-COMPONENT.md): bounded reviewed experiments, not game startup.
-- [Runtime code pool](RUNTIME-CODE-POOL.md), [pool proposal](RUNTIME-CODE-POOL-PROPOSAL.md) and [inventory](RUNTIME-CODE-INVENTORY.md): bounded archive serialization and all-size assessments, not runtime readiness.
-- [Runtime audit](RUNTIME-AUDIT.md): startup, ABI and runtime findings and unknowns.
-- [Startup closure](STARTUP-CLOSURE.md): evidence and remaining startup blockers.
-- [Narrow COFF rewrite](COFF-REWRITE.md) and [extraction](COFF-EXTRACT.md): constrained object-copy operations and validation limits.
-- [Game leaf probe](GAME-LEAF-PROBE.md): one independently reviewed leaf experiment, not gameplay.
-- [Retained-object verification](RETAINED-VERIFY.md): direct checks and strict diagnostic status.
-- [Standalone CRT/TLS probe](RUNTIME-PROBE.md): independent synthetic runtime test, not game startup.
-- [Standalone import alias probe](IMPORT-PROBE.md): independent linker mechanism test, not game ABI validation.
-- [Validation](VALIDATION.md): acceptance gates and isolation.
-- [Work ledger](AGENT-WORK.md): ownership, current evidence and next gates.
+## Setup and basic checks
 
-On Windows, after configuring the private compiler roots described in [BUILD.md](BUILD.md), the basic commands are:
+Configure the private Windows compiler roots as described in [BUILD.md](BUILD.md). The following commands inspect the toolchain, account for the recipe and run the offline tests:
 
 ```powershell
 python tools/rebuild/toolchain.py --out build/rebuild/doctor.json
 python tools/rebuild/recipe_audit.py --out build/rebuild/recipe-audit
-python tools/rebuild/build_objects.py --jobs 2 --output build/rebuild
-python tools/rebuild/coff_inventory.py --manifest build/rebuild/objects.json --out build/rebuild/link-inventory.json --recipes build/units.json --require-full
-python tools/rebuild/canonical_plan.py --recipes build/units.json --manifest build/rebuild/objects.json --inventory build/rebuild/link-inventory.json --out build/rebuild/canonical-plan.json
 python -m unittest discover -s tests/rebuild -p "test_*.py"
 ```
 
-The full build can take significant time; a subset is a smoke test only. The compact full inventory report was about 201 KB in the documented run; the optional legacy full-detail JSON occupied about 1.37 GB. Consult the inventory guide before requesting detailed output. A successful retained-object build or inventory does not establish byte matching or linkability. The canonical command shown omits the optional retained verification receipt, so it produces unverified candidates; see the canonical and retained-verification guides for receipt binding. Run the original comparison separately as described in the root README. `compare_builds.py` checkout/clean operations must use a disposable scratch worktree.
+A full retained build and inventory are separate, time-consuming operations; follow [BUILD.md](BUILD.md) and [LINK-INVENTORY.md](LINK-INVENTORY.md), coordinate compiler slots and do not repeat an existing baseline without a reason. Run the original comparison separately as described in the root README. A successful build or inventory does not prove matching or linkability. Use disposable scratch worktrees for `compare_builds.py` operations that check out or clean files.
 
-Keep game inputs and compiler installations outside the checkout. Generated objects, logs, inventories and reports are private: `build/rebuild/` is ignored, and output can instead be directed to a private location outside the repository. Ignore rules are a backstop; review all material before sharing and never publish game bytes, assets, binaries, objects, disassembly, credentials or personal paths. No licence is granted by the existing repository license; any eventual publication needs a separate rights review.
+## Evidence and boundaries
+
+- [Validation gates](VALIDATION.md) distinguish checked observations from unrun link, startup and gameplay tests.
+- [Function selection](FUNCTION-SELECTION.md), [runtime binding plan](RUNTIME-BIND-PLAN.md) and [import plan](IMPORT-PLAN.md) describe selected code identities and unresolved ABI, provider and import contracts.
+- [Data strategy](DATA-STRATEGY.md), [data owners](RUNTIME-DATA-OWNERS.md), [EH ownership](EH-OWNERSHIP.md) and [EH diagnostics](EH-DIAGNOSTIC-TRIAGE.md) record remaining storage, initialization and exception-handling obligations.
+- [Scalar component](GAME-SCALAR-COMPONENT.md), [game TLS component](GAME-TLS-COMPONENT.md), [CRT bootstrap](CRT-BOOTSTRAP-CONTRACT.md) and [code pool](RUNTIME-CODE-POOL.md) document bounded experiments; none establishes game startup.
+
+Keep owned game inputs and compiler installations private. Generated objects, reports and logs default to ignored `build/rebuild/` or a private location outside the checkout. Never publish binaries, game bytes, assets, disassembly, credentials, personal paths or private packs. The repository license grants no licence to contributions; any eventual release needs a separate rights review.

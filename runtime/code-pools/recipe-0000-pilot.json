@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "kind": "bulk-code-pool-recipe-pilot",
+  "policy_id": "bulk-unresolved-recipe-union-v1",
+  "proposal_sha256": "c2b0d16b827a08eb4567fdc8b3c10b8197268328630d618c74e8faadab0bf2bb",
+  "recipe_index": 0,
+  "recipe_id": "0000-674cf48524ad6cf3",
+  "source": "src/NiRenderedTexture.cpp",
+  "source_sha256": "fb8590bc8cc30dd2591c9588233a487b230b427b9453044bba77dc2f4dae8b04",
+  "object_sha256": "4c82eab96222de5e1494f2cedafcfe5f09d727c364e3cbd93d267ad63e14fc39",
+  "compiler": "sp1",
+  "flags": [
+    "/MT",
+    "/O2",
+    "/GS",
+    "/EHsc",
+    "/Gy"
+  ],
+  "roots": [
+    {
+      "original_address": "0x00a7fc00",
+      "symbol": "?Create@NiRenderedTexture@@SAPAV1@ABVNiFixedString@@IIPAVNiRenderer@@AAUTextureFormatPreferences@NiTexture@@W4MultiSamplePreference@Ni2DBuffer@@PAV1@I@Z",
+      "symbol_index": 8,
+      "section": 3,
+      "value": 0,
+      "size": 304
+    },
+    {
+      "original_address": "0x00a7fd30",
+      "symbol": "?DestroyRenderedTexture@@YIPAXPAVNiRenderedTexture@@HE@Z",
+      "symbol_index": 21,
+      "section": 5,
+      "value": 0,
+      "size": 94
+    },
+    {
+      "original_address": "0x00a7fbd0",
+      "symbol": "?FUN_00a7fbd0@FUN_00a7fbd0_shell@@QAEPAXXZ",
+      "symbol_index": 30,
+      "section": 7,
+      "value": 0,
+      "size": 6
+    },
+    {
+      "original_address": "0x00a7fbe0",
+      "symbol": "?FUN_00a7fbe0@FUN_00a7fbe0_shell@@QAEIXZ",
+      "symbol_index": 36,
+      "section": 9,
+      "value": 0,
+      "size": 14
+    },
+    {
+      "original_address": "0x00a7fbf0",
+      "symbol": "?FUN_00a7fbf0@FUN_00a7fbf0_shell@@QAEIXZ",
+      "symbol_index": 41,
+      "section": 11,
+      "value": 0,
+      "size": 14
+    },
+    {
+      "original_address": "0x00be0b90",
+      "symbol": "?FUN_00be0b90@FnvCpu_FUN_00be0b90_CpuObject@@QAEHXZ",
+      "symbol_index": 46,
+      "section": 13,
+      "value": 0,
+      "size": 4
+    }
+  ],
+  "expected_counts": {
+    "roots": 6,
+    "code_bytes": 436,
+    "literal_bytes": 0,
+    "fields": 14,
+    "unique_undefined_records": 13
+  },
+  "expected_retained_sections": [
+    1,
+    3,
+    5,
+    7,
+    9,
+    11,
+    13
+  ],
+  "expected_debug_exclusions": [
+    4,
+    6,
+    8,
+    10,
+    12,
+    14
+  ],
+  "expected_exports": 6,
+  "expected_undefined_roles": {
+    "code": 6,
+    "data": 5,
+    "iat-cell": 2
+  },
+  "source_only_stage": true,
+  "provider_selected": false,
+  "runtime_eligible": false,
+  "link_ready": false
+}

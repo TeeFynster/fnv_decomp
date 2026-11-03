@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "policy_id": "unresolved-original-data-arena-v1",
+  "allowed_sections": {
+    ".rdata": false,
+    ".data": true,
+    "CONST": true
+  },
+  "roles": [
+    "code",
+    "crt-contract",
+    "data",
+    "iat-cell"
+  ],
+  "exact_target_addend": 0,
+  "identity_bridges": [],
+  "adjacency_contracts": [],
+  "anchors_only": true,
+  "max_fragment_bytes": 16777216,
+  "selected_fragments": [],
+  "projection_enabled": false,
+  "normalized_evidence_sha256": null,
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "materialization_approved": false,
+  "link_ready": false,
+  "game_fixups_approved": 0,
+  "input_pins": {
+    "ledger": "fac1496a2675e9a6b697d604c8d5b35a2e4b8bb6194e2ec823e5a37d1092f2e8",
+    "ledger_details": "c54abfd434ac715a16d31711fa8afb498d4b41420bec3bfcc25347d0eab9bd08",
+    "data_plan": "127644b75ed0c2826a3c1d89e4718076f4617b5a0d1f949b5faa4d61f54e6e93",
+    "data_details": "92c4058fa8ce0a74dd05d8919cc664ebf8326e9d76303d2e67338969880e5fc6",
+    "binding": "275714631903758efbf5a4f82e2428c6f51838f53b90d0c56d2e5dec5da1d804",
+    "binding_details": "4dfc437064b16c1bb933008aebf7def8d279a903eef9cca24d0fedcc12d7d826",
+    "recipes": "62f2c8da5f0daa912abdf4576328706711c6561eef7f01c93a89cb71ad46fb6c",
+    "manifest": "bc62a5fb2553431b1e0547d11f366e52efb73096ea8ceb206c556ae5740a53eb",
+    "retained": "04d44b73e81982f846bfe8d81806db72ea669586b579ff22007dfd6f7d831297",
+    "selection": "48ae62cdc5b1754b9c4af674ef4716d53afb554882e174a93acf860eaf1c6cb1",
+    "imports": "e39b8db63ef73aea57b5dd4963ff29310524644ca36e137cd8b5461a3c90a23f",
+    "reference": "df1788907c6e26ef4df0b448ead526825336356b5606650165a1ce0825097eb7",
+    "image_check": "c03da09d39b8fd22283792c3dc1fbb6ac1e526d8afadd832fabc4071f1720cb1"
+  },
+  "implementation_pins": {
+    "tools/rebuild/runtime_code_pool.py": "729f189e2893c7f3a3e3cd97df7d7381ac115169e1d75cf664e6bbc1c587b277",
+    "tools/rebuild/coff_code_archive.py": "76244d2d4dca4c1f8aa72224be1ef5c92f68976b5cda7d31b5cfe23d3cc29e64",
+    "tools/rebuild/coff_rewrite.py": "48cea438b05a1c2de992eea4200b45a1eb14e49a27704a5c6fff98f941b1ae4c",
+    "tools/rebuild/coff_inventory.py": "3518c044738046e7cd9c8be37a3b1077af750fb2e7a19db793b09999a07ee0d2",
+    "tools/rebuild/data_plan.py": "e013ed5f217f9beeeaf571d089a36df22b645559063e826554179cea506f5bf8",
+    "tools/rebuild/runtime_data_owners.py": "9cbe1b28b5e5f5a440c4a7755bd76a1283f4325d2992800a16859e2819eb6304"
+  },
+  "limits": [
+    "No actual observation before independent source/schema review and root authorization.",
+    "No private projection without a reviewed nonempty fragment selection and exact plan/policy approval.",
+    "Owned disk image full hash must be supplied explicitly; no installed-image discovery.",
+    "Source/manifest/comparator identities are rehashed; geometry is not typed/lifetime approval."
+  ]
+}

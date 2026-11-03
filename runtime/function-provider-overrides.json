@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-function-provider-overrides",
+  "overrides": [
+    {
+      "address": "0x00709960",
+      "recipe_id": "0102-b0e6eedb2645042f",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x008d7dc0",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x008d8040",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x008d6f30",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x005a8060",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x006286d0",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x008041a0",
+      "recipe_id": "0368-6a957cd95eb650a8",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x004a4080",
+      "recipe_id": "0498-7aa2d7817b0846fe",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x008a81c0",
+      "recipe_id": "0583-622c20fba0ab8b44",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    },
+    {
+      "address": "0x00488d50",
+      "recipe_id": "0736-9d0a03ac1685f5fa",
+      "reason": "Same-source SP1 recipe has broader checked selected-row coverage; local EH diagnostics and direct associative children are zero. Code ownership only; ABI, data, EH and runtime closure remain unverified."
+    }
+  ]
+}

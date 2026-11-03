@@ -11,6 +11,8 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [Data strategy](DATA-STRATEGY.md), [data coverage plan](DATA-PLAN.md) and [runtime gaps](RUNTIME-GAPS.md): persistent-data evidence and unresolved fixups.
 - [Generated code gaps](GENERATED-CODE-GAPS.md): bounded metadata reconciliation and unresolved generated-code ownership.
 - [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
+- [Function selection](FUNCTION-SELECTION.md) and [import plan](IMPORT-PLAN.md): reviewed ownership choices and import metadata, without runtime approval.
+- [CRT provider contract](CRT-PROVIDER.md) and [original data fixture](DATA-FIXTURE.md): reviewed bounded experiments, not game provider or data adoption.
 - [EH ownership](EH-OWNERSHIP.md): hash-bound metadata observations and unresolved alternatives.
 - [Original EH fixture probe](EH-FIXTURE-PROBE.md): independently reviewed fixture execution, not game EH closure.
 - [Runtime audit](RUNTIME-AUDIT.md): startup, ABI and runtime findings and unknowns.

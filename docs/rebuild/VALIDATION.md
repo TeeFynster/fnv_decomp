@@ -44,3 +44,21 @@ The separately compiled original EH fixture was independently reviewed before ex
 The reviewed execution receipt reports both original fixture layouts passed: each completed 1,024 rounds covering normal construction/destruction, body-throw rollback and base-constructor throw, with 2,048 expected catches, 3,072 resumed paths, successful sentinels and counts, zero exit status and no stderr. The receipt binds the exact reviewed prepare and approval hashes. This is a narrow synthetic runtime result, not game startup, component closure or gameplay.
 
 Final aggregate rebuild discovery ran 149 tests: 147 passed and two native opt-in tests were skipped. The completed fixture run was not repeated. All 17 prepared input hashes, both executable/map pairs, and the execution receipt bindings still match the independently reviewed preparation. Original source, headers, recipe, oracle and the existing leaf extractor remain unchanged since the foundation checkpoint.
+
+## Named CRT provider investigation
+
+Independent archive and PE parsing verified the exact named SP1 and RTM `__purecall` members and their recorded hashes against one bounded reference entry: 22 non-relocation bytes agree in each 42-byte member and all five relocation records and derived target values reconcile with the private audit. This does not identify those dependency targets or select a game provider.
+
+Ten synthetic CRT-tool tests passed. Before execution, independent review checked the original fixture source, its 23 bound inputs, x86 direct imports and 11 static CRT map providers. The reviewed private execution receipt binds that preparation and review, and reports four bounded child results: set/restore state exit 0, intentional handler exit 73, default null-handler CRT termination exit 3 with the expected diagnostic, and a fresh state exit 0. The handler exit is not evidence of default behavior; no returning handler or game virtual call was executed. Transitive OS loader modules, game ABI, dependency ownership and all game fixups remain unverified.
+
+## Original data fixture
+
+Fifteen synthetic tooling tests passed. Before the native consumer ran, independent COFF and PE inspection checked the fixture's source-owned data and zero-storage ranges, data-only output, two symbolic relocations, map providers, writable/non-executable protections, direct imports and all prepared hashes. The producer had 7,808 actual virtual-zero bytes within the owned zero range; the relocated consumer had 7,968. The exact reviewed consumer's receipt reports exit 0, four scalar and eight byte checks, correct interior pointer identity, 65 callback calls, and 8,192 zero plus 8,192 writable-storage checks. This is evidence for that original fixture only; it approves no game data fixup or executable.
+
+## Function selection and import metadata reviews
+
+A separate reviewer joined the v2 code-ownership selections against all 68,667 retained receipt rows and the candidate stream, including the ten explicit overrides. The report has 68,657 selected addresses, with runtime eligibility and link readiness false; it preserves the 95 local EH diagnostics in 16 units and the absent optional index. Eight focused tests passed.
+
+The same reviewer verified the import v3 report and detailed-stream hashes and reconciled all 9,700 records to 280 import slots, preserving duplicate slot identities. The report records 6,306 uses with exact verified-function evidence; the remainder includes unverified or unresolved cases. Thirteen focused tests passed. This review did not independently rerun the full native PE parse or recheck every raw operand. Import provider selection, DLL exports, ABI and runtime use remain unapproved.
+
+Final integration discovery after the CRT, data, selection and import work ran 195 tests: 193 passed and two native opt-in tests were skipped. The previously reviewed CRT and data runs were not repeated; their bound prepared inputs showed no drift. Original source, headers, recipe, oracle and the existing leaf extractor remain unchanged since the foundation checkpoint.

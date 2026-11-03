@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "kind": "finite-union-reference-production-policy-v3",
+  "policy_id": "finite-union-reference-production-v3",
+  "producer_sha256": {
+    "tools/rebuild/bulk_code_pool.py": "4e6d697c1881c56c4c3f6a84788df6e0e2617b284d8e0226805828829bce49ed",
+    "tools/rebuild/runtime_code_pool.py": "729f189e2893c7f3a3e3cd97df7d7381ac115169e1d75cf664e6bbc1c587b277",
+    "tools/rebuild/coff_code_archive.py": "76244d2d4dca4c1f8aa72224be1ef5c92f68976b5cda7d31b5cfe23d3cc29e64",
+    "tools/rebuild/runtime_code_inventory.py": "c2fdbd52b4b7f4b7c68f9d80ad03708ba57d42b29e5938dfcf9769366a1ffd0b",
+    "tools/rebuild/runtime_gaps.py": "0399e0f91e94de781512a153ac598f4d5eb6210920bc58241542339c72904116",
+    "tools/rebuild/data_plan.py": "e013ed5f217f9beeeaf571d089a36df22b645559063e826554179cea506f5bf8",
+    "tools/rebuild/import_plan.py": "6b9237ab5951e7d4a2ac2f9b0c3435f0a667a9fdebac02a4534ba0e30ba98d9c",
+    "tools/rebuild/coff_inventory.py": "3518c044738046e7cd9c8be37a3b1077af750fb2e7a19db793b09999a07ee0d2",
+    "tools/build_and_match.py": "e4c5f0d8ef8546d1ff82f4f2092e5f65164495daa867c4ff25efd9e45a25d727",
+    "tools/compare.py": "cfcf5921b71b7a58b6f430d999a511fab9a68f037791bc60295a3083535544d1",
+    "tools/function_spans.py": "8e1f9134d9f207dcc8b524b6bac63cf1319f64860903fef5d2a6996709444727",
+    "tools/rebuild/verify_objects.py": "b5bc673596a13c0281f35a2d085503a862623ceb3c4bd7a763f744b6924e6877",
+    "tools/rebuild/union_reference_groups_v2.py": "2438480b1ba641b4714dfc10a739f27560f40a7536b5ee397805da72a9122f4f",
+    "tools/rebuild/application_entry_projection.py": "83510e2714e727970ec54935f0c8245dafeedc2335ae1b1705e0ab83afe9c751",
+    "tools/rebuild/canonical_reference_groups.py": "1f6246444e33b964078121eeabfb3d139642d44b5b164074777249f082ea41a8",
+    "tools/rebuild/coff_rewrite.py": "48cea438b05a1c2de992eea4200b45a1eb14e49a27704a5c6fff98f941b1ae4c",
+    "tools/rebuild/union_reference_projection_v2.py": "cd8ca144c815ffb639fb01dca87eae54f3cfec597b1559334ab7611e3049c123"
+  },
+  "box_artifact_sha256": {
+    "build/rebuild/union-reference-box2089-projection-v1/receipt.json": "c057095b727eced69ae5a45da3dc6498e189d64c47522f4ad1b5e1bbc1ea2d63",
+    "build/rebuild/union-reference-box2089-projection-v1/certificates.jsonl": "9884b0ec82f6ab6f3f8fcc880ea8ded8a152fbd897b5b1d5086575a7c1d521eb",
+    "build/rebuild/union-reference-box2089-projection-v1/2089-51b16ad19e044300.obj.stage": "84d4e7e09d93d0621301ddb9257194e64f9de3164d40826bd766f48537345600",
+    "build/rebuild/union-reference-box2089-projection-v1/union-reference-0000.lib": "c812f534eee078b17cac7816cd38585290e683198ec53f8670e5e162119abc1c",
+    "build/rebuild/union-reference-box2089-projection-v1/independent-outcome-review.json": "2f9a2308e465c79282356e1019b2465e20445bebc8f19c17a092e673ec25c2f4",
+    "build/rebuild/box-union-component-native-v1/prepare.json": "bd4e4e4fcc3f3d1126059b18a1609c64989f5c8b41d1f9d670e3614c633b9f6b",
+    "build/rebuild/box-union-component-normal-reinspection-v1/inspection.json": "4b7c6e49f5ea5a58cb7fd8fff0540873eaf0cabcb4e9d4d8f121a201fab9d453",
+    "build/rebuild/box-union-component-continuation-v1/prepare.json": "4ab9632d3ef795ae59b1172e9e79de4fb4ce6377cce1f4226af3e0650aa9cb47",
+    "build/rebuild/box-union-component-continuation-v1/independent-native-artifact-review.json": "23d95e05619ab805f8a4ff74f8c4f4b7ab462b946d6b6de1c26110c0dd603a60",
+    "build/rebuild/box-union-component-execute-v1.py": "1f6c57de4e3714a6822e82e2fc6a4da940caf8feda68918f0654b3eb7b33c6ca",
+    "build/rebuild/box-union-component-execution-harness-review-v1.json": "08d1eaf3d00c0fa34ce996df75b586f79bd5f40eb6cf7517504a72f3dbdd5d3c",
+    "build/rebuild/box-union-component-execution-v1/execution.json": "a6beff83458446e210048638ec28a92d82e4e375c17989dfaf171e222e86c449",
+    "build/rebuild/box-union-component-execution-v1/independent-outcome-review.json": "db9ccf62e240c53fda8bbf2735281c7cb01bac0e212cb8e125519a3531958745"
+  },
+  "reference_sha256": "df1788907c6e26ef4df0b448ead526825336356b5606650165a1ce0825097eb7",
+  "metadata_observation_sha256": "f4d1d9ef95f30d664b10ee478d19b4030375b1c5af53b7bb07b41f21116a75c5",
+  "metadata_details_sha256": "20626863590bfe069731fac18affe05622ca2d0524d9d66facb820beeeecca94",
+  "finite_scope": {
+    "recipes": 185,
+    "roots": 1372,
+    "code_bytes": 219493,
+    "fields": 7065
+  },
+  "remaining_blocked": {
+    "recipes": 225,
+    "roots": 2541
+  },
+  "baseline": {
+    "selected": 68657,
+    "emitted": 12946,
+    "historical_blocked": 51798,
+    "union_blocked": 3913
+  },
+  "group_constraints": {
+    "required_role": "code",
+    "required_type": 32,
+    "required_storage": 2,
+    "required_addend": 0,
+    "allowed_relocations": [
+      6,
+      20
+    ],
+    "allowed_kinds": [
+      "all-original-undefined",
+      "one-selected-definition-and-undefined"
+    ],
+    "duplicate_strong_definitions_allowed": false,
+    "coalescing_allowed": false,
+    "relocation_retargeting_allowed": false,
+    "unknown_IAT_data_weak_common_interior_group_waivers": false
+  },
+  "resource_limits": {
+    "practical_process_bytes": 1073741824,
+    "seconds": 900,
+    "private_output_bytes": 134217728,
+    "maximum_member_bytes": 16777216,
+    "maximum_shard_bytes": 67108864
+  },
+  "source_review_and_delegated_root_phase_required": true,
+  "native_tools_allowed": false,
+  "execution_allowed": false,
+  "provider_selected": false,
+  "runtime_eligible": false,
+  "compiler_variants_preserved": true,
+  "missing_original_fields": 88,
+  "retained_EH_notes": 95,
+  "optional_function_index_present": false,
+  "authored_fixture_dependencies": {
+    "tests/rebuild/test_coff_code_archive.py": "8a5e717fdcce3651ae1055477d2e3c24c45183b8f02fdfc3ce84444358f1ca43"
+  }
+}

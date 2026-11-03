@@ -60,6 +60,19 @@ class CollectorBoundaryTests(unittest.TestCase):
             except OSError:self.skipTest('directory symlinks unavailable to this test process')
             with self.assertRaises(ValueError):collector.private_outputs(private/'escape/report.json')
 
+    def test_external_filter_then_real_final_index_and_publication(self):
+        obj,raw,p,c,reference=authored.fixture()
+        with tempfile.TemporaryDirectory() as folder:
+            directory=Path(folder);function_index_path=directory/'absent-function-index'
+            source=directory/'source';source.write_text('stable source');pins={source:collector.eh.file_sha(source)}
+            candidates=collector.external_base_candidates(obj,p,reference,c['parent_proof']['address'],c['eh_pieces'])
+            self.assertEqual(candidates,{b['base'] for b in c['external_bindings'].values()})
+            collector.stable(pins,function_index_path)
+            out=directory/'metadata.json'
+            collector.publish_metadata(out,{'candidate_count':len(candidates),'input_stability':True},pins,function_index_path)
+            self.assertEqual(__import__('json').loads(out.read_text())['candidate_count'],7)
+            self.assertFalse(function_index_path.exists())
+
     def context(self):
         obj,raw,p,c,r=authored.fixture();p['external_identities']['18']['role']='data';c['external_bindings']['18']['role']='data';bindings=c['external_bindings'];names={obj['symbols'][int(i)]['name']:b['base'] for i,b in bindings.items()}
         fields=[];shared={}

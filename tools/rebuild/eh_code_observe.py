@@ -18,7 +18,7 @@ from runtime_gaps import read_bound
 
 CURRENT_HEADERS={'src/bsmain/bstaskmanager.h':'fa46a5e973566bd9e5c5943b88d9c50f3140b17c7328b4640f9f0cbc2cfb0a9e',
                  'src/bsmain/bstaskmanager_types.h':'283383384aa6be21f29507f2e807e844473e6a505804f44cc87261b73d206507'}
-TOOLS=('tools/rebuild/eh_code_observe.py','tools/rebuild/eh_code_closure.py','tools/rebuild/expanded_root_code_closure.py',
+TOOLS=('tools/rebuild/eh_code_observe.py','tools/rebuild/eh_field_witness.py','tools/rebuild/eh_code_closure.py','tools/rebuild/expanded_root_code_closure.py',
        'tools/rebuild/root_code_closure.py','tools/rebuild/coff_code_archive.py','tools/rebuild/coff_inventory.py',
        'tools/rebuild/runtime_code_inventory.py','tools/rebuild/runtime_gaps.py','tools/rebuild/data_plan.py',
        'tools/rebuild/import_plan.py','tools/rebuild/runtime_bind_plan.py','tools/rebuild/runtime_code_pool.py','tools/build_and_match.py','tools/compare.py','tools/function_spans.py')
@@ -46,7 +46,21 @@ def stable(observations,index):
     for path,h in observations.items():require(eh.file_sha(path)==h,'authenticated input/tool drift')
 
 
-def external_context(obj,policy,parent_fields,recipe,names,inferred,shared_rows):
+def external_base_candidates(obj,policy,reference,parent_address,pieces):
+    """Address filter only; no binding proof or access to collector index state."""
+    import struct
+    candidates=set();locations={3:int(parent_address,16),4:pieces[0][0]}
+    for section_index in (3,4):
+        original=reference.read(locations[section_index],obj['sections'][section_index]['size'])
+        for offset,symbol_index,kind in obj['sections'][section_index]['relocs']:
+            if str(symbol_index) not in policy['external_identities']:continue
+            addend=struct.unpack_from('<i' if kind==20 else '<I',obj['sections'][section_index]['payload'],offset)[0]
+            target=locations[section_index]+offset+4+struct.unpack_from('<i',original,offset)[0] if kind==20 else struct.unpack_from('<I',original,offset)[0]
+            candidates.add((target-addend)&0xffffffff)
+    return candidates
+
+
+def external_context(obj,policy,parent_fields,recipe,names,inferred,shared_rows,eh_field_context=None,generated_witnesses=None):
     mappings=dict(names);mappings.update({k:int(v,0) for k,v in recipe.get('symbols',{}).items()});mappings.update(inferred)
     result={};evidence=[]
     for text,identity in sorted(policy['external_identities'].items(),key=lambda kv:int(kv[0])):
@@ -78,6 +92,12 @@ def external_context(obj,policy,parent_fields,recipe,names,inferred,shared_rows)
             witnesses.append(eh.digest(row))
         # Recipe-only/inferred EH names have bounded native replay evidence, but
         # are not allowed to masquerade as a separately observed shared binding.
+        if not witnesses and index==20 and eh_field_context is not None:
+            from eh_field_witness import build
+            proof=build(obj,eh_field_context['reference'],eh_field_context)
+            require((proof['base'],proof['role'],proof['semantic_domain'],proof['contract_kind'])==(base,identity['role'],identity['semantic_domain'],identity['contract_kind']),'generated handler witness identity conflicts')
+            witnesses.append(eh.digest(proof));result[text]['proof_consistency']=proof['proof_consistency']
+            require(generated_witnesses is not None,'generated witness provenance sink required');generated_witnesses.append(proof)
         require(witnesses,'shared base identity lacks independent binding witness: '+hex(base)+' '+name)
         evidence.append(dict(base=base,**identity,identity_consistency='EXACT_BASE_ROLE_RESOLUTION'))
     return result,evidence
@@ -90,14 +110,14 @@ def private_outputs(output):
     return out,journal
 
 
-def publish_metadata(out,result,observations,index):
+def publish_metadata(out,result,observations,function_index_path):
     """Exclusive publication; failed final stability leaves only failure journal."""
     owned=None
     try:
         with out.open('x',encoding='utf-8') as target:
             identity=os.fstat(target.fileno());owned=(identity.st_dev,identity.st_ino)
             json.dump(result,target,sort_keys=True);target.write('\n');target.flush();os.fsync(target.fileno())
-        stable(observations,index)
+        stable(observations,function_index_path)
     except BaseException:
         if owned is not None and out.exists():
             current=out.stat()
@@ -120,6 +140,8 @@ def collect(args):
     out,journal=private_outputs(args.out);image=Path(args.image).resolve();detail=Path(args.binding_details).resolve()
     observations={paths[k]:h for k,h in expected.items()};observations[policy_path]=args.policy_sha256
     observations.update({image:pv['inputs']['image_sha256'],detail:binding['details_sha256']})
+    from eh_field_witness import AUDIT_SHA256
+    audit_path=Path(args.handler_field_evidence).resolve();audit=read_bound(audit_path,AUDIT_SHA256);observations[audit_path]=AUDIT_SHA256
     bind_image_gate(pv,observations)
     for name,h in CURRENT_HEADERS.items():observations[ROOT/name]=h
     tools=parse_tools(args.expected_tool)
@@ -134,7 +156,7 @@ def collect(args):
     obj_path=(paths['manifest'].parent/manifest.get('object_root_relative','.')/unit['object']).resolve();source=(ROOT/unit['source']).resolve()
     require(source.is_relative_to(ROOT),'foreign source path');observations.update({obj_path:unit['object_sha256'],source:unit['source_sha256']})
     require(out!=journal and not out.exists() and not journal.exists() and out not in observations and journal not in observations,'exclusive non-input metadata outputs required')
-    index=ROOT/'build/function_index.json';stable(observations,index)
+    function_index_path=ROOT/'build/function_index.json';stable(observations,function_index_path)
     out.parent.mkdir(parents=True,exist_ok=True)
     with journal.open('x',encoding='utf-8') as progress:
         def note(value):progress.write(json.dumps(public_metadata(value),sort_keys=True)+'\n');progress.flush();os.fsync(progress.fileno())
@@ -152,15 +174,7 @@ def collect(args):
             require(pieces==parent_pieces and not errors and {k:'0x%08x'%v for k,v in inferred.items()}=={k:v for k,v in row['eh_inferred'].items() if k in inferred_names},'original bounded parent EH replay differs')
             # Keep only the seven requested bases while streaming full saved rows.
             # These are candidate-filter addresses, not adopted identity evidence.
-            candidates=set();locations={3:int(parent,16),4:parent_pieces[0][0]}
-            for sn in (3,4):
-                original=pe.read(locations[sn],obj['sections'][sn]['size'])
-                for offset,index,kind in obj['sections'][sn]['relocs']:
-                    if str(index) not in policy['external_identities']:continue
-                    import struct
-                    addend=struct.unpack_from('<i' if kind==20 else '<I',obj['sections'][sn]['payload'],offset)[0]
-                    target=locations[sn]+offset+4+struct.unpack_from('<i',original,offset)[0] if kind==20 else struct.unpack_from('<I',original,offset)[0]
-                    candidates.add((target-addend)&0xffffffff)
+            candidates=external_base_candidates(obj,policy,pe,parent,parent_pieces)
             shared={};bucket=None
             with gzip.open(detail,'rt',encoding='utf-8') as stream:
                 reader=BindingReader(stream,binding['summary'],selection['selections'])
@@ -173,27 +187,40 @@ def collect(args):
                             if base and int(base,16) in candidates:shared.setdefault(int(base,16),[]).append(field)
                 census=reader.finish()
             require(bucket is not None and len(bucket['fields'])==5 and bucket['missing_fields']==[],'complete parent field evidence unavailable')
-            bindings,ledger=external_context(obj,policy,bucket['fields'],full_recipe,names,inferred,shared)
+            generated_witnesses=[];field_context=None
+            # Only the exact missing physical20 field may use this family. Read
+            # bounded PE loader-relocation metadata, never scan target code.
+            from data_plan import Pe as MetadataPe
+            metadata_reader=MetadataPe(image)
+            try:
+                section=metadata_reader.section(0xec3d33-metadata_reader.base,1,required=True)
+                field_context=dict(parent_proof=proofs[0],pieces=parent_pieces,recipe=full_recipe,recipes=recipes['units'],names=names,inferred=inferred,
+                    object_sha256=unit['object_sha256'],reference_sha256=pv['inputs']['image_sha256'],recipes_sha256=expected['recipes'],audit=audit,reference=pe,
+                    original_highlow_sites=[metadata_reader.base+site for site in metadata_reader.relocations()],
+                    target_section=dict(executable=section['executable'],original_base=metadata_reader.base+section['rva'],original_end=metadata_reader.base+section['rva']+section['extent']))
+            finally:metadata_reader.close()
+            bindings,ledger=external_context(obj,policy,bucket['fields'],full_recipe,names,inferred,shared,field_context,generated_witnesses)
             # Private comparison bindings preserve the proved original destinations.
             core_recipe.setdefault('symbols',{}).update({obj['symbols'][int(i)]['name']:hex(b['base']) for i,b in bindings.items()})
             handler=next(p for p in parent_pieces if p[1]-p[0]==27);core_recipe['symbols'][obj['symbols'][19]['name']]=hex(handler[0])
             context=dict(object_sha256=unit['object_sha256'],source_sha256=unit['source_sha256'],inputs=expected,fields_complete=True,missing_fields_complete=True,missing_fields=[],parent_proof=proofs[0],eh_pieces=parent_pieces,
                 data_boundary_proof=dict(symbol_index=16,original_base='0x01016c10',role='data',semantic_domain='data',contract_kind='vtable-view',exact=True,storage_defined=False),
-                external_bindings=bindings,shared_base_identities=ledger,core_unit=core_recipe,core_names=names,reference_identity_sha256=pv['inputs']['image_sha256'])
+                external_bindings=bindings,shared_base_identities=ledger,core_unit=core_recipe,core_names=names,generated_eh_field_witnesses=generated_witnesses,reference_identity_sha256=pv['inputs']['image_sha256'])
             plan=eh.observe_component(raw,policy,context,pe)
+            plan['generated_eh_field_witnesses']=generated_witnesses
             contract=dict(recipe_id=unit['recipe_id'],roots=[policy['selected']],export_policy='selected-code-only-no-source-initializers-v1',verified_match=True,fields_complete=True,missing_fields_complete=True,unit_proofs_complete=True,
-                fields=bucket['fields'],missing_fields=[],parent_eh=parent_pieces,unit_verified_functions=row['verified_functions'],omission_field_proofs=[],
+                fields=bucket['fields'],missing_fields=[],generated_eh_field_witnesses=copy.deepcopy(generated_witnesses),parent_eh=parent_pieces,unit_verified_functions=row['verified_functions'],omission_field_proofs=[],
                 expanded_retention_contract=eh.expanded_contract(plan),provenance=dict(object_sha256=unit['object_sha256'],source_sha256=unit['source_sha256'],recipe_id=unit['recipe_id'],recipe_index=69,
                     recipe_unit_sha256=row['recipe_unit_sha256'],recipe_manifest_sha256=expected['recipes'],producer_manifest_sha256=expected['manifest'],retained_proof_sha256=expected['retained'],selection_sha256=expected['selection'],
                     binding_sha256=expected['binding'],binding_details_sha256=binding['details_sha256'],reference_identity_sha256=pv['inputs']['image_sha256'],observer_sha256=tools['tools/rebuild/expanded_root_code_closure.py'],
-                    optional_function_index_present=False,dependency_tools_sha256=tools,current_header_context_sha256=CURRENT_HEADERS,historical_header_compile_inputs_verified=False,binding_row_references=bucket['row_identities']))
+                    optional_function_index_present=False,dependency_tools_sha256=tools,generated_eh_field_witnesses_sha256=eh.digest(generated_witnesses),current_header_context_sha256=CURRENT_HEADERS,historical_header_compile_inputs_verified=False,binding_row_references=bucket['row_identities']))
             import expanded_root_code_closure as producer
             generic=producer.observe_requested_dependency_retention(obj,contract,requested_dependency_retention=plan['retained_sections'])
             decision=eh.recompute_and_compose(plan,generic,obj,contract)
-            stable(observations,index)
+            stable(observations,function_index_path)
             result=public_metadata(dict(schema_version=1,kind='fnv-iotask-eh-metadata-observation',status='metadata-only',inputs=dict(policy_sha256=args.policy_sha256,**expected),tools_sha256=tools,binding_census=census,
                 plan=plan,expanded_observation=generic,composition=decision,input_stability=True,optional_function_index_present=False,emission_performed=False,**eh.FALSE))
-            publish_metadata(out,result,observations,index)
+            publish_metadata(out,result,observations,function_index_path)
             note(dict(state='complete',output_sha256=eh.file_sha(out)));return result
         except BaseException as error:
             note(dict(state='failed',error_type=type(error).__name__,reason=public_metadata(str(error)),error_message_sha256=eh.sha(str(error).encode()),output_published=out.exists()));raise
@@ -201,7 +228,7 @@ def collect(args):
 
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
-    for name in ('manifest','retained','recipes','selection','binding','binding-details','image','out'):parser.add_argument('--'+name,type=Path,required=True)
+    for name in ('manifest','retained','recipes','selection','binding','binding-details','handler-field-evidence','image','out'):parser.add_argument('--'+name,type=Path,required=True)
     parser.add_argument('--policy-sha256',required=True);parser.add_argument('--expected-tool',action='append',required=True)
     result=collect(parser.parse_args(argv));print(json.dumps(dict(status=result['status'],emission_performed=False)));return 0
 

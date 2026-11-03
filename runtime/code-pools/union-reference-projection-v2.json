@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "operational-union-reference-policy-v2",
+  "policy_id": "operational-union-reference-projection-v2",
+  "producer_sha256": {
+    "tools/rebuild/bulk_code_pool.py": "4e6d697c1881c56c4c3f6a84788df6e0e2617b284d8e0226805828829bce49ed",
+    "tools/rebuild/runtime_code_pool.py": "729f189e2893c7f3a3e3cd97df7d7381ac115169e1d75cf664e6bbc1c587b277",
+    "tools/rebuild/coff_code_archive.py": "76244d2d4dca4c1f8aa72224be1ef5c92f68976b5cda7d31b5cfe23d3cc29e64",
+    "tools/rebuild/runtime_code_inventory.py": "c2fdbd52b4b7f4b7c68f9d80ad03708ba57d42b29e5938dfcf9769366a1ffd0b",
+    "tools/rebuild/runtime_gaps.py": "0399e0f91e94de781512a153ac598f4d5eb6210920bc58241542339c72904116",
+    "tools/rebuild/data_plan.py": "e013ed5f217f9beeeaf571d089a36df22b645559063e826554179cea506f5bf8",
+    "tools/rebuild/import_plan.py": "6b9237ab5951e7d4a2ac2f9b0c3435f0a667a9fdebac02a4534ba0e30ba98d9c",
+    "tools/rebuild/coff_inventory.py": "3518c044738046e7cd9c8be37a3b1077af750fb2e7a19db793b09999a07ee0d2",
+    "tools/build_and_match.py": "e4c5f0d8ef8546d1ff82f4f2092e5f65164495daa867c4ff25efd9e45a25d727",
+    "tools/compare.py": "cfcf5921b71b7a58b6f430d999a511fab9a68f037791bc60295a3083535544d1",
+    "tools/function_spans.py": "8e1f9134d9f207dcc8b524b6bac63cf1319f64860903fef5d2a6996709444727",
+    "tools/rebuild/verify_objects.py": "b5bc673596a13c0281f35a2d085503a862623ceb3c4bd7a763f744b6924e6877",
+    "tools/rebuild/union_reference_groups_v2.py": "2438480b1ba641b4714dfc10a739f27560f40a7536b5ee397805da72a9122f4f",
+    "tools/rebuild/application_entry_projection.py": "83510e2714e727970ec54935f0c8245dafeedc2335ae1b1705e0ab83afe9c751",
+    "tools/rebuild/canonical_reference_groups.py": "1f6246444e33b964078121eeabfb3d139642d44b5b164074777249f082ea41a8",
+    "tools/rebuild/coff_rewrite.py": "48cea438b05a1c2de992eea4200b45a1eb14e49a27704a5c6fff98f941b1ae4c"
+  },
+  "metadata_observation_sha256": "f4d1d9ef95f30d664b10ee478d19b4030375b1c5af53b7bb07b41f21116a75c5",
+  "metadata_details_sha256": "20626863590bfe069731fac18affe05622ca2d0524d9d66facb820beeeecca94",
+  "reference_sha256": "df1788907c6e26ef4df0b448ead526825336356b5606650165a1ce0825097eb7",
+  "box2089": {
+    "recipe_id": "2089-51b16ad19e044300",
+    "original_addresses": [
+      "0x00db0920",
+      "0x00db0960",
+      "0x00db09b0"
+    ],
+    "code_bytes": 182,
+    "fields": 1
+  },
+  "finite_scope": {
+    "recipes": 185,
+    "roots": 1372,
+    "code_bytes": 219493,
+    "fields": 7065,
+    "operationally_enabled": false
+  },
+  "whole_coverage": 68657,
+  "maximum_native_object_bytes": 16777216,
+  "coalescing_allowed": false,
+  "relocation_retargeting_allowed": false,
+  "duplicate_strong_definitions_allowed": false,
+  "native_tools_allowed": false,
+  "executable_link_allowed": false,
+  "provider_selected": false,
+  "runtime_eligible": false,
+  "authored_fixture_dependencies": {
+    "tests/rebuild/test_union_reference_groups_v2.py": "be40920ae5dad9fdb32460a443284b2714ee1ffbb851ba895eb7ba5c93f03c1e",
+    "tests/rebuild/test_bulk_code_pool.py": "15fbd2e4185f6df7703c33b12dfd60483d4d4a0d913a6fc1a3d6796eb1122983",
+    "tests/rebuild/test_coff_code_archive.py": "8a5e717fdcce3651ae1055477d2e3c24c45183b8f02fdfc3ce84444358f1ca43"
+  },
+  "operational_profiles": [
+    "box2089"
+  ],
+  "all185_requires_later_exact_artifact_bound_source_review": true
+}

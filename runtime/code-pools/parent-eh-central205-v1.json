@@ -1,0 +1,529 @@
+{
+  "schema_version": 1,
+  "policy_id": "no-catch-parent-eh-central205-v1",
+  "scope": "finite-initial-saved-metadata-selected-CODE-parents",
+  "inputs": {
+    "lane08": "29636ad8fe01d544bf1c9930b64ec01770ddcdb6ff4ded09684ee72beff4e05e",
+    "central": "290ac0e8c1ffbfd89df7dd6cdbbdb8df363edca58111b7aa19fe842aa26cc8e4",
+    "request": "f778bdd8453d9813b978acbba7547e5733c585ebf5043b9769986bf8cf7e0665",
+    "link": "763d7f206b9c838184364071ea035fe9c352dbf25d2a5fb597e7523587ca1a31"
+  },
+  "central_lane_sha256": "d0da19a9b6de1777bb83b58a66773ed6b8280854341f4d2fe4ec24e0569eb50d",
+  "targets": [
+    {
+      "root": {
+        "object_sha256": "4b6995b3df78352b64912e15ba5c0cd161c2d80b38106e98ab1dd26302dac6a9",
+        "original_address": "0x006ff580",
+        "recipe_id": "0022-0f36b7c0a5f81d8f",
+        "recipe_index": 22,
+        "section": 6,
+        "size": 134,
+        "source_sha256": "612450a6e61aa24b6678586fc09f86cf12dea84acd643dcecc4cde9bc60c56ca",
+        "symbol": "?FUN_006ff580@@YAPAUFUN_006ff690@@XZ",
+        "symbol_index": 20,
+        "value": 0
+      },
+      "source": "src/bscore/bsperformancetimer.cpp",
+      "actual_link_symbol": "_fnv_code_7d649c1d04ca290478324e362ab0a05260985d318f05e699c413e8a8a1a28b10",
+      "actual_link_error_occurrences": 2,
+      "central_lane": 8,
+      "central_record_ordinal": 3,
+      "central_record_sha256": "602d5b6a8e6321c9a32611eb572daf120082a3e239cb2fdf199fc30a27574467",
+      "central_certificate_sha256": "be5a009e3d80404c0fd86986ef9fea1ef614491310c61c3fd5292e6900558681",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 6,
+          "section": 7
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 6,
+          "section": 8
+        }
+      ],
+      "prior_blockers": {
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "d2bc1ca08a073a0c14ed55c6c26c37324db664bee045899a44f2bf03e26f3614",
+        "original_address": "0x00afdc60",
+        "recipe_id": "1661-d2ae2a0fce8c1486",
+        "recipe_index": 1661,
+        "section": 3,
+        "size": 136,
+        "source_sha256": "b1a02e5755e15deac04254cfe0d79833beca4fda47d3602f1130e7d4da06ddbf",
+        "symbol": "??0FUN_00afdc60@@QAE@HH_N@Z",
+        "symbol_index": 8,
+        "value": 0
+      },
+      "source": "src/gamebryo2.2/corelibs/nisystem/nifile_od_variant.cpp",
+      "actual_link_symbol": "_fnv_code_8345c91c9497528278d3e3e64256af253701f84764934badd13b2356d4c7522c",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 26,
+      "central_record_sha256": "11b87d141d0fb1dbe6436f8cbe5ab9141d3cd7119194320dee79e6ed62b806ff",
+      "central_certificate_sha256": "2ac0369dc8740445c183644cf55e6ef96dac63094d6180039e7c585f9f8dca01",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 3,
+          "section": 4
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 3,
+          "section": 5
+        }
+      ],
+      "prior_blockers": {
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "576ec05a6783c2081b6bcdff235b26d8d57237ea5b33a4e9e413d92cddaed7f6",
+        "original_address": "0x0049fef0",
+        "recipe_id": "0024-6fad34752982fbc2",
+        "recipe_index": 24,
+        "section": 15,
+        "size": 134,
+        "source_sha256": "5815fcf18de1b3fb141475546df4a58381720785e9ddabccac481272df7f9495",
+        "symbol": "?GetRandomGenerator@MersenneTwister@bsrandom_singleton@@SAPAV12@XZ",
+        "symbol_index": 52,
+        "value": 0
+      },
+      "source": "src/bscore/bsrandom_h_unit.cpp",
+      "actual_link_symbol": "_fnv_code_ba176626e852847085dbc0f0c49734774ee83aab7ae483e96eb60f0f76ea1171",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 5,
+      "central_record_sha256": "f539ecf52252f673a25295743b372c022dd8b471c7f5b2812dffad512af8d534",
+      "central_certificate_sha256": "1e42187a0db5ec1dff4f922c914cd024101456390c111642dd29dc19f08e905d",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 15,
+          "section": 16
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 15,
+          "section": 17
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 1,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "77827dded421a964c2ddd9397f575fcd6e5ab4af7f622ea1f93c6938faef5e81",
+        "original_address": "0x00448420",
+        "recipe_id": "2633-a302a748a2f3dbae",
+        "recipe_index": 2633,
+        "section": 420,
+        "size": 499,
+        "source_sha256": "9236184acd1d32db546f728d2b587b9794836daf4cba13b01560029d1c3d6587",
+        "symbol": "?FUN_00448420@ModelLoader@fnv_00448420@@QAEXXZ",
+        "symbol_index": 1999,
+        "value": 0
+      },
+      "source": "src/staging/blk_00440000_od.cpp",
+      "actual_link_symbol": "_fnv_code_fc5000a24f910bfb511ed8ddc4bdf1b9b0befbe6008f056c3d19d0c9b1516c32",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 32,
+      "central_record_sha256": "507ee98d117b3ffb262c892c439ba17de9e8629895d9c37bc4927712452e5926",
+      "central_certificate_sha256": "d3b746e28ac5e7b342641d64949b32a7c537cbb804aae1d5d2ce95c344e0ec46",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 420,
+          "section": 421
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 420,
+          "section": 422
+        }
+      ],
+      "prior_blockers": {
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "7e2a9146e6ddac83d36042cfdbcd0d9aab19641ae70a475a2a09b19d62ccdc07",
+        "original_address": "0x00af2640",
+        "recipe_id": "0245-016a52221d4fdff6",
+        "recipe_index": 245,
+        "section": 23,
+        "size": 116,
+        "source_sha256": "0bdec41f85752f677ddc3ccae9d72a203942f387c328b9f7c9b4ee814ca7b7e5",
+        "symbol": "??$_Immortalize@VStandardLibrarySingletonObject@std@@@std@@YAAAVStandardLibrarySingletonObject@0@XZ",
+        "symbol_index": 87,
+        "value": 0
+      },
+      "source": "src/bssystemutilities/console/bsawardssystemutility_console.cpp",
+      "actual_link_symbol": "_fnv_code_eb1beaf1f16151f210e120e75a6956fa9623c66fa28ecaac2d7a52dafd303006",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 9,
+      "central_record_sha256": "abbd0c7e2bcd7d06b31e7d96c4647ab4d8f45b7813d4a7b9e3f94b340979da59",
+      "central_certificate_sha256": "aad3276157cc6b0e4df02ff2058e299e2ed2e5a33889f808d702a8089f600306",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 23,
+          "section": 24
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 23,
+          "section": 27
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 1,
+        "UNSUPPORTED_OR_PARTIAL_ROOT_SECTION": 1,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "8d435c28bc61f8a23da22ff8c3a6ad4eb0f6ad8fee10a4a97d7eeea6301ab2be",
+        "original_address": "0x005e0200",
+        "recipe_id": "2656-e9bf85b93a320794",
+        "recipe_index": 2656,
+        "section": 241,
+        "size": 161,
+        "source_sha256": "bfcf1309eef12f0dc15a282e8cd6d4ec56cf684efaac658c14e511542f71c625",
+        "symbol": "?FUN_005e0200@C5E0200File@@QAE_NPBD@Z",
+        "symbol_index": 992,
+        "value": 0
+      },
+      "source": "src/staging/blk_005e0000_od.cpp",
+      "actual_link_symbol": "_fnv_code_d04b74a27f6c311871cba19725f162793d3c28cadb48ccca059d2d553ffae1da",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 35,
+      "central_record_sha256": "f800eeedc1ae65e6eb14803b7c78784f6ca772db6c8d9fe5f29b1886f2f56a33",
+      "central_certificate_sha256": "fdd09ddc6c3dae7f76373f4bafd5eed57b7602d748fc23fd1545095f30111fa8",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 241,
+          "section": 242
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 241,
+          "section": 243
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 1,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "9b03215d6fe3429c4d82ab7e7f23352bc6b6b15f213b858762655e30edbc2db2",
+        "original_address": "0x006c0720",
+        "recipe_id": "0845-b1107b8deb271420",
+        "recipe_index": 845,
+        "section": 290,
+        "size": 162,
+        "source_sha256": "710e559cf0dfb35a179df5fa697a0187bda56b16b3288b99be43e93c12e081fa",
+        "symbol": "?GetNavMeshObstacleManager@fnv_006c0720@@YAPAUNavMeshObstacleManagerObj@1@XZ",
+        "symbol_index": 1739,
+        "value": 0
+      },
+      "source": "src/fallout_shared/pathfinding/navmeshobstaclemanager.cpp",
+      "actual_link_symbol": "_fnv_code_269628d65115da913fb2df6b2f9df981d04c53819b0f2862dc7055bd9b697bfe",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 22,
+      "central_record_sha256": "e29a77d61c413d5bad127a6a05b8a54236495ef2cc097a05c38e3d2a4319d183",
+      "central_certificate_sha256": "62a67a9e08491a999fab2d63312e71f33efdd528e6e5b9371521f1036f65f612",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 290,
+          "section": 291
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 290,
+          "section": 294
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 2,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "9b03215d6fe3429c4d82ab7e7f23352bc6b6b15f213b858762655e30edbc2db2",
+        "original_address": "0x006c07d0",
+        "recipe_id": "0845-b1107b8deb271420",
+        "recipe_index": 845,
+        "section": 14,
+        "size": 262,
+        "source_sha256": "710e559cf0dfb35a179df5fa697a0187bda56b16b3288b99be43e93c12e081fa",
+        "symbol": "?FUN_006c07d0@FUN_006c07d0_shell@@QAE_NXZ",
+        "symbol_index": 69,
+        "value": 0
+      },
+      "source": "src/fallout_shared/pathfinding/navmeshobstaclemanager.cpp",
+      "actual_link_symbol": "_fnv_code_ef40805d4fa39059be2ad2afd43045b39010ffcc1cf1389102fd054c63588973",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 20,
+      "central_record_sha256": "a1961c494c64a828f03d0f11482cc31f251786992ee73372e27ef4989b514f2a",
+      "central_certificate_sha256": "98e1144edc43d11e54c51b0f6027c8047e23713a3a04dffdea2e18600786b2f6",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 14,
+          "section": 15
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 14,
+          "section": 16
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 2,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "a457317714c677897183825de741e78dd32ffd9345fde3437432bfb76330a2d5",
+        "original_address": "0x0095ee80",
+        "recipe_id": "0396-a86e0db061d485dd",
+        "recipe_index": 396,
+        "section": 294,
+        "size": 901,
+        "source_sha256": "5266cc2694244c7f8e3bbbec4cfdcf077b230e8bdfe0a03214f5ea3724bdb3e0",
+        "symbol": "?ClearIdleAnims@FUN_0095ee80_Class@fnv_0095ee80@@QAEXXZ",
+        "symbol_index": 3068,
+        "value": 0
+      },
+      "source": "src/fallout/ai/playercharacter.cpp",
+      "actual_link_symbol": "_fnv_code_3041412a60ce889485428a486a9281ccd60dd3025c7068f2f7725d05a6537213",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 11,
+      "central_record_sha256": "aa26e942f8614efdae9aa255214eb2eeb63934d680ec5b9d6ffdee1d5725c612",
+      "central_certificate_sha256": "442851d0765e02428119212bf7b6b8cf045bc06e726a2c74082adf660918b833",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 294,
+          "section": 295
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 294,
+          "section": 296
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 2,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "582c38fa0cc3184ad31e908ace6dc49eccec0a4a3ba007ac45e6b9383df26df6",
+        "original_address": "0x006519f0",
+        "recipe_id": "0737-c6601f0f06d43d38",
+        "recipe_index": 737,
+        "section": 36,
+        "size": 187,
+        "source_sha256": "f365fd04f2095b9ce68c1a9eedcfebef26f860e125fc2c4c96ffc712a7865f39",
+        "symbol": "?FUN_006519f0@@YAXXZ",
+        "symbol_index": 160,
+        "value": 0
+      },
+      "source": "src/fallout_shared/facegen/bsfacegenmanager.cpp",
+      "actual_link_symbol": "_fnv_code_44bfbbc74ba532525e76a979aa747aae31325cfc8eab9251a1f4216c0234ea96",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 15,
+      "central_record_sha256": "88eee702888100b5afbf544eb0f79cdfa9d36631b1956dce257121bc6a318814",
+      "central_certificate_sha256": "aeba37bb5aecb190371a311490f8ed529f07df0cdd1445cfd43a776d198e9d01",
+      "historical_EH_failed_piece_evidence": [],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 36,
+          "section": 37
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 36,
+          "section": 39
+        }
+      ],
+      "prior_blockers": {
+        "UNSUPPORTED_SECTION_SEMANTICS": 1,
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LABEL_OMISSION_NOT_PROVED": 3,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": false
+    },
+    {
+      "root": {
+        "object_sha256": "77827dded421a964c2ddd9397f575fcd6e5ab4af7f622ea1f93c6938faef5e81",
+        "original_address": "0x00453720",
+        "recipe_id": "2633-a302a748a2f3dbae",
+        "recipe_index": 2633,
+        "section": 298,
+        "size": 139,
+        "source_sha256": "9236184acd1d32db546f728d2b587b9794836daf4cba13b01560029d1c3d6587",
+        "symbol": "?FUN_00453720@@YAPAUS_00453720_Obj@@XZ",
+        "symbol_index": 1210,
+        "value": 0
+      },
+      "source": "src/staging/blk_00440000_od.cpp",
+      "actual_link_symbol": "_fnv_code_73ddd8ef5dd2220d3db6f9b54bf2f092dd6fc65a4f19d3e078a4d619d0037a13",
+      "actual_link_error_occurrences": 1,
+      "central_lane": 8,
+      "central_record_ordinal": 31,
+      "central_record_sha256": "ac0bddc0261e0cc8a5bf2d75ae0f65d4a0f88ee4e8a44f599104f888376ef51d",
+      "central_certificate_sha256": "0fd8787d042640e054061480da23da312ee7af640d7451ca604eb0bc7fdba177",
+      "historical_EH_failed_piece_evidence": [
+        {
+          "code": "INVENTORY_FAILED_PARENT_EH",
+          "evidence": [
+            [
+              15652416,
+              15652431,
+              false,
+              "0x00453720",
+              [
+                "??3S_00453720_Obj@@SAXPAXI@Z"
+              ]
+            ]
+          ]
+        }
+      ],
+      "historical_parent_children": [
+        {
+          "name": ".text$x",
+          "parent": 298,
+          "section": 299
+        },
+        {
+          "name": ".xdata$x",
+          "parent": 298,
+          "section": 300
+        }
+      ],
+      "prior_blockers": {
+        "RETAINED_PARENT_EH_OR_UNKNOWN_CHILD": 2,
+        "SPECIAL_RUNTIME_REFERENCE": 1,
+        "SPECIAL_OMITTED_TARGET_CONVERSION": 1,
+        "LIVE_SAFESEH_HANDLER_REQUIRES_ADAPTER": 1,
+        "PARENT_EH_REQUIRES_CLOSURE_ADAPTER": 1
+      },
+      "no_catch_status": "unobserved",
+      "must_remain_blocked": true
+    }
+  ],
+  "bounds": {
+    "max_roots": 11,
+    "max_recipes": 9,
+    "max_states": 64,
+    "max_eh_code_bytes": 65536,
+    "max_safeseh_records": 4096,
+    "max_output_bytes": 134217728
+  },
+  "families": {
+    "FuncInfo_magic": "VC9-EH3",
+    "EH_flags": 1,
+    "catch_try_IP_exception_spec": "all-zero-only",
+    "original_piecewise_mapping": true,
+    "overlapping_original_pieces": "blocked-initial-policy",
+    "SafeSEH": "complete-record-accounted-selected-handler-projection"
+  },
+  "ordinary_observer_unchanged": true,
+  "source_only": true,
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "ABI_verified": false,
+  "link_ready": false
+}

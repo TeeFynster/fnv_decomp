@@ -81,11 +81,11 @@ def contract_for(plan):
     provenance=dict(object_sha256=plan['object_sha256'],source_sha256=plan['source_sha256'],recipe_id=plan['recipe_id'],recipe_index=69,
         producer_manifest_sha256=plan['inputs']['manifest'],retained_proof_sha256=plan['inputs']['retained'],recipe_manifest_sha256=plan['inputs']['recipes'],
         selection_sha256=plan['inputs']['selection'],binding_sha256=plan['inputs']['binding'],reference_identity_sha256=plan['reference_identity_sha256'],
-        optional_function_index_present=False,observer_sha256='d'*64,dependency_tools_sha256={name:'d'*64 for name in ('tools/rebuild/expanded_root_code_closure.py','tools/rebuild/root_code_closure.py','tools/rebuild/coff_code_archive.py')},recipe_unit_sha256='f'*64,binding_details_sha256='a'*64)
+        optional_function_index_present=False,generated_eh_field_witnesses_sha256=eh.digest(plan.get('generated_eh_field_witnesses',[])),observer_sha256='d'*64,dependency_tools_sha256={name:'d'*64 for name in ('tools/rebuild/expanded_root_code_closure.py','tools/rebuild/root_code_closure.py','tools/rebuild/coff_code_archive.py')},recipe_unit_sha256='f'*64,binding_details_sha256='a'*64)
     fields=[dict(physical_section=3,function_va=plan['selected']['original_address'],coff_relocation=dict(offset=f['offset'],symbol_index=f['target_index'],kind=f['kind'],addend=f['addend']&0xffffffff),
         derived_source_symbol_base_va=hex(f['original_base']),exact_original_target_va=hex(f['original_target']),proof_consistency='EXACT_OWN_SOURCE_RESOLUTION') for f in plan['fields'] if f['section']==3]
     return dict(recipe_id=plan['recipe_id'],roots=[plan['selected']],export_policy='selected-code-only-no-source-initializers-v1',
-        expanded_retention_contract=eh.expanded_contract(plan),parent_eh=plan['parent_EH'],missing_fields=[],fields=fields,
+        expanded_retention_contract=eh.expanded_contract(plan),generated_eh_field_witnesses=copy.deepcopy(plan.get('generated_eh_field_witnesses',[])),parent_eh=plan['parent_EH'],missing_fields=[],fields=fields,
         verified_match=True,fields_complete=True,missing_fields_complete=True,unit_proofs_complete=True,provenance=provenance)
 
 
@@ -95,13 +95,13 @@ def generic_for(plan,obj):
     scope=dict(policy_id=eh.EXPANDED,export_policy=contract['export_policy'],roots=[plan['selected']],requested_dependency_retention=plan['retained_sections'],
         retained_section_indices=plan['retained_sections'],retained_primary_indices=plan['retained_primary_indices'],retained_physical_slots=plan['retained_physical_slots'],
         object_sha256=plan['object_sha256'],provenance_sha256=eh.digest(contract['provenance']),contract_identity_sha256=eh.digest(contract),
-        expanded_retention_contract_sha256=eh.digest(contract['expanded_retention_contract']),edges_sha256=eh.digest(edges),physical_universe_sha256=eh.digest(plan['universe']))
+        expanded_retention_contract_sha256=eh.digest(contract['expanded_retention_contract']),edges_sha256=eh.digest(edges),physical_universe_sha256=eh.digest(plan['universe']),generated_eh_field_witnesses_sha256=eh.digest(plan.get('generated_eh_field_witnesses',[])))
     sections=[dict(index=i,disposition='AUTHORED_RETAIN_OR_OMIT') for i in obj['sections']]
     symbols=[dict(index=i,disposition='AUTHORED_RETAIN_OR_OMIT') for i in obj['symbols']]
     next(s for s in symbols if s['index']==55).update(disposition='OMIT_UNREACHABLE_WEAK_CANDIDATE',decoded_auxiliary=dict(kind='WEAK_EXTERNAL',fallback=54,search=2))
     blockers=eh.extension_obligations(plan);ids=[b['blocker_id'] for b in blockers]
     return dict(schema_version=1,policy_id=eh.EXPANDED,expanded_interface=eh.EXPANDED,requested_dependency_retention=plan['retained_sections'],
-        roots=[plan['selected']],physical_universe=plan['universe'],contract_identity_sha256=eh.digest(contract),provenance=contract['provenance'],
+        roots=[plan['selected']],physical_universe=plan['universe'],generated_eh_field_witnesses=copy.deepcopy(plan.get('generated_eh_field_witnesses',[])),external_reference_contracts=copy.deepcopy(plan['external_obligations']),shared_base_identities=copy.deepcopy(plan['shared_base_identities']),contract_identity_sha256=eh.digest(contract),provenance=contract['provenance'],
         retained_section_indices=plan['retained_sections'],retained_runtime_section_indices=[3,4,6],retained_primary_indices=plan['retained_primary_indices'],retained_physical_slots=plan['retained_physical_slots'],
         dependency_field_observations=plan['dependency_field_observations'],parent_EH=plan['parent_EH'],
         closure_observed=False,root_closure_candidate=False,serialization_candidate=False,full_serialization_eligible=False,emission_performed=False,
@@ -221,7 +221,7 @@ class EHCodeClosureTests(unittest.TestCase):
             else:contract['provenance']['source_sha256']='a'*64
             with self.assertRaises(ValueError):eh.compose(plan,g,copy.deepcopy(g),contract)
     def test_exact_dependency_contract_and_unpromoted_generic_flags(self):
-        for mode in ('field','target','parent','universe','scope','candidate','complete','contract-hash'):
+        for mode in ('field','target','parent','universe','scope','candidate','complete','contract-hash','witness-output','external-output','shared-output','witness-scope'):
             obj,_,_,_,_,plan=self.observed();g=copy.deepcopy(generic_for(plan,obj));contract=contract_for(plan)
             if mode=='field':contract['expanded_retention_contract']['dependency_field_observations'].pop()
             elif mode=='target':g['dependency_field_observations'][0]['target_symbol']['section']=6
@@ -230,6 +230,12 @@ class EHCodeClosureTests(unittest.TestCase):
             elif mode=='scope':g['omission_subcertificate']['scope']['expanded_retention_contract_sha256']='a'*64
             elif mode=='candidate':g['root_closure_candidate']=True
             elif mode=='complete':g['omission_subcertificate']['graph_observation_complete']=False
+            elif mode=='witness-output':g['generated_eh_field_witnesses']=[dict(family='forged')]
+            elif mode=='external-output':g['external_reference_contracts'][0]['role']='data'
+            elif mode=='shared-output':g['shared_base_identities'].pop()
+            elif mode=='witness-scope':
+                g['omission_subcertificate']['scope']['generated_eh_field_witnesses_sha256']='a'*64
+                g['omission_subcertificate']['scope_sha256']=eh.digest(g['omission_subcertificate']['scope'])
             else:g['contract_identity_sha256']='a'*64
             with self.assertRaises(ValueError):eh.compose(plan,g,copy.deepcopy(g),contract)
     def test_recompute_uses_separate_expanded_producer(self):

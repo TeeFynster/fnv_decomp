@@ -41,9 +41,10 @@ def validate_policy(p):
     require(p['required_expanded_interface']==EXPANDED and all(p.get(k)is False for k in ('runtime_eligible','provider_selected','ABI_verified','link_ready')),'policy promotion forbidden')
 
 
-def validate_external_identities(bindings,identities,shared):
+def validate_external_identities(bindings,identities,shared,generated=None):
     """Shared base identity is required; semantic distinctions never enter its hash."""
     require(set(bindings)==set(identities),'external identity set differs')
+    generated=[] if generated is None else generated
     seen={}
     def check(row):
         role=row.get('role');domain=row.get('semantic_domain');kind=row.get('contract_kind')
@@ -60,7 +61,10 @@ def validate_external_identities(bindings,identities,shared):
     for index,b in bindings.items():
         declared=identities[index]
         require(set(declared)=={'role','semantic_domain','contract_kind'},'unknown identity policy fields')
-        require(all(b.get(k)==v for k,v in declared.items()) and b.get('proof_consistency')=='EXACT_OWN_SOURCE_RESOLUTION','unproved external semantic identity')
+        require(all(b.get(k)==v for k,v in declared.items()),'unproved external semantic identity')
+        if generated and index==20:
+            require(len(generated)==1 and generated[0]['family']=='EH_HANDLER_REL32_CRT_FIELD_V1' and generated[0]['symbol_index']==20 and generated[0]['base']==b['base'] and generated[0]['proof_consistency']==b.get('proof_consistency')=='EXACT_GENERATED_HANDLER_FIELD_RESOLUTION','generated handler cannot masquerade as own-source resolution')
+        else:require(b.get('proof_consistency')=='EXACT_OWN_SOURCE_RESOLUTION','unproved ordinary external identity')
         require(b['base'] in seen and seen[b['base']]==(b['role'],b['semantic_domain'],b['contract_kind']),'missing compatible shared base identity')
         check(b)
 
@@ -119,7 +123,7 @@ def observe_component(raw,policy,context,reference):
     require(context['data_boundary_proof']==dict(symbol_index=16,original_base='0x01016c10',role='data',semantic_domain='data',contract_kind='vtable-view',exact=True,storage_defined=False),'missing explicit DATA boundary')
     bindings={int(k):v for k,v in context['external_bindings'].items()}
     identities={int(k):v for k,v in policy['external_identities'].items()}
-    validate_external_identities(bindings,identities,context['shared_base_identities'])
+    validate_external_identities(bindings,identities,context['shared_base_identities'],context.get('generated_eh_field_witnesses',[]))
     for i in bindings:
         if i!=16:require(sym[i]['section']==0 and sym[i]['value']==0 and sym[i]['storage']==2 and not sym[i]['aux_count'],'unsupported external source record')
     require(bindings[16]['base']==0x01016c10,'vtable original base differs')
@@ -160,7 +164,7 @@ def observe_component(raw,policy,context,reference):
     names={8:canonical(dict(recipe_id=policy['recipe_id'],object_sha256=sha(raw),symbol_index=8))}
     names.update({i:unresolved('0x%08x'%b['base'],b['role']) for i,b in bindings.items()})
     require(names[8] not in [names[i] for i in bindings],'canonical physical namespace collision')
-    plan=dict(schema_version=1,policy_id=POLICY,kind='fnv-parent-eh-retention-plan',status='eh-observed-composition-pending',recipe_id=policy['recipe_id'],object_sha256=sha(raw),source_sha256=policy['source_sha256'],inputs=policy['inputs'],selected=selected,retained_sections=keep,retained_primary_indices=sorted(required),retained_physical_slots=slots,undefined_conversions=[16],namespace=[[i,names[i]] for i in sorted(names)],external_obligations=[dict(symbol_index=i,**bindings[i]) for i in sorted(bindings)],shared_base_identities=copy.deepcopy(context['shared_base_identities']),comparisons=comparisons,fields=fields,unchanged_core=core_evidence,parent_EH=copy.deepcopy(pieces),reference_identity_sha256=context['reference_identity_sha256'],dependency_field_observations=dependency_observations(obj),state_transitions=[dict(state=0,to_state=-1,cleanup_index=12,native_offset=0,original_cleanup=pieces[0][0])],associations=associations,safeseh=dict(section=16,ordinal=0,input_handler_index=19),required_weak_omission=policy['required_weak_omission'],source_graph_sha256=structural_identity(obj),universe=dict(section_indices=sorted(sec),primary_indices=sorted(sym),physical_slots=list(range(obj['symbol_count']))),**FALSE)
+    plan=dict(schema_version=1,policy_id=POLICY,kind='fnv-parent-eh-retention-plan',status='eh-observed-composition-pending',recipe_id=policy['recipe_id'],object_sha256=sha(raw),source_sha256=policy['source_sha256'],inputs=policy['inputs'],selected=selected,retained_sections=keep,retained_primary_indices=sorted(required),retained_physical_slots=slots,undefined_conversions=[16],namespace=[[i,names[i]] for i in sorted(names)],external_obligations=[dict(symbol_index=i,**bindings[i]) for i in sorted(bindings)],shared_base_identities=copy.deepcopy(context['shared_base_identities']),generated_eh_field_witnesses=copy.deepcopy(context.get('generated_eh_field_witnesses',[])),comparisons=comparisons,fields=fields,unchanged_core=core_evidence,parent_EH=copy.deepcopy(pieces),reference_identity_sha256=context['reference_identity_sha256'],dependency_field_observations=dependency_observations(obj),state_transitions=[dict(state=0,to_state=-1,cleanup_index=12,native_offset=0,original_cleanup=pieces[0][0])],associations=associations,safeseh=dict(section=16,ordinal=0,input_handler_index=19),required_weak_omission=policy['required_weak_omission'],source_graph_sha256=structural_identity(obj),universe=dict(section_indices=sorted(sec),primary_indices=sorted(sym),physical_slots=list(range(obj['symbol_count']))),**FALSE)
     return plan
 
 
@@ -224,6 +228,25 @@ def check_contract(plan,contract):
             int(row['derived_source_symbol_base_va'],16)==field['original_base'] and int(row['exact_original_target_va'],16)==field['original_target'] and
             row['coff_relocation']['addend']==field['addend']&0xffffffff,'parent field semantic proof differs')
     provenance=contract['provenance']
+    witnesses=plan.get('generated_eh_field_witnesses',[])
+    require(contract.get('generated_eh_field_witnesses',[])==witnesses,'full generated witness container differs')
+    if witnesses:
+        require(len(witnesses)==1 and witnesses[0]['family']=='EH_HANDLER_REL32_CRT_FIELD_V1' and witnesses[0]['symbol_index']==20 and witnesses[0]['parent']==plan['selected']['original_address'],'unknown generated witness family/scope')
+        witness=witnesses[0]
+        external=next(row for row in plan['external_obligations'] if row['symbol_index']==20)
+        require(witness['proof_consistency']==external['proof_consistency']=='EXACT_GENERATED_HANDLER_FIELD_RESOLUTION','generated proof cannot claim ordinary own-source resolution')
+        require(witness['object_sha256']==plan['object_sha256'] and witness['reference_sha256']==plan['reference_identity_sha256'] and witness['recipes_sha256']==plan['inputs']['recipes'],'generated witness provenance differs')
+        from eh_field_witness import AUDIT_SHA256
+        require(witness['audit_sha256']==AUDIT_SHA256 and witness['symbol']=='___CxxFrameHandler3' and (witness['base'],witness['role'],witness['semantic_domain'],witness['contract_kind'])==(0xec3d33,'crt-contract','code','cxx-frame-handler'),'wrong handler contract/audit identity')
+        require(all(witness[k]is False for k in ('function_boundary_verified','runtime_eligible','provider_selected','ABI_verified','link_ready')),'handler witness runtime promotion')
+        require(witness['handler']==dict(section=4,symbol_index=19,value=8,size=27,original_start=0xeec248,original_end=0xeec263,nonfield_differences=0) and witness['original_highlow_offsets']==[18],'handler proof extent/asymmetric fields differ')
+        expected_fields=[f for f in plan['fields'] if f['section']==4 and f['offset']>=8]
+        require(len(witness['fields'])==len(expected_fields)==3,'incomplete generated handler field graph')
+        for own,proved in zip(expected_fields,witness['fields']):
+            require(all(proved[k]==own[k] for k in ('section','offset','target_index','kind','original_base','original_target')) and proved['source_addend']==own['addend'],'generated handler field semantics differ')
+        info=next(f for f in expected_fields if f['target_index']==24)
+        require(witness['metadata']==dict(section=6,size=44,original_base=info['original_base']-8,nonfield_differences=0,original_highlow_offsets=[4,16]),'handler state proof differs')
+        require(provenance.get('generated_eh_field_witnesses_sha256')==digest(witnesses),'missing generated witness identity')
     expected=dict(object_sha256=plan['object_sha256'],source_sha256=plan['source_sha256'],recipe_id=plan['recipe_id'],recipe_index=69,
         producer_manifest_sha256=plan['inputs']['manifest'],retained_proof_sha256=plan['inputs']['retained'],recipe_manifest_sha256=plan['inputs']['recipes'],
         selection_sha256=plan['inputs']['selection'],binding_sha256=plan['inputs']['binding'],reference_identity_sha256=plan['reference_identity_sha256'],optional_function_index_present=False)
@@ -246,9 +269,10 @@ def compose(plan,generic,recomputed,contract=None):
         requested_dependency_retention=plan['retained_sections'],retained_section_indices=plan['retained_sections'],
         retained_primary_indices=plan['retained_primary_indices'],retained_physical_slots=plan['retained_physical_slots'],object_sha256=plan['object_sha256'],
         provenance_sha256=digest(contract['provenance']),contract_identity_sha256=digest(contract),
-        expanded_retention_contract_sha256=digest(contract['expanded_retention_contract']),physical_universe_sha256=digest(plan['universe']))
+        expanded_retention_contract_sha256=digest(contract['expanded_retention_contract']),physical_universe_sha256=digest(plan['universe']),generated_eh_field_witnesses_sha256=digest(plan.get('generated_eh_field_witnesses',[])))
     require(all(scope.get(k)==v for k,v in expected.items()),'expanded retained/root/provenance scope differs')
     require(generic['contract_identity_sha256']==digest(contract) and generic['provenance']==contract['provenance'],'expanded full contract/provenance differs')
+    require(generic['generated_eh_field_witnesses']==plan.get('generated_eh_field_witnesses',[]) and generic['external_reference_contracts']==plan['external_obligations'] and generic['shared_base_identities']==plan['shared_base_identities'],'expanded typed witness/external identity output differs')
     require(generic['roots']==[plan['selected']] and generic['physical_universe']==plan['universe'],'expanded root/universe differs')
     require(generic['retained_section_indices']==plan['retained_sections'] and generic['retained_runtime_section_indices']==[3,4,6] and generic['retained_primary_indices']==plan['retained_primary_indices'] and generic['retained_physical_slots']==plan['retained_physical_slots'],'expanded retained maps differ')
     require(generic['dependency_field_observations']==plan['dependency_field_observations'] and generic['parent_EH']==plan['parent_EH'],'expanded dependency or parent evidence differs')

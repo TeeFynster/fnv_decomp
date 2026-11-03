@@ -298,3 +298,196 @@ The bounded current source-header context is also pinned before/after collection
 `bstaskmanager.h` and `bstaskmanager_types.h`. These hashes describe current
 repository context only; historical compiler header-input causality remains
 explicitly unverified. No compilation or standard-library header replay occurs.
+
+## First actual observation: preserved negative
+
+The one authorized actual metadata collection stopped before semantic-plan or
+expanded-graph certification. It found no ordinary selected-function binding
+witness for the handler's `___CxxFrameHandler3` target. This preserves a real
+coverage gap: generated EH-handler fields are outside that ordinary stream.
+No successful observation report, COFF object or native execution was produced.
+The run took 16.547 seconds and peaked at 500,846,592 bytes without a resource
+abort. All 29 protected input/tool/reference/header hashes were unchanged in the
+post-run reconciliation, and the optional index remained absent. Independent
+review accepted the saved failure as a negative result; no retry occurred.
+
+| Private evidence identity | SHA-256 |
+|---|---|
+| Operation receipt | `3970997c207e05dd7ab2a407b7eafe9fa42bbdec01862ca306a31675a3212ab3` |
+| Exit receipt | `945b05392ffd6960ee72526b9aea2b9edb31ca5e68755739ce6639c6b7bee8c1` |
+| Failure journal | `36729bcd6b2ccc4d043895dafeec75b0b8fee98ce2d57b91ebff644fe77cbb9e` |
+| Post-run hash reconciliation | `4eaae6a4b8fb637512e2ad52048053814115622b792b4c2ac4cca0a69752aabf` |
+| Bounded handler-field investigation | `de1a169ae78a18f7f8c84bb327dfcc98414eb1dbba41b1d7a8f79531380ed50a` |
+
+### Next precise proof family
+
+The bounded investigation locates the missing field in the 27-byte matching
+handler piece: source section 4, handler value 8, relocation offset 31 (piece
+relative 23), REL32 to external physical record 20. That record is the exact
+compiler function symbol `___CxxFrameHandler3`, undefined section/value zero,
+function type 32, external storage 2 and no auxiliaries. The handler's actual
+association remains parent section 3. Its original nonrelocation comparison has
+zero differences. The original field plus native relocation addend resolves
+exactly to 0x00ec3d33 in executable image text. Private machine evidence retains
+the bounded source/native branch-byte and target-entry observations; no payload
+or disassembly is included here.
+
+Unit 69 has no own explicit mapping for this name. Four exact global recipe
+symbol-map records, in recipes 130, 141, 368 and 853, independently name the same
+original address; there is no resolver ambiguity. These mappings are metadata
+identity evidence, not four runtime provider choices.
+
+The proposed `EH_HANDLER_REL32_CRT_FIELD_V1` family must bind that exact parent,
+matching handler interval, association, physical source/target records,
+relocation offset/kind/addend, bounded native/reference field comparison and
+complete unique recipe resolver records. The exact compiler symbol and explicit
+normal-CRT function set establish a contract candidate only when all of those
+source/native facts agree. The name alone, executable containment alone or a
+policy-supplied subtype cannot establish the witness. The first family is only
+for record 20; another missing field must remain blocked.
+
+A source bridge and focused tests must precede any newly authorized collection.
+Required negatives include wrong parent/handler extent or verdict, wrong
+opcode/field offset/kind/addend, auxiliary or nonfunction target, changed original
+destination, absent or conflicting resolver rows, false EH piece, unowned child,
+ordinary missing-field promotion and a different CRT subtype. The bridge must
+preserve ordinary-binding completeness and the existing generic false flags.
+It must not turn an arbitrary unknown into CRT or adopt the original handler
+body. Normal CRT provision, parent-frame/lifetime behavior and runtime remain
+unverified and unselected.
+
+
+### Source bridge implemented, awaiting fresh review
+
+`eh_field_witness.py` implements only the fixed generated handler family. The
+collector authenticates the saved bounded investigation by its exact digest and
+reconstructs the proof from the loaded object/reference/recipe context. It checks
+all three handler fields, nonfields, both state-table pointer fields and scalar
+states, actual association and static handler identity. Bounded PE loader
+relocation metadata supplies an independent HIGHLOW inventory: the handler's one
+absolute field and the state table's two fields must agree exactly, including
+no partial or additional original fields. This reads loader metadata, not an
+unbounded target-code range. Source/reference code observations remain the fixed
+handler and one target-entry byte; executable containment never claims a function
+boundary or runtime behavior.
+
+Only missing physical record 20 may use this bridge. Other missing witnesses
+still fail. No ordinary record is invented: the typed generated-field witness is
+retained separately in the semantic plan, and its digest enters full contract
+provenance. The consumer checks all three witness fields against its independently
+replayed plan, plus exact handler/state extents and source/reference/recipe/audit
+identity. Ordinary five-parent-field and missing-field requirements are unchanged.
+The expanded producer's generic false flags and exact three obligations remain
+unchanged.
+
+New authored tests cover complete handler/state proof, wrong/foreign/failed
+parent or handler, extra/missing/asymmetric fields, unsupported target type or
+auxiliary, opcode/addend/destination/nonfield/state drift, missing/conflicting or
+additional resolvers, fabricated own mapping, audit drift, nonexecutable/outside
+target, the exact missing-record-20 bridge, rejection of another missing record,
+and changed witness provenance/field/subtype. Existing EH tests reported 85 cases
+with 84 passes and the same one privilege-dependent symlink skip; the separate
+expanded producer's 20 tests passed. No actual v2 collector or writer has run.
+The old negative files are immutable, with all four exact accepted source/policy
+snapshots retained privately. Independent source review must precede a separately
+authorized new metadata observation into fresh v2 paths.
+
+
+The bridge uses the distinct proof-consistency label
+`EXACT_GENERATED_HANDLER_FIELD_RESOLUTION`. It does not claim ordinary
+`EXACT_OWN_SOURCE_RESOLUTION`, and it does not fabricate an own-recipe mapping.
+Only external physical record 20 may carry that label with the complete separate
+typed witness and its provenance digest. A label without the full field proof,
+or a generated witness masked as ordinary own-source resolution, is rejected.
+The normal ordinary binding labels and requirements remain unchanged.
+
+
+The coordinated producer extension accepts the distinct generated label only for
+record 20 with the full outer typed-witness list, exact provenance digest and
+physical family/source/field/state/resolver identities. It preserves the list
+and its scope digest in output; the consumer explicitly compares those plus
+external and shared-base ledgers against its own plan. Generic approvals remain
+false. Old accepted producer/source snapshots are retained; ordinary main,
+allocator and entry policies are unchanged. No new observation is authorized by
+this source change.
+
+
+## Accepted actual metadata and private COFF projector source
+
+The v2 collection reached final stability but failed because a loop variable
+shadowed the optional-index path. Its artifacts and exact accepted sources are
+preserved. A reviewed narrow fix extracted the candidate filter and kept the
+index path distinct. The fresh v3 collection succeeded in 17.047 seconds at a
+500,932,608-byte peak working set. Independent reconciliation accepted it:
+parent 101 bytes MATCH with exact extent, both EH pieces MATCH, all eleven fields
+and 44-byte state metadata verified, five sections / nineteen primary symbols /
+twenty-four physical slots retained. The generic result keeps three pending
+obligations; the separate source-verified composer discharges exactly those three.
+Weak 55 -> 54 remains omitted as unreachable; the 54/68 name group is not adopted.
+Seven external CODE/DATA/CRT obligations remain unresolved. Runtime/provider/ABI/
+link/namespace approval stays false.
+
+The accepted private observation SHA-256 is
+`fc3e969a5b7c4e577db8ddf75bb358791b2aa6143b3f7e3e54d2ae2b2007af36`;
+operation identity is
+`91bb74e7cdcc13ae3cc0deb81a6c712bf1347c4a15ee2cd2ad2638d2b9ea11a0`.
+No COFF was emitted by that metadata operation.
+
+New `eh_code_project.py` source authenticates those metadata/operation identities
+and reconstructs the complete protected input/tool/header/reference/image-gate
+set. It retains the fixed policy and optional-index gates, recomputes the current
+expanded composition through the existing writer, and stages only the accepted
+parent/code/state/whole-SafeSEH component in a fresh private directory. No archive,
+compiler, linker, native inspector or execution API is included.
+
+Mandatory unchanged original ordinary/EH comparisons run before and after
+serialization. Explicit private renamed bindings are comparison-only. Independent
+code/state checks re-evaluate every original target/addend and all nonfields,
+including the 44-byte state table. The exact SafeSEH index must target the mapped
+local owned handler. The frozen writer and independent reader preserve complete
+section/symbol/auxiliary maps and code/data payloads; only documented symbol/index
+serialization fields change. Staged verification precedes exclusive publication.
+Late drift removes only owned published files and preserves stage/failure journal.
+
+Six authored projector tests pass, including actual authored end-to-end staging,
+original before/after comparisons, code/state/relocation/extent/registry drift,
+forged original targets, private-directory/existing-output/input/index rejection,
+and injected late-publication drift cleanup. This is source validation; actual
+projection remains subject to the independent source review delegated by root.
+Normal CRT cookie provisioning must use fresh CRT initialization; no original
+cookie contents or vtable provider is adopted.
+
+## Actual private parent-owned EH COFF projection accepted
+
+The independently reviewed projector produced one private 1,841-byte I386 COFF
+component. Independent artifact reconciliation accepted the exact original/output
+payloads, all eleven relocation mappings, five retained sections, nineteen primary
+symbols and five auxiliaries (twenty-four physical slots). SafeSEH physical index
+19 is rebased to 15 and still names the local owned handler. Only the canonical
+parent is exported; cleanup and handler remain local frame-owned entries.
+
+Mandatory saved original comparisons pass before and after projection: ordinary
+101-byte MATCH with exact compiled extent, both 8/27-byte EH pieces MATCH, and
+zero nonfield differences across the 101/35/44-byte code/state sections. The
+artifact reviewer reconciled these saved oracle results without rerunning them.
+The producer checked 34 protected inputs including the private reference; the
+reviewer independently rehashed 33 repository inputs. The optional index remained
+absent. The bounded operation exited zero in 1.015 seconds, peaked at 155,484,160
+bytes and had no resource abort or stderr.
+
+| Private artifact identity | SHA-256 |
+|---|---|
+| Projected COFF (identical to verified stage) | `ae6731831bed4907a85b26e30bdf82a2ba764f04d04add9e0e850ac28dc68c44` |
+| Projection receipt | `bd106bb8f7249d49047bad422df75dbe490b9aecc467cc222353821eb5ce244f` |
+| Projection journal | `b4baceafd491e0b9cae2fc343946b7ba10d56b9fb2b64d333a3fd1240f058e2c` |
+| Bounded operation receipt | `21e8c6e72d5eb894b8f63fbc6ffec4fe426a215de09cced23f7a63e6116f7aed` |
+| Exit receipt | `56800d78e1b5eb36bcb29a5c00fc9ca965b7e4d5ec5853bb578899d3ca08d7fd` |
+
+Seven external obligations remain unresolved: three ordinary code identities,
+vtable DATA, security-cookie DATA, normal CRT frame handler and cookie check.
+Fresh normal CRT initialization, class storage/vtable identity, parent frame and
+lifetime behavior, executable linking and runtime adoption remain separate work.
+No original cookie contents are adopted. No archive/native inspector/compiler/
+linker/Game execution occurred. Runtime/provider/ABI/link/namespace approvals stay
+false. This establishes a real portable unresolved EH component, not a runnable
+Game or general eligibility upgrade for the preserved failed EH pieces.

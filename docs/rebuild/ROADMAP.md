@@ -33,3 +33,5 @@ A reviewed original binding fixture passed, and two reviewed layouts of one sour
 The latest independent aggregate ran 283 tests: 281 passed and two native opt-ins were skipped.
 
 The independently reviewed runtime binding plan records 490,713 actual fields and 88 exact missing identities; its 18 focused tests passed. A separate one-source overlay passed 14 focused tests and 12/12 same-unit comparisons while moving one field to a DIR32 relocation. It was compiled only, not linked or executed. Neither result approves providers or fixups; the original 88-field baseline remains unchanged.
+
+Reviewed TLS and CRT proposals do not approve runtime providers. EH triage found 95 textual notes in 16 units and 128 false pieces in total: 116 in those units and 12 elsewhere. The review did not independently reconstruct every role label or the full trace, and these counts do not establish EH closure. The latest stable scoped suite remains 301 passed and two skipped out of 303 tests.

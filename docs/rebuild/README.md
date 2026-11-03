@@ -14,6 +14,8 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [Relocation audit](RELOCATION-AUDIT.md) and [absolute-address triage](ABSOLUTE-ADDRESS-TRIAGE.md): field geometry and unresolved missing fields.
 - [Runtime binding plan](RUNTIME-BIND-PLAN.md) and [source overlay pilot](SOURCE-OVERLAY.md): read-only identities and one compile-only relocation experiment, with no provider approval.
 - [Game component candidate](GAME-COMPONENT-CANDIDATE.md) and [scalar component](GAME-SCALAR-COMPONENT.md): one bounded source-built scalar execution and its limits.
+- [TLS owner proposal](TLS-OWNER-PROPOSAL.md) and [CRT integration proposal](CRT-INTEGRATION-PROPOSAL.md): reviewed proposals, without provider or runtime approval.
+- [EH diagnostic triage](EH-DIAGNOSTIC-TRIAGE.md): local diagnostic evidence and remaining uncertainty.
 - [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
 - [Function selection](FUNCTION-SELECTION.md) and [import plan](IMPORT-PLAN.md): reviewed ownership choices and import metadata, without runtime approval.
 - [CRT provider contract](CRT-PROVIDER.md) and [original data fixture](DATA-FIXTURE.md): reviewed bounded experiments, not game provider or data adoption.

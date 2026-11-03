@@ -11,3 +11,11 @@ results*.json
 /out/
 /obj/
 __pycache__/
+
+# Private rebuild inputs, intermediates and local reports (prefer outside the checkout).
+/rebuild-private/
+/rebuild-out/
+/local/
+*.ilk
+*.map
+/build/rebuild/

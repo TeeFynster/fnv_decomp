@@ -176,7 +176,10 @@ semantics; no unknown template pointers/fixups; correct callback termination;
 normal imports, SafeSEH and CRT providers. Reject a +4 shift, duplicate owner,
 unknown callback, stale evidence or unsupported linker record. Separate prepare,
 independent artifact approval and bounded own-child execution; preserve failures.
-This fixture has not been implemented or executed.
+At the proposal stage this fixture was unimplemented. The subsequently assigned
+[original fixture](TLS-OWNER-FIXTURE.md) records its own source reviews and the
+failed pre-link alignment experiment; no runtime layout or execution success is
+implied here.
 
 ## One possible later game reader
 

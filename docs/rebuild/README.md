@@ -11,7 +11,8 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [Data strategy](DATA-STRATEGY.md), [data coverage plan](DATA-PLAN.md) and [runtime gaps](RUNTIME-GAPS.md): persistent-data evidence and unresolved fixups.
 - [Generated code gaps](GENERATED-CODE-GAPS.md): bounded metadata reconciliation and unresolved generated-code ownership.
 - [Binding fixture](BINDING-FIXTURE.md): reviewed original symbol-binding mechanism, not game mappings.
-- [Relocation audit](RELOCATION-AUDIT.md): reviewed field geometry and unresolved missing fields.
+- [Relocation audit](RELOCATION-AUDIT.md) and [absolute-address triage](ABSOLUTE-ADDRESS-TRIAGE.md): field geometry and unresolved missing fields.
+- [Runtime binding plan](RUNTIME-BIND-PLAN.md) and [source overlay pilot](SOURCE-OVERLAY.md): read-only identities and one compile-only relocation experiment, with no provider approval.
 - [Game component candidate](GAME-COMPONENT-CANDIDATE.md) and [scalar component](GAME-SCALAR-COMPONENT.md): one bounded source-built scalar execution and its limits.
 - [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
 - [Function selection](FUNCTION-SELECTION.md) and [import plan](IMPORT-PLAN.md): reviewed ownership choices and import metadata, without runtime approval.

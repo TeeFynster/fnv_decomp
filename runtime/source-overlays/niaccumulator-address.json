@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-fixed-runtime-source-overlay",
+  "policy": "niaccumulator-address-carrier-v1",
+  "source": "src/gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator.cpp",
+  "source_sha256": "36a0fde7e9010dca9552434cc5730d82657b2b37036ab57649ee523f842264e6",
+  "header": "src/gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator_decls.h",
+  "header_sha256": "623ec38f6cc3c7f25952ba20191ecccc0f9b8dad17b9b66d9e6d122c82b037ec",
+  "recipe_index": 1401,
+  "recipe_id": "1401-50cd6090ff456b83",
+  "compiler": "sp1",
+  "flags": [
+    "/MT",
+    "/O2",
+    "/GS",
+    "/EHsc",
+    "/Gy"
+  ],
+  "function": {
+    "symbol": "??0NiBackToFrontAccumulator@@QAE@XZ",
+    "address": "0x00aa0fc0",
+    "size": 25
+  },
+  "field_offset": 10,
+  "target": "0x010a2304",
+  "target_symbol": "?DAT_010a2304@@3HA",
+  "old_span": "#include \"nibacktofrontaccumulator_decls.h\"\r\n\r\n// @fnv 0x00aa0fc0\r\nNiBackToFrontAccumulator::NiBackToFrontAccumulator()\r\n{\r\n    *(volatile unsigned int*)this = 0x010a2304;\r\n",
+  "new_span": "#include \"nibacktofrontaccumulator_decls.h\"\r\nextern int DAT_010a2304;\r\n// @fnv 0x00aa0fc0\r\nNiBackToFrontAccumulator::NiBackToFrontAccumulator()\r\n{\r\n    *(volatile unsigned int*)this = reinterpret_cast<unsigned int>(&DAT_010a2304);\r\n",
+  "provider_selected": false,
+  "native_execution_authorized": false
+}

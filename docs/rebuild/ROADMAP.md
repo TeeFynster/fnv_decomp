@@ -30,4 +30,6 @@ The latest independently reviewed phase selected 68,657 function CODE owners, in
 
 A reviewed original binding fixture passed, and two reviewed layouts of one source-built game scalar function with two literals each passed 9,216 exact-bit calls with x87 state unchanged. A metadata scan found 189,111 matching relocation field geometries and 88 missing COFF fields across 59 functions and 47 units; no safe patch has been established. Read-only triage is underway. These results do not establish game startup or broader closure.
 
-The latest independent aggregate ran 251 tests: 249 passed and two native opt-ins were skipped.
+The latest independent aggregate ran 283 tests: 281 passed and two native opt-ins were skipped.
+
+The independently reviewed runtime binding plan records 490,713 actual fields and 88 exact missing identities; its 18 focused tests passed. A separate one-source overlay passed 14 focused tests and 12/12 same-unit comparisons while moving one field to a DIR32 relocation. It was compiled only, not linked or executed. Neither result approves providers or fixups; the original 88-field baseline remains unchanged.

@@ -10,6 +10,9 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [Canonical candidate plan](CANONICAL-PLAN.md): unselected address-provider candidates and evidence boundaries.
 - [Data strategy](DATA-STRATEGY.md), [data coverage plan](DATA-PLAN.md) and [runtime gaps](RUNTIME-GAPS.md): persistent-data evidence and unresolved fixups.
 - [Generated code gaps](GENERATED-CODE-GAPS.md): bounded metadata reconciliation and unresolved generated-code ownership.
+- [Binding fixture](BINDING-FIXTURE.md): reviewed original symbol-binding mechanism, not game mappings.
+- [Relocation audit](RELOCATION-AUDIT.md): reviewed field geometry and unresolved missing fields.
+- [Game component candidate](GAME-COMPONENT-CANDIDATE.md) and [scalar component](GAME-SCALAR-COMPONENT.md): one bounded source-built scalar execution and its limits.
 - [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
 - [Function selection](FUNCTION-SELECTION.md) and [import plan](IMPORT-PLAN.md): reviewed ownership choices and import metadata, without runtime approval.
 - [CRT provider contract](CRT-PROVIDER.md) and [original data fixture](DATA-FIXTURE.md): reviewed bounded experiments, not game provider or data adoption.

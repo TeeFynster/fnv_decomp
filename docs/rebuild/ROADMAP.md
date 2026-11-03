@@ -20,4 +20,8 @@ Follow the existing README for supported image and Microsoft compiler requiremen
 
 `LICENSE` explicitly grants no licence to contributions; third-party components retain their own licences. Private development does not establish rights to publish a rebuild or its inputs. A separate rights review is needed before any eventual publication. No copy-protection bypass is part of this plan.
 
-See [agent work and ownership](AGENT-WORK.md) for present assignments; the assigned runtime audit will record runtime findings.
+## Current evidence and next work
+
+The committed foundation compiled all 2,988 recipe entries. A separate full original comparison and direct retained verification report parity for 68,667 recipe rows and 1,954 EH entries; 95 local EH notes remain, and strict local EH and runtime closure are false. The offline suite passed 118 of 120 tests with two native opt-ins skipped; three separate native probes were executed and verified, including one four-byte game leaf exercised in 7,168 calls across seven values. No playable game has been demonstrated. These results do not complete canonical ownership, startup or link.
+
+The authorized immediate work is a fixture-only EH extractor and constructor-rollback probe, and a metadata-only tool recording hash-bound EH piece alternatives with runtime selection false. Independent review includes pre-execution gates. Real IOTask, vtable and RTTI closure is not authorized in this slice. Evidence-backed data ownership and initialization and actual CRT, helper and import-library provider contracts remain subsequent work. The recovery audits are delivered with bounded independent review. See [agent work and ownership](AGENT-WORK.md) for assignments and evidence boundaries.

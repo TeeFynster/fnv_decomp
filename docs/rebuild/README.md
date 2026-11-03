@@ -1,6 +1,6 @@
 # Rebuild guide
 
-This work is developing a separate source-built runtime. The current repository is a byte-matching reference, not a runnable game. A private-machine retained-object build has compiled all 2,988 recipe entries; full inventory has reconciled all entries and the independent full reference comparison passed on separately compiled temporary objects. Direct retained-object verification reports original parity with local EH diagnostics; strict EH closure, link and game runtime gates remain open.
+This work is developing a separate source-built runtime. The current repository is a byte-matching reference, not a runnable game. A private-machine retained-object build has compiled all 2,988 recipe entries; full inventory has reconciled all entries and the independent full reference comparison passed on separately compiled temporary objects. Direct retained-object verification reports original parity across 68,667 recipe rows and 1,954 EH entries, with 95 local EH notes; strict local EH and runtime closure remain false. One four-byte game leaf ran 7,168 calls across seven values; link and game runtime gates remain open.
 
 Start with the root [README](../../README.md) for the existing matching workflow, compiler versions and owned input requirements, and read [LICENSE](../../LICENSE). Then use these documents:
 
@@ -9,6 +9,8 @@ Start with the root [README](../../README.md) for the existing matching workflow
 - [COFF link inventory](LINK-INVENTORY.md): inventory of private objects and interpretation limits.
 - [Canonical candidate plan](CANONICAL-PLAN.md): unselected address-provider candidates and evidence boundaries.
 - [Data strategy](DATA-STRATEGY.md), [data coverage plan](DATA-PLAN.md) and [runtime gaps](RUNTIME-GAPS.md): persistent-data evidence and unresolved fixups.
+- [Generated code gaps](GENERATED-CODE-GAPS.md): bounded metadata reconciliation and unresolved generated-code ownership.
+- [EH closure pilot](EH-CLOSURE-PILOT.md): one bounded constructor and compiler-generated EH graph, with remaining dependencies.
 - [Runtime audit](RUNTIME-AUDIT.md): startup, ABI and runtime findings and unknowns.
 - [Startup closure](STARTUP-CLOSURE.md): evidence and remaining startup blockers.
 - [Narrow COFF rewrite](COFF-REWRITE.md) and [extraction](COFF-EXTRACT.md): constrained object-copy operations and validation limits.

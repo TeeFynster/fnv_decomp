@@ -9,58 +9,47 @@ Coordinate changes before editing a path owned by another contributor. The recip
 | Canonical provider planning | `tools/rebuild/canonical_plan.py`, `tests/rebuild/`, `docs/rebuild/CANONICAL-PLAN.md` | `/root/rebuild_symbols`; gpt-6.1-sol medium | Owner reports v3 receipt consumer and 19 tests: selected recipe rows cover 68,657 byte-verified addresses; all candidates remain unselected and runtime closure remains false. |
 | Narrow COMDAT extraction and leaf proof | `tools/rebuild/coff_extract.py`, `tools/rebuild/game_leaf_probe.py`, `runtime/probes/game_leaf_probe.cpp`, `tests/rebuild/`, `docs/rebuild/COFF-EXTRACT.md`, `docs/rebuild/GAME-LEAF-PROBE.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Owner reports the initial whole-object link failed on 11 unrelated references; constrained extraction then enabled an independently map/hash/import-reviewed native leaf probe (7 values, 7,168 calls). Final independent validation passed; no gameplay or general closure is claimed. |
 | Retained-object verification | `tools/rebuild/verify_objects.py`, `tests/rebuild/`, `docs/rebuild/RETAINED-VERIFY.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Independently reviewed v3 checks all 2,988 retained objects: selected function rows and global EH coverage match original parity, with 95 local EH notes preserved. Strict local EH and runtime closure remain false. |
-| Narrow COFF rewrite | `tools/rebuild/coff_rewrite.py`, `tests/rebuild/`, `docs/rebuild/COFF-REWRITE.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Owner reports nine tests and a narrow private rename/match check; independent validation is pending before expansion. |
+| Narrow COFF rewrite | `tools/rebuild/coff_rewrite.py`, `tests/rebuild/`, `docs/rebuild/COFF-REWRITE.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Nine focused tests and a narrow private rename/match check documented; broader rewrite remains unproven. |
 | Data coverage plan | `tools/rebuild/data_plan.py`, `tests/rebuild/`, `docs/rebuild/DATA-PLAN.md` | `/root/rebuild_toolchain`; gpt-6.1-sol medium | Owner reports 15 synthetic tests and a successful private metadata run; 8,549 classified targets unresolved and no semantic fixups approved. |
 | Data strategy | `docs/rebuild/DATA-STRATEGY.md` | `/root/rebuild_toolchain`; gpt-6.1-sol medium | Read-only evidence audit delivered; canonical data ownership and initialization remain open. |
+| Generated code gaps audit | `docs/rebuild/GENERATED-CODE-GAPS.md` | `/root/rebuild_gaps_recovery`; gpt-6.1-sol medium | Recovery audit delivered and independently reviewed against named-file hashes; complete joins were not independently rerun. Historical sample and CRT lead remain unverified. |
+| EH closure pilot | `docs/rebuild/EH-CLOSURE-PILOT.md` | `/root/rebuild_eh_recovery`; gpt-6.1-sol medium | Recovery audit independently reviewed against named object hashes; PE metadata observations were not independently rechecked. One constructor graph has no catches and still needs vtable, RTTI, deleting-destructor and lock-provider closure. |
+| Fixture-only EH extraction and probe | `tools/rebuild/coff_eh_extract.py`, `tools/rebuild/eh_fixture_probe.py`, four original EH C++ fixture files, two test files, `docs/rebuild/EH-FIXTURE-PROBE.md` | `/root/rebuild_eh_recovery`; gpt-6.1-sol medium | Authorized and in progress; independently review pre-execution gates. The existing zero-relocation extractor remains unchanged. Real IOTask, vtable and RTTI closure is not authorized in this slice. |
+| Metadata-only EH ownership | `tools/rebuild/eh_ownership.py`, its tests, `docs/rebuild/EH-OWNERSHIP.md` | `/root/rebuild_gaps_recovery`; gpt-6.1-sol medium | Authorized and in progress; retain exact hash-bound EH piece alternatives with runtime selection false. |
 | Startup closure | `docs/rebuild/STARTUP-CLOSURE.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Audit delivered; startup remains unproven. |
 | Runtime gaps join | `tools/rebuild/runtime_gaps.py`, `tests/rebuild/test_runtime_gaps.py`, `docs/rebuild/RUNTIME-GAPS.md` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Metadata join and private receipt independently reviewed; relocation occurrences are not a missing-function count. |
-| Recipe audit | `tools/rebuild/recipe_audit.py` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Assigned; implementation and verification in progress. |
+| Recipe audit | `tools/rebuild/recipe_audit.py` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Foundation implementation committed; offline suite and independent review cover the delivered tool. |
 | Synthetic runtime probe | `runtime/probes/crt_tls_probe.cpp`, `tools/rebuild/runtime_probe.py`, `tests/rebuild/test_runtime_probe.py`, `docs/rebuild/RUNTIME-PROBE.md` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Native independent CRT/TLS probe passed; it is not game startup. |
-| Synthetic import alias probe | `runtime/probes/import_alias_probe.cpp`, `tools/rebuild/import_probe.py`, `tests/rebuild/test_import_probe.py`, `docs/rebuild/IMPORT-PROBE.md` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Owner reports a standalone native pass; game ABI and startup remain unverified. |
-| Validation and review | `docs/rebuild/VALIDATION.md`, read-only implementation review | `/root/rebuild_validation`; gpt-6.1-terra high | Assigned; review in progress. |
-| Runtime audit | `docs/rebuild/RUNTIME-AUDIT.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | In progress: source audit identifies an application-entry candidate and unresolved startup and ABI contracts; no runtime launch established. |
+| Synthetic import alias probe | `runtime/probes/import_alias_probe.cpp`, `tools/rebuild/import_probe.py`, `tests/rebuild/test_import_probe.py`, `docs/rebuild/IMPORT-PROBE.md` | `/root/rebuild_recipe_audit`; gpt-6.1-terra high | Standalone native probe passed; game ABI and startup remain unverified. |
+| Validation and review | `docs/rebuild/VALIDATION.md`, read-only implementation review | `/root/rebuild_validation_recovery`; gpt-6.1-terra high | Recovery audits reviewed within recorded limits; reviewing both new implementations and their pre-execution gates. |
+| Runtime audit | `docs/rebuild/RUNTIME-AUDIT.md` | `/root/rebuild_runtime`; gpt-6.1-sol medium | Audit delivered: application-entry candidate identified; startup and ABI contracts remain unresolved and no game runtime launch established. |
 | Offline CI workflow | `.github/workflows/rebuild-tests.yml` | `/root/rebuild_integration`; gpt-6.1-terra high | Validator reviewed workflow and native opt-in guards; public CI has not run. |
-| Documentation integration | `AGENTS.md`, `docs/rebuild/README.md`, `docs/rebuild/ROADMAP.md`, `docs/rebuild/AGENT-WORK.md`, additive `.gitignore` rules | `/root/rebuild_integration`; gpt-6.1-terra high | Initial integration documentation in progress. |
+| Documentation integration | `AGENTS.md`, `docs/rebuild/README.md`, `docs/rebuild/ROADMAP.md`, `docs/rebuild/AGENT-WORK.md`, additive `.gitignore` rules | `/root/rebuild_docs_recovery`; gpt-6.1-terra high | Recovery integration continues alongside the newly authorized implementations. |
 
 The reference recipe is the source of truth for compiler selection, flags and variant identity. Runtime selection must be an explicit, separately evidenced decision. Keep sensitive inputs outside the checkout; generated output defaults to the ignored `build/rebuild/` directory and can instead be kept outside the checkout, and do not commit local paths, secrets, binaries, assets, disassembly, game code bytes or packs. Preserve the matching and official gates. Use a disposable scratch checkout for any `compare_builds.py` command that checks out or cleans files. See [the roadmap](ROADMAP.md) and the root README for setup and constraints.
 
 
+## Crash recovery continuation
+
+The foundation checkpoint contains 50 files. Recovery continues from that checkpoint without repeating the completed build baseline. The current coordinator is `/root`; recovery owners are `/root/rebuild_gaps_recovery`, `/root/rebuild_eh_recovery`, `/root/rebuild_validation_recovery`, and `/root/rebuild_docs_recovery`, with the scopes in the table above. Prior agents are no longer active. The two audits were not saved before the interruption; their recovered versions are delivered and reviewed within the limits recorded below. Preserve the existing uncommitted ledger changes.
+
+The offline suite ran 120 tests: 118 passed and two native opt-ins were skipped. Three separate native probes were executed and verified: synthetic CRT/TLS, synthetic import alias, and a single four-byte game leaf (7 values, 7,168 calls). Source and tool hashes were stable after the foundation commit. The leaf is not a game launch. Hosted CI has not run.
+
+Authorized next work is a fixture-only EH extractor and constructor-rollback probe using the real CRT, plus a metadata-only ownership tool that records exact hash-bound EH piece alternatives with runtime selection false. Independent review covers both implementations and pre-execution gates. The existing narrow zero-relocation extractor stays unchanged; real IOTask, vtable and RTTI closure is outside this authorization. Subsequent work remains evidence-backed data ownership and initialization, CRT purecall and other actual provider contracts, and a metadata-bound candidate body/ABI check. No provider should be guessed or placeholder manufactured to satisfy a link. The generated-code audit was independently reviewed without rerunning its complete joins; the EH audit review checked object hashes without independently rechecking PE metadata.
+
 ## Continuation ledger
 
-Starting checkout: `87eb937` on `main`, clean before branch `codex/playable-rebuild` was created. The root coordinator assigns work, integrates reports and resolves shared ownership; individual owners edit only their assigned deliverables. The work began on an uncommitted branch; private artifacts remain ignored and no push is part of this checkpoint.
+Starting checkout: `87eb937` on `main`, clean before branch `codex/playable-rebuild` was created. The root coordinator assigns work, integrates reports and resolves shared ownership; individual owners edit only their assigned deliverables. The foundation checkpoint is `fb73d342e64c90d1aa7d1fccb43c6955524b82e4`; private artifacts remain ignored and no push was made.
 
 Next gates:
 
-1. Owners finish and report the actual interfaces, tests, limitations and private output handling for their assigned deliverables. Integration checks documentation against the implemented commands and updates this ledger from verified reports.
-2. Review recipe accounting and synthetic COFF inventory tests; resolve reported implementation issues before calling either tool ready. Keep generated data and reports private.
-3. Preserve and review the full retained-build and independent reference-comparison evidence, including compiler identity and variant coverage; compilation alone does not establish a matching baseline.
-4. Use retained private objects to classify definition, reference, data and ABI blockers. Only then plan canonical runtime inputs and a separate startup/link target.
+1. Implement the authorized fixture-only EH extraction and probe and metadata-only ownership tool; obtain independent review and satisfy pre-execution gates before execution.
+2. Use reviewed audit findings to plan evidence-backed data and provider closure. Keep generated data and reports private; runtime selection remains false.
+3. Preserve the full retained-build and independent reference-comparison evidence, including compiler identity and variant coverage; compilation alone does not establish a matching baseline.
+4. Plan canonical runtime inputs and a separate startup/link target only after definition, reference, data and ABI blockers are evidenced.
 
 The coordinator reports all three compiler probes passed and the full retained-object build compiled 2,988 of 2,988 recipes with exit 0. Full COFF inventory reconciled all 2,988 entries, with zero parse errors or omissions; it recorded 814,858 relocations, 180,206 external definitions, 11,727 duplicate names and 174,649 raw unresolved names. Raw unresolved names are not a missing-source count. The independent full reference comparison passed on separately compiled temporary objects, exit 0: 68,667 of 68,667 recipe function rows and 1,954 of 1,954 EH entries matched. Recipe rows include repeated addresses and are not unique-function counts. That run does not intrinsically bind the retained objects. The independently reviewed direct retained-object v3 check reports original parity and matching selected function rows/global EH coverage, preserving 95 local EH notes also found in the baseline. Strict local EH and individual provider runtime closure remain unverified; prior receipts remain intact. An earlier owner-reported SP1 smoke retained two of 2,988 recipe objects. The partial inventory reported 115 relocations, 28 external definitions, 55 unresolved names and two imports; these are sample counts, not whole-program totals. The final independently run suite reports 120 tests with two intentionally skipped native opt-ins; the separate native CRT/TLS probe passed constructor and destructor checks and independent main/worker thread-local values. This synthetic bootstrap is not game startup. A runnable executable, menu, gameplay and save/load remain future milestones; none has been demonstrated in this wave.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Independent final validation reviewed the v3 retained, data, canonical, gaps and leaf receipts and passed scoped privacy and diff checks. The next work remains canonical data ownership, provider and per-function EH closure, startup and link; none is established by the leaf probe. Hosted CI has not run.
+
+Next-phase audits are bounded: the current EH-piece join covers 1,006 other-code and 484 ambiguous-EH unique targets. A 64-target sample found 43 frame-cleanup targets, three this-adjust tails and 12 unrecognized targets, with other categories also present. These sample results do not classify the whole population or prove runtime closure. The two recovery audits are delivered with the review limits recorded above; use their exact evidence before planning a nontrivial EH/data component.

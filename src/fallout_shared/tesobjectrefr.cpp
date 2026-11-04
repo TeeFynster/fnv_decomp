@@ -33773,7 +33773,7 @@ struct FUN_0055a2f0
 struct ScriptOps
 {
     void* FUN_005abf60();
-    bool Execute(FUN_0055a2f0*, void*, int, bool);
+    bool Run(FUN_0055a2f0*, void*, int, bool);
 };
 struct ExtraOps
 {
@@ -34004,7 +34004,7 @@ void RefOps::FUN_00574b30(RefOps* source, int count, bool abArg1, bool abArg2)
                             extras->FUN_00419f80(script->FUN_005abf60());
                             FUN_0055a2f0* reference = new FUN_0055a2f0;
                             reference->FUN_00484490();
-                            script->Execute(reference, extras->FUN_00418830(), 0, false);
+                            script->Run(reference, extras->FUN_00418830(), 0, false);
                             delete reference;
                         }
                         MarkBaseExtraListScriptEvent(this, extras, 1);

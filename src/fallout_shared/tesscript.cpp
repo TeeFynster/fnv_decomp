@@ -641,14 +641,14 @@ void __cdecl DoCheckScriptRunnerAndRun(TESObjectREFR* ownerObject, ExtraDataList
 
 struct FUN_005ac1e0_shell : public Script
 {
-    bool Execute(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    bool Run(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
 };
 
 extern SettingT_GameSettingCollection_ g_011cac68;
 
 // Runs the script via the script runner, decrementing a timer and resetting it from the game setting or a referenced value when the header flag is set.
 // @fnv 0x005ac1e0
-bool FUN_005ac1e0_shell::Execute(TESObjectREFR* ownerObject, ScriptLocals* ownerVars,
+bool FUN_005ac1e0_shell::Run(TESObjectREFR* ownerObject, ScriptLocals* ownerVars,
                                       TESObjectREFR* ownerContainer, bool abIsPartialScript)
 {
     if (!abIsPartialScript && GetHeader()->dataSize <= 4)
@@ -1830,12 +1830,12 @@ __declspec(thread) unsigned char FUN_005ac400_tls[0x269];
 
 struct ScriptCompileAndRun
 {
-    void Run(ScriptCompiler* compiler, COMPILER_NAME compilerIndex, TESObjectREFR* ownerObject);
+    void CompileAndRun(ScriptCompiler* compiler, COMPILER_NAME compilerIndex, TESObjectREFR* ownerObject);
 };
 
 // Compiles the script with the given compiler index and owner object, and if compilation succeeds and the script has data, runs it with the owner's locals.
 // @fnv 0x005ac400
-void ScriptCompileAndRun::Run(ScriptCompiler* compiler, COMPILER_NAME compilerIndex,
+void ScriptCompileAndRun::CompileAndRun(ScriptCompiler* compiler, COMPILER_NAME compilerIndex,
                                        TESObjectREFR* ownerObject)
 {
     AutoMemHelper tempMemContext(0x15, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESScript.cpp",

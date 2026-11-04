@@ -7487,7 +7487,7 @@ struct Sh00418800
 };
 struct Sh005ac1e0
 {
-    bool Execute(void* a, void* b, void* c, bool d);
+    bool Run(void* a, void* b, void* c, bool d);
 };
 struct Sh0087ce80
 {

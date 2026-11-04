@@ -13439,7 +13439,7 @@ struct FUN_0092b460_cls
     FUN_0092b460_cls* GetTargetFromOffset();
     FUN_0092b460_cls* FUN_008d8520();
     FUN_0092b460_cls* FUN_008d0430();
-    void Execute(FUN_0092b460_cls* a, int b, int c, int d);
+    void Run(FUN_0092b460_cls* a, int b, int c, int d);
     void FUN_0092b460(FUN_0092b460_cls* a1, FUN_0092b460_cls* a2);
 };
 
@@ -13471,7 +13471,7 @@ void FUN_0092b460_cls::FUN_0092b460(FUN_0092b460_cls* a1, FUN_0092b460_cls* a2)
         c5 = q->FUN_008d0430();
         if (c5 != 0)
         {
-            c5->Execute(a1, 0, 0, 0);
+            c5->Run(a1, 0, 0, 0);
         }
     }
 }

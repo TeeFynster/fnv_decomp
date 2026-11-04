@@ -2030,7 +2030,7 @@ class Script
 {
   public:
     ScriptLocals* FUN_005abf60();
-    bool Execute(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    bool Run(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
 };
 struct ExtraDataList
 {
@@ -2284,7 +2284,7 @@ bool Action::TryAddTopic(TopicInfo* pTopicInfo, TESObjectREFR* reference, int ar
                     extra->FUN_00419ed0(pScript);
                     extra->FUN_00419f80(extra->FUN_00418800()->FUN_005abf60());
                     TESObjectREFR* temporary = new FUN_0055a2f0;
-                    pScript->Execute(temporary, extra->FUN_00418830(), 0, false);
+                    pScript->Run(temporary, extra->FUN_00418830(), 0, false);
                 }
                 reinterpret_cast<ActorActions*>(actor)->AddTopic(script, extra, true);
             }

@@ -16003,7 +16003,7 @@ struct Sh00418800
 };
 struct Sh005ac1e0
 {
-    bool Execute(void* a, void* b, void* c, bool d);
+    bool Run(void* a, void* b, void* c, bool d);
 };
 struct Sh0087ce80
 {
@@ -16069,7 +16069,7 @@ bool C004d2480::FUN_004d2480(TESObjectREFR* apRef)
                             ((Sh00568bb0*)DAT_011c6444)->FUN_00568bb0(pExtra);
                             ((Sh00575690*)DAT_011c6444)->FUN_00575690((void*)FUN_0044ddc0((InventoryItemEntry*)pItem));
                             if (((Sh005ac1e0*)pScript)
-                                    ->Execute(DAT_011c6444, ((Sh00418830*)pExtra)->FUN_00418830(), apRef, false))
+                                    ->Run(DAT_011c6444, ((Sh00418830*)pExtra)->FUN_00418830(), apRef, false))
                                 bRan = true;
                             ((Sh00419f80*)((Sh005d43c0*)DAT_011c6444)->FUN_005d43c0())->FUN_00419f80((void*)0);
                             ((Sh00411fd0*)((Sh005d43c0*)DAT_011c6444)->FUN_005d43c0())->FUN_00411fd0((void*)1);
@@ -17142,7 +17142,7 @@ struct FUN_0055a2f0
 struct InvScript
 {
     void* FUN_005abf60();
-    void Execute(FUN_0055a2f0*, void*, int, int);
+    void Run(FUN_0055a2f0*, void*, int, int);
 };
 struct FUN_00410360_Inventory
 {
@@ -17241,7 +17241,7 @@ void InvInventory::FUN_004d1960()
                             extraA->FUN_00419f80(extraA->FUN_00418800()->FUN_005abf60());
                             FUN_0055a2f0* temporaryA = new FUN_0055a2f0;
                             temporaryA->FUN_00484490();
-                            script1->Execute(temporaryA, extraA->FUN_00418830(), 0, 0);
+                            script1->Run(temporaryA, extraA->FUN_00418830(), 0, 0);
                             delete temporaryA;
                             --count17;
                         }
@@ -17262,7 +17262,7 @@ void InvInventory::FUN_004d1960()
                             extraB->FUN_00419f80(extraB->FUN_00418800()->FUN_005abf60());
                             FUN_0055a2f0* temporaryB = new FUN_0055a2f0;
                             temporaryB->FUN_00484490();
-                            script1->Execute(temporaryB, extraB->FUN_00418830(), 0, 0);
+                            script1->Run(temporaryB, extraB->FUN_00418830(), 0, 0);
                             delete temporaryB;
                         }
                     }
@@ -17280,7 +17280,7 @@ void InvInventory::FUN_004d1960()
                     {
                         FUN_0055a2f0* temporaryC = new FUN_0055a2f0;
                         temporaryC->FUN_00484490();
-                        script1->Execute(temporaryC, extraC->FUN_00418830(), 0, 0);
+                        script1->Run(temporaryC, extraC->FUN_00418830(), 0, 0);
                         delete temporaryC;
                         --count17;
                     }
@@ -17316,7 +17316,7 @@ void InvInventory::FUN_004d1960()
                             extraD->FUN_00419f80(extraD->FUN_00418800()->FUN_005abf60());
                             FUN_0055a2f0* temporaryD = new FUN_0055a2f0;
                             temporaryD->FUN_00484490();
-                            scriptB46->Execute(temporaryD, extraD->FUN_00418830(), 0, 0);
+                            scriptB46->Run(temporaryD, extraD->FUN_00418830(), 0, 0);
                             delete temporaryD;
                             --countB11;
                         }
@@ -17335,7 +17335,7 @@ void InvInventory::FUN_004d1960()
                         extraE->FUN_00419f80(extraE->FUN_00418800()->FUN_005abf60());
                         FUN_0055a2f0* temporaryE = new FUN_0055a2f0;
                         temporaryE->FUN_00484490();
-                        scriptB46->Execute(temporaryE, extraE->FUN_00418830(), 0, 0);
+                        scriptB46->Run(temporaryE, extraE->FUN_00418830(), 0, 0);
                         delete temporaryE;
                     }
                 }
@@ -17350,7 +17350,7 @@ void InvInventory::FUN_004d1960()
                     {
                         FUN_0055a2f0* temporaryF = new FUN_0055a2f0;
                         temporaryF->FUN_00484490();
-                        scriptB46->Execute(temporaryF, extraF->FUN_00418830(), 0, 0);
+                        scriptB46->Run(temporaryF, extraF->FUN_00418830(), 0, 0);
                         delete temporaryF;
                         --countB11;
                     }
@@ -17460,7 +17460,7 @@ struct CleanEvent;
 struct CleanScript
 {
     CleanEvent* FUN_005abf60();
-    void Execute(CleanRef*, CleanEvent*, int, int);
+    void Run(CleanRef*, CleanEvent*, int, int);
 };
 struct CleanRef
 {
@@ -17654,7 +17654,7 @@ void InventoryClean::FUN_004cbbc0()
                                 copyScope15->FUN_00419f80(copyScope15->FUN_00418800()->FUN_005abf60());
                                 CleanRef* refScope3 = new CleanRef;
                                 refScope3->FUN_00484490();
-                                extraScope12->FUN_00418800()->Execute(refScope3, copyScope15->FUN_00418830(), 0,
+                                extraScope12->FUN_00418800()->Run(refScope3, copyScope15->FUN_00418830(), 0,
                                                                            0);
                                 nextScope13->FUN_00905820(&copyScope15);
                                 nextScope13 = nodeScope11->FUN_00726070();
@@ -17688,7 +17688,7 @@ void InventoryClean::FUN_004cbbc0()
                             extraScope20->FUN_00419f80(extraScope20->FUN_00418800()->FUN_005abf60());
                             CleanRef* refScope21 = new CleanRef;
                             refScope21->FUN_00484490();
-                            itemScope4Local28->FUN_004bde40()->Execute(refScope21, extraScope20->FUN_00418830(), 0,
+                            itemScope4Local28->FUN_004bde40()->Run(refScope21, extraScope20->FUN_00418830(), 0,
                                                                             0);
                             delete refScope21;
                         }
@@ -17702,7 +17702,7 @@ void InventoryClean::FUN_004cbbc0()
                         extraScope23->FUN_00419f80(extraScope23->FUN_00418800()->FUN_005abf60());
                         CleanRef* refScope3 = new CleanRef;
                         refScope3->FUN_00484490();
-                        scriptScope17->Execute(refScope3, extraScope23->FUN_00418830(), 0, 0);
+                        scriptScope17->Run(refScope3, extraScope23->FUN_00418830(), 0, 0);
                         delete refScope3;
                         nodeScope18->FUN_005ae3d0(&extraScope23);
                     }
@@ -17916,7 +17916,7 @@ void InventoryClean::FUN_004cbbc0()
                             copyScope52->FUN_00419f80(copyScope52->FUN_00418800()->FUN_005abf60());
                             CleanRef* refScope6 = new CleanRef;
                             refScope6->FUN_00484490();
-                            extraScope49->FUN_00418800()->Execute(refScope6, copyScope52->FUN_00418830(), 0, 0);
+                            extraScope49->FUN_00418800()->Run(refScope6, copyScope52->FUN_00418830(), 0, 0);
                             nextScope50->FUN_00905820(&copyScope52);
                             nextScope50 = nodeScope48->FUN_00726070();
                         }
@@ -17949,7 +17949,7 @@ void InventoryClean::FUN_004cbbc0()
                             extraScope57->FUN_00419f80(extraScope57->FUN_00418800()->FUN_005abf60());
                             CleanRef* refScope58 = new CleanRef;
                             refScope58->FUN_00484490();
-                            itemScope39->FUN_004bde40()->Execute(refScope58, extraScope57->FUN_00418830(), 0, 0);
+                            itemScope39->FUN_004bde40()->Run(refScope58, extraScope57->FUN_00418830(), 0, 0);
                         }
                         nodeScope55 = nodeScope55->FUN_00726070();
                     }
@@ -17961,7 +17961,7 @@ void InventoryClean::FUN_004cbbc0()
                         extraScope60->FUN_00419f80(extraScope60->FUN_00418800()->FUN_005abf60());
                         CleanRef* refScope61 = new CleanRef;
                         refScope61->FUN_00484490();
-                        scriptScope54->Execute(refScope61, extraScope60->FUN_00418830(), 0, 0);
+                        scriptScope54->Run(refScope61, extraScope60->FUN_00418830(), 0, 0);
                         delete refScope61;
                         nodeScope55->FUN_005ae3d0(&extraScope60);
                     }

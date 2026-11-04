@@ -65,6 +65,12 @@ function, put its new decorated name at the same address, in every unit that lis
 the old name as unbound. Adding a declaration or a string literal can renumber the compiler's string labels
 (`$SG...`) that `build/units.json` names; the check says so when that is the cause.
 
+A unit may also give an address it refers to a further name, as long as `build/units.json` already has that address.
+Identical code that the linker folded has one address and several names, for example one template instantiated for
+several types. An address that `build/units.json` does not have yet needs a maintainer. Exception-handling code
+resolves names through the whole of `build/units.json`, so when a pull request changes any names there, the check
+also rebuilds every unit with exception-handling code. That adds a few minutes.
+
 ### Never include any part of the game
 
 No executable, no bytes copied from it, no object files built from this code, no game data. A pull request that

@@ -21,8 +21,11 @@ The rules (plan): only src/, include/, build/units.json and *.md files may chang
 a pull request opened by the repository owner) .github/ and tools/ may change as well: this check cannot vouch for
 them, the owner verifies them with a full build_and_match.py run, and main is built against the game after every
 change. In build/units.json only decorated names may change: every unit keeps its source, compiler, flags, function
-addresses and sizes, EH tails and the addresses its symbols bind. Anything else (build/image_check.json,
-third_party/, patches/, a new unit) needs a maintainer.
+addresses and sizes, EH tails and every address its symbols bind. A unit may also bind a further name to an address
+the recipe already has (identical code the linker folded has one address and several names). EH code resolves names
+through the whole recipe, so when those names change in any way, every unit with EH tails is built again. Anything
+else (build/image_check.json, third_party/, patches/, a new unit, an address the recipe does not have) needs a
+maintainer.
 
 A file whose change is only in comments and whitespace inside lines (nothing else moves) cannot change any function,
 so its includers are not rebuilt; __LINE__ is used only to name static-assert typedefs, and a change that adds a new
@@ -30,6 +33,7 @@ __LINE__ use is rebuilt in full. The compilers come from FNV_MSVC9_ROOT etc. as 
 stay in a temporary folder and are deleted; results hold addresses and counts only.
 """
 import argparse
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
@@ -141,9 +145,16 @@ def closure(graph, start):
     return seen
 
 
+def address_of(value):
+    return int(value, 16) if isinstance(value, str) else int(value)
+
+
 def recipe_problems(a, b):
     """What build/units.json changes beyond decorated names, and the units whose entry changed."""
     problems, changed = [], set()
+    # every address the base recipe already names: a function's start, or a symbol some unit binds
+    known = {address_of(f['address']) for u in a['units'] for f in u['functions']}
+    known |= {address_of(v) for u in a['units'] for v in u.get('symbols', {}).values()}
     if a.get('totals') != b.get('totals'):
         problems.append('build/units.json: the totals changed')
     ua, ub = a['units'], b['units']
@@ -164,7 +175,11 @@ def recipe_problems(a, b):
                 if (f['address'], f['size'], len(f.get('fold_aliases', []))) != \
                         (g['address'], g['size'], len(g.get('fold_aliases', []))) or set(g) - {'address', 'size', 'symbol', 'fold_aliases'}:
                     problems.append('%s: function %s changed beyond its name' % (where, f['address']))
-        if sorted(x.get('symbols', {}).values()) != sorted(y.get('symbols', {}).values()):
+        bound_a, bound_b = Counter(map(address_of, x.get('symbols', {}).values())), Counter(map(address_of, y.get('symbols', {}).values()))
+        # a name added for an address the recipe already has (one address with several decorated names: identical code
+        # the linker folded, such as one template instantiated for several types) points nothing anywhere new
+        added = {v for v in bound_b - bound_a if v not in known}
+        if bound_a - bound_b or added:
             problems.append('%s: its symbols bind different addresses' % where)
         if x != y:
             changed.add(i)
@@ -203,6 +218,10 @@ def plan(base, head, shard_size, max_shards, trusted=False):
         code_changed += comment_only; comment_only = []   # a new __LINE__ use: line positions may matter
     units = ra['units']
     affected = set(recipe_changed)
+    if rb is not None and recipe_names(ra['units']) != recipe_names(rb['units']):
+        # EH code resolves names through the whole recipe (recipe_names): a binding added, removed or renamed in any
+        # unit can change what it resolves to in units that did not change, so every unit with EH tails is built again
+        affected |= {i for i, u in enumerate(units) if u.get('eh_tails')}
     if code_changed:
         ga, gb = include_graph(base, fa), include_graph(head, fb)
         hit = set(code_changed)

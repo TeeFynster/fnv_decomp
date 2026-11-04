@@ -1,0 +1,31 @@
+{
+  "schema": "fnv-resource-source-manifest",
+  "schema_version": 1,
+  "default_language": {"primary": 9, "sub": 1},
+  "resources": [
+    {"type": "ICON", "id": 101, "file": "assets/example-icon.ico"},
+    {"type": "MANIFEST", "id": 1, "file": "assets/example.manifest"},
+    {
+      "type": "VERSIONINFO",
+      "id": 1,
+      "file_version": [0, 1, 0, 0],
+      "product_version": [0, 1, 0, 0],
+      "file_flags_mask": 63,
+      "file_flags": 0,
+      "file_os": 262148,
+      "file_type": 1,
+      "file_subtype": 0,
+      "string_table": {
+        "language": {"primary": 9, "sub": 1},
+        "codepage": 1200,
+        "strings": {
+          "CompanyName": "Example Company",
+          "FileDescription": "Synthetic example",
+          "FileVersion": "0.1.0.0",
+          "ProductName": "Example Product",
+          "ProductVersion": "0.1.0.0"
+        }
+      }
+    }
+  ]
+}

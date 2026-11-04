@@ -1,0 +1,16 @@
+{
+  "schema": "fnv-runtime-readiness-manifest",
+  "schema_version": 1,
+  "description": "Example only. Copy to a PRIVATE location outside the repository and replace each placeholder with your own path. Relative paths resolve against the manifest's own directory. No environment-variable or ~ expansion is done.",
+  "paths": {
+    "installation": "<owned-game-data>",
+    "executable": "<private-built-exe>",
+    "working_directory": "<working-directory>",
+    "isolated_profile": "<isolated-config-and-saves>",
+    "dll_providers": ["<verified-dll-providers>"]
+  },
+  "protected_paths": ["<existing-user-config-and-saves>"],
+  "launch": {
+    "arguments": []
+  }
+}

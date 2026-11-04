@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-compile-only-eh-type-overlay",
+  "policy": "constructor-0043fd40-two-views-v1",
+  "recipe_index": 802,
+  "recipe_id": "0802-87f974b83dab6f45",
+  "parent": "0x0043fd40",
+  "symbol": "??0FUN_0043fd40@@QAE@HH@Z",
+  "size": 166,
+  "source": "src/fallout_shared/modelloader.cpp",
+  "source_sha256": "93fba6b335addd4607a7faff409958111f8ed989d405cb8b39f293c5275adf97",
+  "slice": {
+    "first_line": 11565,
+    "last_line": 11610,
+    "normalized_sha256": "8c9459e1aaf4c839b32d59c44717aa70cf8b6af369b82731a8b8377e42afb41d"
+  },
+  "views": [
+    {
+      "member": "m_30",
+      "type": "Overlay0043fd40Member30",
+      "constructor_original": "0x00633c90",
+      "destructor_original": "0x0040c110"
+    },
+    {
+      "member": "m_34",
+      "type": "Overlay0043fd40Member34",
+      "constructor_original": "0x00633c90",
+      "destructor_original": "0x0045cec0"
+    }
+  ],
+  "compiler_inputs": {
+    "VC/bin/cl.exe": "2954bed141f2f283e3109b2187406704a2d5cb6378cb3074f1b09bc5045d65c1",
+    "VC/bin/c1xx.dll": "93380e0bc9505d70896ec06d973cf6e06e4a4f27ee61f5365df1c83353151a45",
+    "VC/bin/c2.dll": "e3dd31ec4cb066fdf27cea24efc37944bb9d6a2720e6310213217e571f288404",
+    "VC/include/stddef.h": "2e604fb2a77340a25599dec98c283ce0b3d3373ab86473ab29bb1715e7c3a7b5",
+    "VC/include/crtdefs.h": "bb52597bc38e9d508dda575a0b598f56954f426dd38463c75af767c5b2f56642",
+    "VC/include/sal.h": "c25c776da247c8d3c145cb9afcbc81eea81912f588166de4f84cec9baf8fac18",
+    "VC/include/crtassem.h": "44ea728fb08f21a56aefa461057fe8e1346c73763582ed28bc5ae9e1c9643a4d",
+    "VC/include/vadefs.h": "aae1adc7f057aa349aafd6e78388f3065516cacd3ab1e1adb175d5f269d2b8a2",
+    "VC/include/codeanalysis/sourceannotations.h": "492e8bf2c45a6a2a33e295d73b44dcb3d67a4bf37de1db63c01324985c5675ef"
+  },
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "link_eligible": false
+}

@@ -1,0 +1,378 @@
+{
+  "schema": "fnv-runtime-smoke-test-record",
+  "schema_version": 1,
+  "status_notice": "UNEXECUTED TEMPLATE. NO LAUNCH IS AUTHORIZED. Every result is not-run until the step is actually performed on an approved build. Copy to a private location before filling; never put private absolute paths, game bytes, assets or credentials in the record.",
+  "launch_authorized": false,
+  "record": {
+    "record_id": "",
+    "prepared_by": {
+      "name": "",
+      "model_or_tool_attribution": ""
+    },
+    "date": "",
+    "approval_reference": ""
+  },
+  "build_identity": {
+    "source_commit": "",
+    "source_branch": "",
+    "build_recipe_or_command_reference": "",
+    "executable_placeholder": "<private-built-exe>",
+    "executable_sha256": "",
+    "executable_size_bytes": null,
+    "toolchain_report_reference": "",
+    "readiness_report_reference": ""
+  },
+  "platform": {
+    "target": "x86 Windows GUI (prospective, unverified)",
+    "os_name_version": "",
+    "cpu_arch": "",
+    "gpu_and_driver": "",
+    "audio_device": "",
+    "display_mode": ""
+  },
+  "owned_inputs": {
+    "installation_placeholder": "<owned-game-data>",
+    "installation_version": "",
+    "original_executable_left_unchanged_verified": null,
+    "data_files_used": [],
+    "addons_and_localization": "",
+    "access_arrangement": ""
+  },
+  "isolation": {
+    "isolated_config_and_saves_placeholder": "<isolated-config-and-saves>",
+    "existing_user_config_and_saves_backed_up": null,
+    "backup_location_reference": "",
+    "existing_user_config_and_saves_untouched_verified": null,
+    "dll_provider_placeholder": "<verified-dll-providers>",
+    "dll_search_policy": ""
+  },
+  "launch": {
+    "application_directory_placeholder": "<application-directory>",
+    "working_directory_placeholder": "<working-directory>",
+    "arguments": [],
+    "environment_changes": [],
+    "expected_reads": [
+      "<owned-game-data> (read-only)",
+      "<verified-dll-providers>"
+    ],
+    "expected_writes": [
+      "<isolated-config-and-saves> only"
+    ]
+  },
+  "steps": [
+    {
+      "id": "preflight-record-identity",
+      "title": "Record build identity, platform and owned inputs",
+      "phase": "preflight",
+      "depends_on": [],
+      "preconditions": "All readiness gates (source link, CRT/TLS, ABI, resource, provider) are closed; the readiness report was reviewed; written approval for this build is referenced in record.approval_reference.",
+      "procedure": [
+        "Copy this template to a PRIVATE location outside the repository and work only in the copy.",
+        "Fill record, prepared_by (real model/tool attribution of who fills the record; do not infer it) and date.",
+        "Using a read-only hashing tool, record executable_sha256 and executable_size_bytes of <private-built-exe>; record source_commit, source_branch, build recipe, toolchain and readiness report references.",
+        "Fill platform and owned_inputs (installation version, data files used, add-ons/localization, access arrangement) without private paths, game bytes, assets or credentials.",
+        "Run the validator on the copy and confirm it reports no problems."
+      ],
+      "expected": "Identity, platform and inputs are recorded with placeholders only; validator reports no problems; nothing was launched.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "No game or system state changed. If the record was filled in the wrong place, move it to the private location and securely delete the stray copy.",
+      "notes": ""
+    },
+    {
+      "id": "preflight-backup-and-isolate",
+      "title": "Back up existing config/saves and confirm isolation",
+      "phase": "preflight",
+      "depends_on": [
+        "preflight-record-identity"
+      ],
+      "preconditions": "Identity step passed. You know (privately) where existing user configuration and saves live; those locations are not written into this record.",
+      "procedure": [
+        "Copy (never move) existing user configuration and saves to a private backup location outside the repository; record only a backup reference.",
+        "Prepare <isolated-config-and-saves> as a new, empty location separate from every existing user location; no junctions, links or asset copies.",
+        "Record the isolation mechanism in launch.arguments / launch.environment_changes; confirm it cannot resolve to existing user config or saves.",
+        "Take a baseline hash of the original game executable and a listing/hash baseline of the existing user config and saves (kept privately).",
+        "Confirm <verified-dll-providers> lists only vetted providers, the original game executable is not a runtime provider, and no Steam stub, protection bypass or credentials are involved.",
+        "Set isolation.existing_user_config_and_saves_backed_up to true only after verifying the backup is readable."
+      ],
+      "expected": "A verified backup exists; the isolated location is empty and separate; baselines are taken; provider policy is recorded.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Nothing in the existing configuration or saves was modified. If anything was changed by mistake, restore it from the backup copy before continuing; delete the empty isolated location if abandoning the run.",
+      "notes": ""
+    },
+    {
+      "id": "launch-to-window",
+      "title": "Process starts and a window appears",
+      "phase": "startup",
+      "depends_on": [
+        "preflight-backup-and-isolate"
+      ],
+      "preconditions": "Backup and isolation passed; explicit approval is recorded; launch.application_directory_placeholder and launch.working_directory_placeholder are filled as separate fields; a time limit is chosen in advance and recorded in notes.",
+      "procedure": [
+        "Start <private-built-exe> once from the recorded application directory with the recorded working directory, arguments and environment.",
+        "Observe whether the process starts and a top-level window appears within the time limit.",
+        "Do not interact with menus or gameplay in this step.",
+        "Capture a screenshot or log excerpt as evidence; list any files written."
+      ],
+      "expected": "Process starts without crash dialog, loader or missing-DLL error; a window appears; writes (if any) land only in <isolated-config-and-saves>.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If the process hangs or fails, end only that process by normal OS means and mark the step fail or blocked. Confirm no stray processes remain; reset <isolated-config-and-saves> to its empty baseline; do not touch the backup.",
+      "notes": ""
+    },
+    {
+      "id": "clean-exit-from-startup",
+      "title": "Clean exit straight from startup",
+      "phase": "startup",
+      "depends_on": [
+        "launch-to-window"
+      ],
+      "preconditions": "launch-to-window passed and the process is still running.",
+      "procedure": [
+        "Request exit using the normal window close or system exit path; do not use forced termination.",
+        "Record the process exit code and whether it exited within the time limit.",
+        "Confirm no lingering processes, no crash dialog and no writes outside <isolated-config-and-saves>."
+      ],
+      "expected": "Process exits cleanly within the time limit with the expected exit code; no lingering processes or crash reports.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If the process did not exit, end only that process by normal OS means and record fail. Reset <isolated-config-and-saves> to its empty baseline unless later steps need its contents.",
+      "notes": ""
+    },
+    {
+      "id": "menu-responsive",
+      "title": "Main menu is responsive",
+      "phase": "menu",
+      "depends_on": [
+        "clean-exit-from-startup"
+      ],
+      "preconditions": "clean-exit-from-startup passed; relaunch uses the same recorded arguments, working directory and isolation.",
+      "procedure": [
+        "Relaunch <private-built-exe> as recorded.",
+        "Wait for the main menu; move focus with keyboard and mouse across items; open and back out of a sub-menu.",
+        "Do not change settings other than inside the isolated profile; do not start gameplay yet.",
+        "Capture a screenshot and note any input lag, freezes or missing text/graphics."
+      ],
+      "expected": "Main menu renders; input moves focus and activates items without freezing; back/escape works.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Leave the menu and exit cleanly if possible, otherwise end only the test process by normal OS means. Reset <isolated-config-and-saves> to baseline if settings were written.",
+      "notes": ""
+    },
+    {
+      "id": "new-game",
+      "title": "Start a new game",
+      "phase": "gameplay",
+      "depends_on": [
+        "menu-responsive"
+      ],
+      "preconditions": "menu-responsive passed; the game is at the main menu; saves target <isolated-config-and-saves> only.",
+      "procedure": [
+        "Choose New Game from the main menu and proceed through any intro to a controllable state.",
+        "Record time taken and any errors or stalls.",
+        "Capture a screenshot of the first controllable frame."
+      ],
+      "expected": "A new game starts and reaches a controllable state without crash, hang or error dialog.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If the game fails to start, exit by normal means and record fail. Discard the new-game state by resetting <isolated-config-and-saves> to baseline.",
+      "notes": ""
+    },
+    {
+      "id": "movement",
+      "title": "Player movement and camera",
+      "phase": "gameplay",
+      "depends_on": [
+        "new-game"
+      ],
+      "preconditions": "new-game passed and the player is controllable.",
+      "procedure": [
+        "Walk forward, backward and sideways; turn and look; jump if available.",
+        "Check for input lag, stuck keys, falling through the world or camera glitches.",
+        "Record a short capture or notes of the movement."
+      ],
+      "expected": "Movement and camera respond to input smoothly with no crash, freeze or collision failure.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Stop input and return to a safe state; if the game is unstable, exit by normal means. No persistent state outside <isolated-config-and-saves> may remain.",
+      "notes": ""
+    },
+    {
+      "id": "render",
+      "title": "Rendering of world and UI",
+      "phase": "gameplay",
+      "depends_on": [
+        "new-game"
+      ],
+      "preconditions": "new-game passed; platform.display_mode is recorded.",
+      "procedure": [
+        "Observe world geometry, textures, lighting, HUD and menus for corruption, missing assets or black/flickering frames.",
+        "Confirm the display mode matches platform.display_mode.",
+        "Capture at least one screenshot of the world and one of the UI."
+      ],
+      "expected": "World and UI render correctly and stably; no severe corruption, flicker or black screen.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "No state to roll back beyond the isolated profile; copy screenshots to the private evidence location before any profile cleanup.",
+      "notes": ""
+    },
+    {
+      "id": "audio",
+      "title": "Audio playback",
+      "phase": "gameplay",
+      "depends_on": [
+        "new-game"
+      ],
+      "preconditions": "new-game passed; platform.audio_device is recorded and volume is at a safe level.",
+      "procedure": [
+        "Listen for music, ambient sound, effects and speech as available.",
+        "Check for stutter, silence, distortion or crashes on audio events.",
+        "Note audio observations; do not retain recordings of game assets."
+      ],
+      "expected": "Audio plays on the recorded device without crash, stutter or distortion.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Restore the system volume and any audio device setting changed for the test; nothing outside <isolated-config-and-saves> should remain changed.",
+      "notes": ""
+    },
+    {
+      "id": "save-game",
+      "title": "Save a game into the isolated location",
+      "phase": "persistence",
+      "depends_on": [
+        "movement",
+        "render",
+        "audio"
+      ],
+      "preconditions": "movement, render and audio have results recorded; saves are directed to <isolated-config-and-saves>.",
+      "procedure": [
+        "Save through the in-game menu using a new unique save name (include record_id).",
+        "Confirm the save file appears only inside <isolated-config-and-saves>.",
+        "Record the save name, size and hash (no contents) and the player state noted before saving (position and one inventory item)."
+      ],
+      "expected": "Save completes without error; one new save file exists only in the isolated location; no pre-existing user save was written or overwritten.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If a save was written anywhere else, stop, restore from the backup and record fail. Otherwise the save stays in the isolated profile until the cleanup-rollback step.",
+      "notes": ""
+    },
+    {
+      "id": "reload-save",
+      "title": "Reload the save created in this run",
+      "phase": "persistence",
+      "depends_on": [
+        "save-game"
+      ],
+      "preconditions": "save-game passed; the save to load is the one created in this run, never a pre-existing user save.",
+      "procedure": [
+        "Change the player state (move and alter one inventory item).",
+        "Load the save created in save-game from the in-game load dialog.",
+        "Compare the loaded state to the state noted before saving."
+      ],
+      "expected": "The save loads without error and the state matches what was saved.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Do not load or overwrite any other save. If loading fails or corrupts state, exit by normal means and keep the isolated profile for analysis.",
+      "notes": ""
+    },
+    {
+      "id": "load-game-from-menu",
+      "title": "Load the same save via the main menu",
+      "phase": "persistence",
+      "depends_on": [
+        "reload-save"
+      ],
+      "preconditions": "reload-save passed; the game can return to the main menu (or be cleanly restarted with the same isolated profile).",
+      "procedure": [
+        "Return to the main menu or exit cleanly and relaunch as recorded.",
+        "Choose Load Game from the main menu and select the save created in this run.",
+        "Confirm the loaded state matches the saved state."
+      ],
+      "expected": "The save created in this run loads from the main menu with matching state and no error.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "Pick no other save. Exit by normal means; keep the isolated profile intact for the verification step.",
+      "notes": ""
+    },
+    {
+      "id": "clean-exit",
+      "title": "Clean exit after gameplay",
+      "phase": "shutdown",
+      "depends_on": [
+        "load-game-from-menu"
+      ],
+      "preconditions": "load-game-from-menu passed and the game is running.",
+      "procedure": [
+        "Exit through the in-game menu or window close; do not use forced termination.",
+        "Record the exit code, time to exit and whether any crash dialog or lingering process appeared.",
+        "List files changed or created in <isolated-config-and-saves>."
+      ],
+      "expected": "Process exits cleanly within the time limit; no lingering processes; only expected files written in the isolated location.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If the process did not exit, end only that process by normal OS means and record fail. Do not modify the isolated profile further before the verification step.",
+      "notes": ""
+    },
+    {
+      "id": "postflight-verify-untouched",
+      "title": "Verify original install and user data are untouched",
+      "phase": "postflight",
+      "depends_on": [
+        "clean-exit"
+      ],
+      "preconditions": "clean-exit has a result recorded; baselines from preflight-backup-and-isolate exist.",
+      "procedure": [
+        "Re-hash the original game executable and compare it to the baseline; set owned_inputs.original_executable_left_unchanged_verified.",
+        "Compare existing user configuration and saves to the backup/baseline; set isolation.existing_user_config_and_saves_untouched_verified.",
+        "Record isolated profile contents as names, sizes and hashes only (no contents, no private paths).",
+        "Confirm no junctions, asset copies, Steam stub or protection bypass were used."
+      ],
+      "expected": "Original executable and existing user config/saves match their baselines; isolated profile contents are recorded.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "If anything differs, do not run further tests: restore changed items from the backup, record fail and list it in summary.blocking_issues.",
+      "notes": ""
+    },
+    {
+      "id": "cleanup-rollback",
+      "title": "Cleanup and rollback",
+      "phase": "postflight",
+      "depends_on": [
+        "postflight-verify-untouched"
+      ],
+      "preconditions": "Verification step finished; the isolated-profile retention policy is decided and recorded in notes.",
+      "procedure": [
+        "Restore from the backup any user configuration or saves that were changed.",
+        "Delete or retain <isolated-config-and-saves> according to the recorded policy; delete only items created in this run.",
+        "Remove temporary files and confirm no test processes remain.",
+        "Keep the backup until the owner confirms it can be removed; finalize summary and re-validate the record."
+      ],
+      "expected": "System state matches the pre-test state apart from the retained evidence; summary is complete.",
+      "observed": "",
+      "result": "not-run",
+      "evidence_location": "",
+      "cleanup_rollback": "This step is the rollback. If restoration fails, stop, leave the backup and isolated profile untouched, record blocked with notes and report to the owner.",
+      "notes": ""
+    }
+  ],
+  "summary": {
+    "overall_result": "not-run",
+    "blocking_issues": [],
+    "follow_ups": []
+  }
+}

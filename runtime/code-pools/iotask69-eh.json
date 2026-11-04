@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-iotask69-eh-policy",
+  "policy_id": "iotask69-parent-eh-component-v1",
+  "recipe_index": 69,
+  "recipe_id": "0069-3b6fc41592bb705f",
+  "source": "src/bsmain/bstaskmanager_h_unit.cpp",
+  "source_sha256": "d23399d7bfd5d925fdade829b504a803beabf4ded9f8c5121c64047dc14b8371",
+  "object_sha256": "4e7ad6d343e1abc45e1ef23eb96436174032d7cdd5a0c69b2f0748bd8b37607b",
+  "selected": {
+    "original_address": "0x00440540",
+    "symbol": "??0IOTask@@QAE@W4IO_TASK_PRIORITY@@@Z",
+    "symbol_index": 8,
+    "section": 3,
+    "value": 0,
+    "size": 101
+  },
+  "retained_sections": [
+    1,
+    3,
+    4,
+    6,
+    16
+  ],
+  "eh": {
+    "code_section": 4,
+    "size": 35,
+    "cleanup_index": 12,
+    "handler_index": 19,
+    "handler_offset": 8,
+    "metadata_section": 6,
+    "metadata_size": 44,
+    "info_index": 24,
+    "unwind_index": 25,
+    "state_count": 1
+  },
+  "safeseh": {
+    "section": 16,
+    "ordinal": 0,
+    "handler_index": 19,
+    "record_count": 1
+  },
+  "data_boundary": {
+    "symbol_index": 16,
+    "section": 5,
+    "value": 4,
+    "symbol": "??_7IOTask@@6B@",
+    "original_base": "0x01016c10",
+    "role": "data",
+    "storage_defined": false,
+    "semantic_domain": "data",
+    "contract_kind": "vtable-view"
+  },
+  "required_weak_omission": {
+    "symbol_index": 55,
+    "fallback_index": 54,
+    "search": 2
+  },
+  "inputs": {
+    "manifest": "bc62a5fb2553431b1e0547d11f366e52efb73096ea8ceb206c556ae5740a53eb",
+    "retained": "04d44b73e81982f846bfe8d81806db72ea669586b579ff22007dfd6f7d831297",
+    "recipes": "62f2c8da5f0daa912abdf4576328706711c6561eef7f01c93a89cb71ad46fb6c",
+    "selection": "48ae62cdc5b1754b9c4af674ef4716d53afb554882e174a93acf860eaf1c6cb1",
+    "binding": "275714631903758efbf5a4f82e2428c6f51838f53b90d0c56d2e5dec5da1d804"
+  },
+  "required_expanded_interface": "root-code-closure-expanded-eh-v2",
+  "actual_expanded_producer_available": false,
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "ABI_verified": false,
+  "link_ready": false,
+  "comparison_tools": {
+    "tools/build_and_match.py": "e4c5f0d8ef8546d1ff82f4f2092e5f65164495daa867c4ff25efd9e45a25d727",
+    "tools/compare.py": "cfcf5921b71b7a58b6f430d999a511fab9a68f037791bc60295a3083535544d1",
+    "tools/function_spans.py": "8e1f9134d9f207dcc8b524b6bac63cf1319f64860903fef5d2a6996709444727"
+  },
+  "external_identities": {
+    "9": {
+      "role": "code",
+      "semantic_domain": "code",
+      "contract_kind": "ordinary-function"
+    },
+    "13": {
+      "role": "code",
+      "semantic_domain": "code",
+      "contract_kind": "ordinary-function"
+    },
+    "17": {
+      "role": "code",
+      "semantic_domain": "code",
+      "contract_kind": "ordinary-function"
+    },
+    "16": {
+      "role": "data",
+      "semantic_domain": "data",
+      "contract_kind": "vtable-view"
+    },
+    "18": {
+      "role": "data",
+      "semantic_domain": "data",
+      "contract_kind": "security-cookie"
+    },
+    "20": {
+      "role": "crt-contract",
+      "semantic_domain": "code",
+      "contract_kind": "cxx-frame-handler"
+    },
+    "21": {
+      "role": "crt-contract",
+      "semantic_domain": "code",
+      "contract_kind": "security-cookie-check"
+    }
+  }
+}

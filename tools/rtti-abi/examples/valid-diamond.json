@@ -1,0 +1,91 @@
+{
+  "schema": "fnv-rtti-abi-metadata",
+  "schema_version": 1,
+  "fixture": "example_diamond",
+  "classes": [
+    {"id": "Device", "polymorphic": true, "bases": []},
+    {
+      "id": "Reader",
+      "polymorphic": true,
+      "bases": [{"class": "Device", "virtual": true, "access": "public"}]
+    },
+    {
+      "id": "Writer",
+      "polymorphic": true,
+      "bases": [{"class": "Device", "virtual": true, "access": "public"}]
+    },
+    {
+      "id": "Console",
+      "polymorphic": true,
+      "bases": [
+        {"class": "Reader", "virtual": false, "access": "public"},
+        {"class": "Writer", "virtual": false, "access": "public"}
+      ]
+    }
+  ],
+  "objects": [{"id": "a_console", "class": "Console"}, {"id": "a_reader", "class": "Reader"}],
+  "casts": [
+    {
+      "id": "D1",
+      "form": "pointer",
+      "input": {"object": "a_console", "path": ["Console", "Reader"]},
+      "target": "Writer",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["Console", "Writer"]
+    },
+    {
+      "id": "D2",
+      "form": "pointer",
+      "input": {"object": "a_console", "path": ["Console", "Reader", "Device"]},
+      "target": "Console",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["Console"]
+    },
+    {
+      "id": "D3",
+      "form": "pointer",
+      "input": {"object": "a_console", "path": ["Console", "Writer", "Device"]},
+      "target": "Console",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "same_result_as": "D2"
+    },
+    {
+      "id": "D4",
+      "form": "reference",
+      "input": {"object": "a_reader", "path": ["Reader", "Device"]},
+      "target": "Writer",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    }
+  ],
+  "layout_claims": [
+    {
+      "id": "K1",
+      "record": "vbtable",
+      "class": "Reader",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "K2",
+      "record": "class_hierarchy_descriptor",
+      "class": "Console",
+      "property": "virtual_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "set"
+    },
+    {
+      "id": "K3",
+      "record": "base_class_descriptor",
+      "class": "Console",
+      "base_path": ["Console", "Writer", "Device"],
+      "property": "vdisp",
+      "status": "unknown"
+    }
+  ],
+  "measurements": []
+}

@@ -1,0 +1,77 @@
+{
+  "schema": "fnv-runtime-readiness-observed-inventory",
+  "schema_version": 1,
+  "provenance": {
+    "source": "docs/rebuild/GAME-RUNTIME-ENVIRONMENT.md",
+    "observed_on": "2026-11-03",
+    "basis": "observed-snapshot",
+    "statement": "Top-level names from one owned installation (with add-ons), inspected without running it. Names and sizes are evidence for investigation only. They are not a minimum-required list and do not prove runtime use, compatibility, version, exports or licensing."
+  },
+  "installation_entries": [
+    {"path": "Data", "kind": "directory"},
+    {"path": "Redists", "kind": "directory"},
+    {"path": "atimgpud.dll", "kind": "file", "observed_size": 165304},
+    {"path": "binkw32.dll", "kind": "file", "observed_size": 338944},
+    {"path": "ExitData.mhd", "kind": "file", "observed_size": 0},
+    {"path": "Fallout_default.ini", "kind": "file", "observed_size": 19959},
+    {"path": "FalloutNV.exe", "kind": "file", "observed_size": 16549704, "note": "original executable; must stay unchanged; not a runtime provider for the rebuild"},
+    {"path": "FalloutNV.ico", "kind": "file", "observed_size": 168879},
+    {"path": "FalloutNVLauncher.exe", "kind": "file", "observed_size": 2074440},
+    {"path": "GDFFalloutNV.dll", "kind": "file", "observed_size": 1963176},
+    {"path": "high.ini", "kind": "file", "observed_size": 1116},
+    {"path": "low.ini", "kind": "file", "observed_size": 1107},
+    {"path": "medium.ini", "kind": "file", "observed_size": 1115},
+    {"path": "VeryHigh.ini", "kind": "file", "observed_size": 1134},
+    {"path": "InstallScript.vdf", "kind": "file", "observed_size": 889},
+    {"path": "libvorbis.dll", "kind": "file", "observed_size": 1241528, "note": "not a direct import descriptor of the inspected original; need unverified"},
+    {"path": "libvorbisfile.dll", "kind": "file", "observed_size": 120248},
+    {"path": "MainTitle.wav", "kind": "file", "observed_size": 6158306},
+    {"path": "Readme.txt", "kind": "file", "observed_size": 4086},
+    {"path": "steam_api.dll", "kind": "file", "observed_size": 121984},
+    {"path": "Data/Music", "kind": "directory"},
+    {"path": "Data/Shaders", "kind": "directory"},
+    {"path": "Data/Sound", "kind": "directory"},
+    {"path": "Data/Video", "kind": "directory"},
+    {"path": "Data/FalloutNV.esm", "kind": "file"},
+    {"path": "Data/Fallout - Meshes.bsa", "kind": "file"},
+    {"path": "Data/Fallout - Misc.bsa", "kind": "file"},
+    {"path": "Data/Fallout - Sound.bsa", "kind": "file"},
+    {"path": "Data/Fallout - Textures.bsa", "kind": "file"},
+    {"path": "Data/Fallout - Textures2.bsa", "kind": "file"},
+    {"path": "Data/Fallout - Voices1.bsa", "kind": "file"},
+    {"path": "Data/Update.bsa", "kind": "file"},
+    {"path": "Data/Credits.txt", "kind": "file"},
+    {"path": "Data/CreditsWacky.txt", "kind": "file"}
+  ],
+  "addon_stems": {
+    "statement": "Each add-on had a .esm, a .nam and a ' - Main.bsa'; those listed with sounds also had a ' - Sounds.bsa'. Add-ons are part of one snapshot, not a requirement.",
+    "main_only": ["CaravanPack", "ClassicPack", "MercenaryPack", "TribalPack"],
+    "with_sounds": ["DeadMoney", "GunRunnersArsenal", "HonestHearts", "LonesomeRoad", "OldWorldBlues"]
+  },
+  "original_normal_imports": {
+    "statement": "Normal import descriptors of the inspected ORIGINAL executable (17 DLLs, 280 slots; no delay-import directory observed). Evidence for investigation only, not the rebuilt executable's proven dependency set. Transitive and runtime-selected loads are not covered.",
+    "dlls": [
+      {"name": "COMCTL32.dll", "slots": 3},
+      {"name": "d3d9.dll", "slots": 1},
+      {"name": "XINPUT1_3.dll", "slots": 2},
+      {"name": "KERNEL32.dll", "slots": 138},
+      {"name": "USER32.dll", "slots": 37},
+      {"name": "GDI32.dll", "slots": 1},
+      {"name": "ADVAPI32.dll", "slots": 6},
+      {"name": "SHELL32.dll", "slots": 3},
+      {"name": "ole32.dll", "slots": 7},
+      {"name": "steam_api.dll", "slots": 11},
+      {"name": "WSOCK32.dll", "slots": 21},
+      {"name": "d3dx9_38.dll", "slots": 25},
+      {"name": "DINPUT8.dll", "slots": 1},
+      {"name": "WINMM.dll", "slots": 8},
+      {"name": "DSOUND.dll", "slots": 1},
+      {"name": "binkw32.dll", "slots": 9},
+      {"name": "libvorbisfile.dll", "slots": 6}
+    ],
+    "optional_dynamic_loads": {
+      "statement": "Bounded source evidence: an optional graphics capability path tries these names dynamically and handles failure. Other dynamic loads are not ruled out.",
+      "names": ["atiadlxx.dll", "atiadlxy.dll"]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "fnv-runtime-readiness-requirements",
+  "schema_version": 1,
+  "provenance": {
+    "source": "<where these requirements come from, e.g. a reviewed runtime trace or source audit reference>",
+    "basis": "<how they were established, e.g. 'bounded source evidence' or 'observed private test run'>",
+    "author": "<person>",
+    "model_or_tool_attribution": "<actual model/tool, or 'none'>",
+    "date": "<YYYY-MM-DD>"
+  },
+  "requirements": [
+    {
+      "id": "example-master-file",
+      "role": "installation",
+      "path": "Data/FalloutNV.esm",
+      "kind": "file",
+      "note": "EXAMPLE ONLY. Listed here to show the format; the snapshot does not establish that a build needs it."
+    }
+  ],
+  "attestations": [
+    {
+      "contract": "platform_x86_windows_gui",
+      "statement": "EXAMPLE ONLY. Replace with your own statement and evidence reference, or delete. Never attest something you have not checked.",
+      "provenance": {
+        "source": "<evidence reference>",
+        "basis": "<how it was checked>"
+      }
+    }
+  ]
+}

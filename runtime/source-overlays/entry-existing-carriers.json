@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-entry-relocation-source-overlay",
+  "policy": "entry-two-existing-int-carriers-v1",
+  "inputs": {
+    "triage_sha256": "4e06af226997152e1a7097e93f3b96d92804b229f97139dd21c89e249c6f5a28",
+    "entry_derivation_sha256": "eca726d106f800b023c831280c7f2ce7eb3d448a00a570f827dcd264d7dfc803"
+  },
+  "layout_header_sha256": "3db3ce3bf18e4e90eb430d811424b2ea135588aa526494c306b7a8f1e25be237",
+  "compiler_headers": {
+    "VC/include/stddef.h": "2e604fb2a77340a25599dec98c283ce0b3d3373ab86473ab29bb1715e7c3a7b5",
+    "VC/include/crtdefs.h": "bb52597bc38e9d508dda575a0b598f56954f426dd38463c75af767c5b2f56642",
+    "VC/include/sal.h": "c25c776da247c8d3c145cb9afcbc81eea81912f588166de4f84cec9baf8fac18",
+    "VC/include/crtassem.h": "44ea728fb08f21a56aefa461057fe8e1346c73763582ed28bc5ae9e1c9643a4d",
+    "VC/include/vadefs.h": "aae1adc7f057aa349aafd6e78388f3065516cacd3ab1e1adb175d5f269d2b8a2",
+    "VC/include/codeanalysis/sourceannotations.h": "492e8bf2c45a6a2a33e295d73b44dcb3d67a4bf37de1db63c01324985c5675ef"
+  },
+  "targets": [
+    {
+      "recipe_id": "2689-cd7a30f3908a1d49",
+      "source": "src/staging/blk_00840000_od.cpp",
+      "function": "?Init@FUN_0084ba20@fnv_0084ba20@@QAEXXZ",
+      "function_va": "0x0084ba20",
+      "field_va": "0x0084ba2c",
+      "function_offset": 12,
+      "physical_field": {
+        "section": 60,
+        "offset": 12,
+        "width": 4
+      },
+      "target_va": "0x0107f4e8",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 853,
+          "text": "m_vft = (void*)0x0107f4e8;",
+          "token": "0x0107f4e8"
+        }
+      ],
+      "source_sha256": "3f69d0280bf866b54150ec59583bab93167fc743de5086e768d31a282a25c3d0",
+      "object_sha256": "662d3b844e06d037aeeb6695e8307df3904746eea0486c530a20a0b34a176e8d",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_0107f4e8@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "selection": {
+        "link_ready": false,
+        "recipe_id": "2689-cd7a30f3908a1d49",
+        "recipe_index": 2689,
+        "runtime_eligible": false,
+        "section": 60,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 43,
+        "symbol": "?Init@FUN_0084ba20@fnv_0084ba20@@QAEXXZ",
+        "value": 0
+      },
+      "old_statement": "m_vft = (void*)0x0107f4e8;",
+      "new_statement": "m_vft = (void*)&::DAT_0107f4e8;"
+    },
+    {
+      "recipe_id": "2763-d9f880a2cbd3ef77",
+      "source": "src/staging/blk_00c00000_o2.cpp",
+      "function": "??0FUN_00c033c0@@QAE@XZ",
+      "function_va": "0x00c033c0",
+      "field_va": "0x00c033cc",
+      "function_offset": 12,
+      "physical_field": {
+        "section": 124,
+        "offset": 12,
+        "width": 4
+      },
+      "target_va": "0x010bc8a4",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 1469,
+          "text": "*(int*)this = 0x10bc8a4;",
+          "token": "0x10bc8a4"
+        }
+      ],
+      "source_sha256": "7ff7286ef3b6b27740d70b6670df8486091517cb0963e151e843bd227e540b8a",
+      "object_sha256": "83b258a64fa61b70b2a3b619d25244cf0d741e3a2f6cf458552266ef705ff83d",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010bc8a4@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "selection": {
+        "link_ready": false,
+        "recipe_id": "2763-d9f880a2cbd3ef77",
+        "recipe_index": 2763,
+        "runtime_eligible": false,
+        "section": 124,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 38,
+        "symbol": "??0FUN_00c033c0@@QAE@XZ",
+        "value": 0
+      },
+      "old_statement": "*(int*)this = 0x10bc8a4;",
+      "new_statement": "*(int*)this = reinterpret_cast<int>(&::DAT_010bc8a4);"
+    }
+  ],
+  "provider_selected": false,
+  "runtime_eligible": false,
+  "link_performed": false,
+  "game_execution": false
+}

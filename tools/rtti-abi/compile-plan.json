@@ -1,0 +1,159 @@
+{
+  "schema": "fnv-rtti-abi-compile-plan",
+  "schema_version": 1,
+  "status": "NOT_RUN",
+  "authorization": "coordinator_review_required",
+  "compiler": {
+    "selection": [
+      "caller_supplied_path",
+      "private_doctor_report"
+    ],
+    "placeholder": "<CALLER_SUPPLIED_CL_EXE>",
+    "automatic_discovery": false,
+    "trusted_before_review": false,
+    "expected_product": "msvc_2008_sp1_x86"
+  },
+  "identity": [
+    {
+      "item": "compiler_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "compiler_version_banner",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "front_end_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "back_end_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "pdb_support_dll_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "include_dir_listing_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "source_sha256_at_run",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "object_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "stdout_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "stderr_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "exit_code",
+      "value": "NOT_RUN"
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/rtti-abi/fixture/rtti_abi_fixture.h",
+      "role": "header",
+      "sha256_lf": "5ec76e967d6014c28dda3dafa97008b96e7383ee5850ed45423abd242e4486cd"
+    },
+    {
+      "path": "tools/rtti-abi/fixture/rtti_producer.cpp",
+      "role": "compile",
+      "sha256_lf": "a1869b7f511409ff06097caaca76b6e46dd7e74df7a2e643a1df2398399e96bb"
+    },
+    {
+      "path": "tools/rtti-abi/fixture/rtti_consumer.cpp",
+      "role": "compile",
+      "sha256_lf": "b9484a9900cf730377130ec41c07117355fb43839595e8f573df7d3fae7ec7ad"
+    }
+  ],
+  "environment": {
+    "inherit": false,
+    "set": {
+      "PATH": "<CALLER_SUPPLIED_TOOL_PATH>",
+      "TMP": "<PRIVATE_TEMP_DIR>",
+      "TEMP": "<PRIVATE_TEMP_DIR>",
+      "SystemRoot": "<CALLER_SUPPLIED_SYSTEMROOT>"
+    },
+    "unset": [
+      "CL",
+      "_CL_",
+      "INCLUDE",
+      "LIB",
+      "LIBPATH"
+    ]
+  },
+  "cwd": "<CHECKOUT_ROOT>",
+  "output_root": "<PRIVATE_OUT_DIR>",
+  "variants": [
+    {
+      "id": "od_mt",
+      "steps": [
+        {
+          "id": "producer",
+          "source": "tools/rtti-abi/fixture/rtti_producer.cpp",
+          "argv": [
+            "<CALLER_SUPPLIED_CL_EXE>",
+            "/nologo",
+            "/c",
+            "/TP",
+            "/X",
+            "/I<CALLER_SUPPLIED_VC_INCLUDE>",
+            "/GR",
+            "/EHsc",
+            "/W4",
+            "/Od",
+            "/MT",
+            "/Fo<PRIVATE_OUT_DIR>/od_mt/rtti_producer.obj",
+            "tools/rtti-abi/fixture/rtti_producer.cpp"
+          ],
+          "outputs": [
+            "<PRIVATE_OUT_DIR>/od_mt/rtti_producer.obj"
+          ],
+          "result": "NOT_RUN"
+        },
+        {
+          "id": "consumer",
+          "source": "tools/rtti-abi/fixture/rtti_consumer.cpp",
+          "argv": [
+            "<CALLER_SUPPLIED_CL_EXE>",
+            "/nologo",
+            "/c",
+            "/TP",
+            "/X",
+            "/I<CALLER_SUPPLIED_VC_INCLUDE>",
+            "/GR",
+            "/EHsc",
+            "/W4",
+            "/Od",
+            "/MT",
+            "/Fo<PRIVATE_OUT_DIR>/od_mt/rtti_consumer.obj",
+            "tools/rtti-abi/fixture/rtti_consumer.cpp"
+          ],
+          "outputs": [
+            "<PRIVATE_OUT_DIR>/od_mt/rtti_consumer.obj"
+          ],
+          "result": "NOT_RUN"
+        }
+      ]
+    }
+  ],
+  "forbidden_operations": [
+    "discover_compiler",
+    "install_toolchain",
+    "link",
+    "run_fixture",
+    "extract_rtti_from_binary",
+    "select_game_alias",
+    "change_runtime_provider"
+  ]
+}

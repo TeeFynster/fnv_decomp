@@ -107,6 +107,8 @@ list of entries in the executable that are not functions.
 - It does not contain any part of the game's executable or data files. Addresses, function sizes and a few SHA-256
   fingerprints are the only facts about the executable in this repository.
 
+Experimental standalone rebuild development is tracked in the [rebuild guide](docs/rebuild/README.md). It is in progress and is not playable.
+
 ## Names and comments
 
 The function comments were written by machine: Qwen 27B proposed them from the matched code, and Codex Luna and

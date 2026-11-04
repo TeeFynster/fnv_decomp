@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "policy_id": "application-entry-unresolved-projection-v1",
+  "member_name": "r0576-application-entry.obj",
+  "object_sha256": "a6c310961921f70eea2c70b9c18dba3d85ac19bffdfe3164922e9c3462ab425b",
+  "root": {
+    "recipe_id": "0576-dd603b7071c482c6",
+    "original_address": "0x0086a850",
+    "symbol_index": 1215,
+    "section": 199,
+    "value": 0,
+    "size": 4532
+  },
+  "retained_sections": [
+    1,
+    199
+  ],
+  "runtime_sections": [
+    199
+  ],
+  "primary_records": 285,
+  "auxiliary_records": 2,
+  "relocations": 442,
+  "code_bytes": 4532,
+  "undefined_records": 280,
+  "undefined_names": 279,
+  "reference_members": [
+    289,
+    1392
+  ],
+  "root_certificate_canonical_sha256": "9bbbdfe0b590b4919ae773094c9d466d16ff41f38333803d67a69ff1364a3037",
+  "reference_certificate_canonical_sha256": "29514253a155065c0da694f77c2c55c3436ad48df203528ab431eb6cb16a442e",
+  "evidence_sha256": {
+    "recipe": "62f2c8da5f0daa912abdf4576328706711c6561eef7f01c93a89cb71ad46fb6c",
+    "manifest": "bc62a5fb2553431b1e0547d11f366e52efb73096ea8ceb206c556ae5740a53eb",
+    "selection": "48ae62cdc5b1754b9c4af674ef4716d53afb554882e174a93acf860eaf1c6cb1",
+    "retained": "04d44b73e81982f846bfe8d81806db72ea669586b579ff22007dfd6f7d831297",
+    "binding": "275714631903758efbf5a4f82e2428c6f51838f53b90d0c56d2e5dec5da1d804",
+    "binding_details": "4dfc437064b16c1bb933008aebf7def8d279a903eef9cca24d0fedcc12d7d826",
+    "object": "a6c310961921f70eea2c70b9c18dba3d85ac19bffdfe3164922e9c3462ab425b",
+    "source": "89d09f8b4ba6d9758fca0ac3ebd32e18c9cc82c68a739c044457ed5c005ae3c5",
+    "inventory": "02a77cce3f43c1786cd027e72ffb17e76ffe6766c2823872254015b6e40549f6",
+    "inventory_details": "91cdc91af6530e6e80e2104cdfeb9bd6928e17fa0f75bcf066734985248f1031",
+    "imports": "e39b8db63ef73aea57b5dd4963ff29310524644ca36e137cd8b5461a3c90a23f",
+    "root_report": "2273d54cdf913e58c4eb9317bf4f289a71a7e49639ed16a6cf2a317bc37d17b3",
+    "root_details": "7dda28aafa2e6ae2791827978b319b8844c0d29d70bc1ddf48a29bbdf12973e6",
+    "root_review": "dd939a576f89af41c54dd3ca99eb8b37257efe2a3f6cc535211dc495809f007e",
+    "reference_certificate": "bd66830f9f879af1a53ca35156124f769d228f9a63dfda08591e959a7a1a82a9",
+    "reference_receipt": "2fb8a84f7fd1ff55e64d22a485a985e5c2f01f5f82756a5bbead7abf4d2af80a",
+    "reference": "df1788907c6e26ef4df0b448ead526825336356b5606650165a1ce0825097eb7"
+  },
+  "producer_sha256": {
+    "tools/rebuild/coff_code_archive.py": "76244d2d4dca4c1f8aa72224be1ef5c92f68976b5cda7d31b5cfe23d3cc29e64",
+    "tools/rebuild/runtime_code_pool.py": "729f189e2893c7f3a3e3cd97df7d7381ac115169e1d75cf664e6bbc1c587b277",
+    "tools/rebuild/canonical_reference_groups.py": "1f6246444e33b964078121eeabfb3d139642d44b5b164074777249f082ea41a8",
+    "tools/rebuild/root_code_closure.py": "4bfdb5001380a3d7e5db7517033285d49ab211be68e2fcba15964f0ad5b03c53",
+    "tools/rebuild/coff_rewrite.py": "48cea438b05a1c2de992eea4200b45a1eb14e49a27704a5c6fff98f941b1ae4c",
+    "tests/rebuild/test_canonical_reference_groups.py": "761811aafb3064429c4f48c6bb1e7836b2d218c568faa46df29148013cf5a81e",
+    "tools/rebuild/runtime_code_inventory.py": "c2fdbd52b4b7f4b7c68f9d80ad03708ba57d42b29e5938dfcf9769366a1ffd0b",
+    "tools/rebuild/runtime_gaps.py": "0399e0f91e94de781512a153ac598f4d5eb6210920bc58241542339c72904116",
+    "tools/rebuild/data_plan.py": "e013ed5f217f9beeeaf571d089a36df22b645559063e826554179cea506f5bf8",
+    "tools/rebuild/import_plan.py": "6b9237ab5951e7d4a2ac2f9b0c3435f0a667a9fdebac02a4534ba0e30ba98d9c",
+    "tools/rebuild/coff_inventory.py": "3518c044738046e7cd9c8be37a3b1077af750fb2e7a19db793b09999a07ee0d2",
+    "tools/build_and_match.py": "e4c5f0d8ef8546d1ff82f4f2092e5f65164495daa867c4ff25efd9e45a25d727",
+    "tools/compare.py": "cfcf5921b71b7a58b6f430d999a511fab9a68f037791bc60295a3083535544d1",
+    "tools/function_spans.py": "8e1f9134d9f207dcc8b524b6bac63cf1319f64860903fef5d2a6996709444727",
+    "tools/rebuild/verify_objects.py": "b5bc673596a13c0281f35a2d085503a862623ceb3c4bd7a763f744b6924e6877"
+  },
+  "emission_approved": false,
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "link_ready": false
+}

@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "kind": "whole-union-code-reference-policy",
+  "policy_id": "whole-union-code-reference-groups-v2",
+  "input_sha256": {
+    "production": "ad870815321b42485378b0f896340bfd0b70cd52aea0dd27ffc39725bd93ce14",
+    "unions": "fd3b319cf25bea35c6523ebd7a734441804670943200547724d1d87c8a6a1b64",
+    "coverage": "e29cef9c0169ea19ac39724d3acb33163b101d9f21e8eed970c8071253d4ec16",
+    "inventory": "91cdc91af6530e6e80e2104cdfeb9bd6928e17fa0f75bcf066734985248f1031",
+    "binding": "275714631903758efbf5a4f82e2428c6f51838f53b90d0c56d2e5dec5da1d804",
+    "binding_details": "4dfc437064b16c1bb933008aebf7def8d279a903eef9cca24d0fedcc12d7d826",
+    "manifest": "bc62a5fb2553431b1e0547d11f366e52efb73096ea8ceb206c556ae5740a53eb",
+    "selection": "48ae62cdc5b1754b9c4af674ef4716d53afb554882e174a93acf860eaf1c6cb1",
+    "retained": "04d44b73e81982f846bfe8d81806db72ea669586b579ff22007dfd6f7d831297",
+    "recipes": "62f2c8da5f0daa912abdf4576328706711c6561eef7f01c93a89cb71ad46fb6c"
+  },
+  "producer_sha256": {
+    "tools/rebuild/bulk_code_pool.py": "4e6d697c1881c56c4c3f6a84788df6e0e2617b284d8e0226805828829bce49ed",
+    "tools/rebuild/runtime_code_pool.py": "729f189e2893c7f3a3e3cd97df7d7381ac115169e1d75cf664e6bbc1c587b277",
+    "tools/rebuild/coff_code_archive.py": "76244d2d4dca4c1f8aa72224be1ef5c92f68976b5cda7d31b5cfe23d3cc29e64",
+    "tools/rebuild/runtime_code_inventory.py": "c2fdbd52b4b7f4b7c68f9d80ad03708ba57d42b29e5938dfcf9769366a1ffd0b"
+  },
+  "authored_fixture_dependencies": {
+    "tests/rebuild/test_bulk_code_pool.py": "15fbd2e4185f6df7703c33b12dfd60483d4d4a0d913a6fc1a3d6796eb1122983",
+    "tests/rebuild/test_coff_code_archive.py": "8a5e717fdcce3651ae1055477d2e3c24c45183b8f02fdfc3ce84444358f1ca43"
+  },
+  "permitted_group_kinds": [
+    "all-original-undefined",
+    "one-selected-definition-and-undefined"
+  ],
+  "required_coff_type": 32,
+  "required_storage": 2,
+  "allowed_relocations": [
+    6,
+    20
+  ],
+  "required_addend": 0,
+  "group_target_class": "SELECTED_CODE_ENTRY",
+  "require_unique_selected_provider": true,
+  "require_whole_union_scope": true,
+  "require_all_original_fields": true,
+  "preserve_distinct_primary_and_auxiliary_bijections": true,
+  "duplicate_strong_definitions_allowed": false,
+  "omitted_definition_reference_groups_allowed": false,
+  "data_IAT_common_weak_interior_unknown_groups_allowed": false,
+  "coalescing_allowed": false,
+  "relocation_retargeting_allowed": false,
+  "metadata_census_sha256": "b1ac17e8b21c9c6617bc8011092150526b76056926bd3130ac65def66a92269c",
+  "observed_metadata_scope": {
+    "recipes": 185,
+    "roots": 1372,
+    "code_bytes": 219493,
+    "fields": 7065,
+    "meaning": "Planning observation only; not an eligibility assertion or unlock quota."
+  },
+  "later_mechanism_candidate": {
+    "recipe_id": "2089-51b16ad19e044300",
+    "source": "src/havok/physics/collide/boxbox/hkpboxboxmanifold.cpp",
+    "object_sha256": "194c1727183ab018c6c0082b0659895597023a513482939d8db4c848e216f67b",
+    "roots": [
+      {
+        "original_address": "0x00db0920",
+        "section": 5,
+        "size": 50,
+        "symbol": "?FUN_00db0920@FUN_00db0920_cls@@QAEPAU1@XZ",
+        "symbol_index": 13,
+        "value": 0
+      },
+      {
+        "original_address": "0x00db0960",
+        "section": 7,
+        "size": 72,
+        "symbol": "?FUN_00db0960@BoxPointInsertion@@QAEHIIPBE@Z",
+        "symbol_index": 18,
+        "value": 0
+      },
+      {
+        "original_address": "0x00db09b0",
+        "section": 3,
+        "size": 60,
+        "symbol": "?ContainsKey@FUN_00db0920@@QAEPAEPAEPBE@Z",
+        "symbol_index": 8,
+        "value": 0
+      }
+    ],
+    "code_bytes": 182,
+    "retained_fields": 1
+  },
+  "real_subset_emission_authorized": false,
+  "native_tools_authorized": false,
+  "executable_link_authorized": false,
+  "game_execution_authorized": false,
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "ABI_verified": false,
+  "link_ready": false
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "fnv-rtti-abi-metadata",
+  "schema_version": 1,
+  "fixture": "example_observed_claim",
+  "classes": [
+    {"id": "Animal", "polymorphic": true, "bases": []},
+    {
+      "id": "Bird",
+      "polymorphic": true,
+      "bases": [{"class": "Animal", "virtual": false, "access": "public"}]
+    },
+    {
+      "id": "Fish",
+      "polymorphic": true,
+      "bases": [{"class": "Animal", "virtual": false, "access": "public"}]
+    }
+  ],
+  "objects": [{"id": "a_bird", "class": "Bird"}],
+  "casts": [
+    {
+      "id": "C1",
+      "form": "pointer",
+      "input": {"object": "a_bird", "path": ["Bird", "Animal"]},
+      "target": "Bird",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["Bird"]
+    },
+    {
+      "id": "C2",
+      "form": "pointer",
+      "input": {"object": "a_bird", "path": ["Bird", "Animal"]},
+      "target": "Fish",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "C3",
+      "form": "reference",
+      "input": {"object": "a_bird", "path": ["Bird", "Animal"]},
+      "target": "Fish",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "C4",
+      "form": "pointer",
+      "input": {"null_of": "Animal"},
+      "target": "Bird",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "C5",
+      "form": "pointer",
+      "input": {"object": "a_bird", "path": ["Bird"]},
+      "target": "Bird",
+      "expect": "success",
+      "adjustment": "none"
+    },
+    {
+      "id": "C6",
+      "form": "void_pointer",
+      "input": {"object": "a_bird", "path": ["Bird", "Animal"]},
+      "expect": "success",
+      "adjustment": "unknown"
+    }
+  ],
+  "layout_claims": [
+    {
+      "id": "K1",
+      "record": "type_descriptor",
+      "class": "Bird",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "K2",
+      "record": "base_class_descriptor",
+      "class": "Bird",
+      "base_path": ["Bird", "Animal"],
+      "property": "mdisp",
+      "status": "observed"
+    }
+  ],
+  "measurements": [{"id": "M1", "kind": "compile_only", "variant": "example", "result": "NOT_RUN"}]
+}

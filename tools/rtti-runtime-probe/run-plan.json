@@ -1,0 +1,468 @@
+{
+  "schema": "fnv-rtti-runtime-plan",
+  "schema_version": 1,
+  "status": "NOT_RUN",
+  "authorization": "coordinator_review_required",
+  "variant": "od_mt",
+  "toolchain": {
+    "expected_product": "msvc_2008_sp1_x86",
+    "selection": [
+      "caller_supplied_path",
+      "private_doctor_report"
+    ],
+    "automatic_discovery": false,
+    "install": false,
+    "trusted_before_review": false,
+    "placeholders": {
+      "compiler": "<CALLER_SUPPLIED_CL_EXE>",
+      "linker": "<CALLER_SUPPLIED_LINK_EXE>",
+      "python": "<CALLER_SUPPLIED_PYTHON_EXE>",
+      "vc_include": "<CALLER_SUPPLIED_VC_INCLUDE>",
+      "vc_lib": "<CALLER_SUPPLIED_VC_LIB>",
+      "sdk_lib": "<CALLER_SUPPLIED_SDK_LIB>"
+    }
+  },
+  "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+  "output_root": "<PRIVATE_OUT_DIR>",
+  "output_in_repository": false,
+  "sources": [
+    {
+      "path": "tools/rtti-abi/fixture/rtti_abi_fixture.h",
+      "role": "fixture_header",
+      "sha256_lf": "5ec76e967d6014c28dda3dafa97008b96e7383ee5850ed45423abd242e4486cd"
+    },
+    {
+      "path": "tools/rtti-abi/fixture/rtti_producer.cpp",
+      "role": "fixture_source",
+      "sha256_lf": "a1869b7f511409ff06097caaca76b6e46dd7e74df7a2e643a1df2398399e96bb"
+    },
+    {
+      "path": "tools/rtti-abi/fixture/rtti_consumer.cpp",
+      "role": "fixture_source",
+      "sha256_lf": "b9484a9900cf730377130ec41c07117355fb43839595e8f573df7d3fae7ec7ad"
+    },
+    {
+      "path": "tools/rtti-abi/fixture/fixture-metadata.json",
+      "role": "fixture_metadata",
+      "sha256_lf": "b31a308a94a06f13cc69fdcde1ce79b0c5a590f5211fc442dc8dec02c47d64b5"
+    },
+    {
+      "path": "tools/rtti-runtime-probe/driver/rtti_probe_main.cpp",
+      "role": "driver_source",
+      "sha256_lf": "b465bc04510fd42a9e152b90f76d30099f63137b85d1aaf3eb64925215e32fad"
+    },
+    {
+      "path": "tools/rtti-runtime-probe/rtti_probe_check.py",
+      "role": "checker",
+      "sha256_lf": "9f17d1d5fc3eb7a54076f8e20826d5ec7031a705d5079825c7226c9699f1d153"
+    }
+  ],
+  "object_reuse": {
+    "default": "compile_from_source",
+    "alternative": "reuse_approved_compile_only_objects",
+    "alternative_requires": [
+      "coordinator approval of the specific objects",
+      "the same compiler identity as recorded for those objects",
+      "the same compile flags as compile_producer and compile_consumer",
+      "matching source sha256 for the header, producer and consumer",
+      "object sha256 recorded before and after copying"
+    ],
+    "result": "NOT_RUN"
+  },
+  "environments": {
+    "build": {
+      "inherit": false,
+      "set": {
+        "PATH": "<CALLER_SUPPLIED_TOOL_PATH>",
+        "TMP": "<PRIVATE_TEMP_DIR>",
+        "TEMP": "<PRIVATE_TEMP_DIR>",
+        "SystemRoot": "<CALLER_SUPPLIED_SYSTEMROOT>"
+      },
+      "unset": [
+        "CL",
+        "_CL_",
+        "LINK",
+        "_LINK_",
+        "INCLUDE",
+        "LIB",
+        "LIBPATH"
+      ]
+    },
+    "run": {
+      "inherit": false,
+      "set": {
+        "SystemRoot": "<CALLER_SUPPLIED_SYSTEMROOT>"
+      },
+      "unset": []
+    },
+    "check": {
+      "inherit": false,
+      "set": {
+        "SystemRoot": "<CALLER_SUPPLIED_SYSTEMROOT>"
+      },
+      "unset": [
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PYTHONSTARTUP"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "id": "compile_producer",
+      "kind": "compile",
+      "environment": "build",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_CL_EXE>",
+        "/nologo",
+        "/c",
+        "/TP",
+        "/X",
+        "/I<CALLER_SUPPLIED_VC_INCLUDE>",
+        "/GR",
+        "/EHsc",
+        "/W4",
+        "/Od",
+        "/MT",
+        "/Fo<PRIVATE_OUT_DIR>/od_mt/obj/rtti_producer.obj",
+        "tools/rtti-abi/fixture/rtti_producer.cpp"
+      ],
+      "inputs": [
+        "tools/rtti-abi/fixture/rtti_producer.cpp",
+        "tools/rtti-abi/fixture/rtti_abi_fixture.h"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_producer.obj"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 120,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "d2bf53f3172ec66b503071e02d1f96bee322a02d55c087355d293e65e70d73c4",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "compile_consumer",
+      "kind": "compile",
+      "environment": "build",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_CL_EXE>",
+        "/nologo",
+        "/c",
+        "/TP",
+        "/X",
+        "/I<CALLER_SUPPLIED_VC_INCLUDE>",
+        "/GR",
+        "/EHsc",
+        "/W4",
+        "/Od",
+        "/MT",
+        "/Fo<PRIVATE_OUT_DIR>/od_mt/obj/rtti_consumer.obj",
+        "tools/rtti-abi/fixture/rtti_consumer.cpp"
+      ],
+      "inputs": [
+        "tools/rtti-abi/fixture/rtti_consumer.cpp",
+        "tools/rtti-abi/fixture/rtti_abi_fixture.h"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_consumer.obj"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 120,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "a4db9ea834e7685148d19858e3ba41cef15c40ffafa733cb3e72ff0c435010e0",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "compile_driver",
+      "kind": "compile",
+      "environment": "build",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_CL_EXE>",
+        "/nologo",
+        "/c",
+        "/TP",
+        "/X",
+        "/I<CALLER_SUPPLIED_VC_INCLUDE>",
+        "/Itools/rtti-abi/fixture",
+        "/GR",
+        "/EHsc",
+        "/W4",
+        "/Od",
+        "/MT",
+        "/Fo<PRIVATE_OUT_DIR>/od_mt/obj/rtti_probe_main.obj",
+        "tools/rtti-runtime-probe/driver/rtti_probe_main.cpp"
+      ],
+      "inputs": [
+        "tools/rtti-runtime-probe/driver/rtti_probe_main.cpp",
+        "tools/rtti-abi/fixture/rtti_abi_fixture.h"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_probe_main.obj"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 120,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "b308ffa2f5ac851d6698892c5e62414c874acada8c9514690d9e4e28153ec1f4",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "link",
+      "kind": "link",
+      "environment": "build",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_LINK_EXE>",
+        "/NOLOGO",
+        "/MACHINE:X86",
+        "/SUBSYSTEM:CONSOLE",
+        "/INCREMENTAL:NO",
+        "/MANIFEST:NO",
+        "/OUT:<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe",
+        "/LIBPATH:<CALLER_SUPPLIED_VC_LIB>",
+        "/LIBPATH:<CALLER_SUPPLIED_SDK_LIB>",
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_producer.obj",
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_consumer.obj",
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_probe_main.obj"
+      ],
+      "inputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_producer.obj",
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_consumer.obj",
+        "<PRIVATE_OUT_DIR>/od_mt/obj/rtti_probe_main.obj"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 120,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "43d551351bfdba2c6fad85b3a07d30aa2540be1f6bfdd2628477b50f0da650e6",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "run_one_cycle",
+      "kind": "run",
+      "environment": "run",
+      "cwd": "<PRIVATE_OUT_DIR>/od_mt/run-1",
+      "argv": [
+        "<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe",
+        "--cycles",
+        "1"
+      ],
+      "inputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-1/stdout.json",
+        "<PRIVATE_OUT_DIR>/od_mt/run-1/stderr.txt"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 30,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "cf1faeca5c56530c82d6be6456daaf2a7d545343ab23c2523f29972bd01e3c8e",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "check_one_cycle",
+      "kind": "check",
+      "environment": "check",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_PYTHON_EXE>",
+        "-I",
+        "tools/rtti-runtime-probe/rtti_probe_check.py",
+        "check",
+        "<PRIVATE_OUT_DIR>/od_mt/run-1/stdout.json",
+        "--metadata",
+        "tools/rtti-abi/fixture/fixture-metadata.json"
+      ],
+      "inputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-1/stdout.json",
+        "tools/rtti-abi/fixture/fixture-metadata.json",
+        "tools/rtti-runtime-probe/rtti_probe_check.py"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-1/check.txt"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 30,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "90ef349c83dd8864a56c029fc5b93a5f1eac824b94a19468f7ab59c02137be0b",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "run_three_cycles",
+      "kind": "run",
+      "environment": "run",
+      "cwd": "<PRIVATE_OUT_DIR>/od_mt/run-3",
+      "argv": [
+        "<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe",
+        "--cycles",
+        "3"
+      ],
+      "inputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/bin/rtti_probe.exe"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-3/stdout.json",
+        "<PRIVATE_OUT_DIR>/od_mt/run-3/stderr.txt"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 30,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "7faedce79b48f9af39a088f4a27b1e859c2d87f2c36d858c1c8100f37ce508ee",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "check_three_cycles",
+      "kind": "check",
+      "environment": "check",
+      "cwd": "<REVIEWED_CHECKOUT_ROOT>",
+      "argv": [
+        "<CALLER_SUPPLIED_PYTHON_EXE>",
+        "-I",
+        "tools/rtti-runtime-probe/rtti_probe_check.py",
+        "check",
+        "<PRIVATE_OUT_DIR>/od_mt/run-3/stdout.json",
+        "--metadata",
+        "tools/rtti-abi/fixture/fixture-metadata.json"
+      ],
+      "inputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-3/stdout.json",
+        "tools/rtti-abi/fixture/fixture-metadata.json",
+        "tools/rtti-runtime-probe/rtti_probe_check.py"
+      ],
+      "outputs": [
+        "<PRIVATE_OUT_DIR>/od_mt/run-3/check.txt"
+      ],
+      "stdin": "null_device",
+      "timeout_seconds": 30,
+      "stdout_limit_bytes": 65536,
+      "stderr_limit_bytes": 16384,
+      "command_sha256": "a6bc9ca74fad6993949fc05a752c9a55afaf6076327ebfc560d43480da3ab671",
+      "result": "NOT_RUN"
+    }
+  ],
+  "identity": [
+    {
+      "item": "compiler_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "compiler_version_banner",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "front_end_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "back_end_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "linker_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "linker_version_banner",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "pdb_support_dll_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "static_crt_library_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "sdk_kernel32_library_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "include_dir_listing_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "library_dir_listing_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "source_sha256_at_run",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "object_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "executable_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "substituted_command_sha256",
+      "value": "NOT_RUN"
+    },
+    {
+      "item": "python_version",
+      "value": "NOT_RUN"
+    }
+  ],
+  "native_record": {
+    "location": "<PRIVATE_OUT_DIR>/native-run-record.json",
+    "in_repository": false,
+    "kept_apart_from": [
+      "tools/rtti-runtime-probe/run-plan.json",
+      "tests/rtti-runtime-probe/samples"
+    ],
+    "fields_per_step": [
+      "step_id",
+      "substituted_command_sha256",
+      "started",
+      "exit_code",
+      "timed_out",
+      "wall_seconds",
+      "stdout_bytes",
+      "stdout_sha256",
+      "stdout_truncated",
+      "stderr_bytes",
+      "stderr_sha256",
+      "stderr_truncated"
+    ],
+    "status": "NOT_RUN"
+  },
+  "acceptance": [
+    "every build step exits 0 within its timeout and output limits",
+    "the run step exits within its timeout, with stdout and stderr not truncated",
+    "the run step's exit code equals the report's driver_exit_code",
+    "the check step prints PASS with --metadata, without the synthetic tag",
+    "a PASS covers only this fixture with this compiler, flags and static runtime"
+  ],
+  "scope_limits": [
+    "tests only this synthetic fixture with the selected compiler and runtime configuration",
+    "is not evidence of retained game RTTI, object ownership, exception frames, cross-module behaviour or playable readiness",
+    "the separate local COFF metadata measurement is outside this plan"
+  ],
+  "forbidden_operations": [
+    "discover_compiler",
+    "install_toolchain",
+    "run_without_coordinator_review",
+    "use_game_files_or_assets",
+    "use_game_addresses_or_aliases",
+    "inspect_binary_bytes",
+    "modify_fixture_files",
+    "change_dll_search_path",
+    "network_access",
+    "commit_native_outputs"
+  ]
+}

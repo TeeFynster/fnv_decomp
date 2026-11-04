@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "policy_id": "ModelLoader-selected-parent-EH-CODE-groups-v1",
+  "parent": "0x00448420",
+  "source": "src/staging/blk_00440000_od.cpp",
+  "recipe_id": "2633-a302a748a2f3dbae",
+  "recipe_index": 2633,
+  "object_sha256": "77827dded421a964c2ddd9397f575fcd6e5ab4af7f622ea1f93c6938faef5e81",
+  "source_sha256": "9236184acd1d32db546f728d2b587b9794836daf4cba13b01560029d1c3d6587",
+  "observation_receipt_sha256": "a43a899d5339e95a2e1cedfaf1e8a64d4b3a97d10fcc381c9e3cc56712f51e2c",
+  "expected_field_count": 52,
+  "expected_state_count": 6,
+  "expected_SafeSEH_records": 26,
+  "expected_extents": {
+    "parent": 499,
+    "code": 75,
+    "state": 84
+  },
+  "groups": [
+    {
+      "original_base": 7257568,
+      "role": "code",
+      "semantic_domain": "code",
+      "contract_kind": "function",
+      "members": [
+        2013,
+        2016,
+        2024
+      ],
+      "name": "_fnv_undefined_1157894fa4be3163ff5ee9d62e8713def31851c71c6286b2cc3974b4946c57fa"
+    },
+    {
+      "original_base": 9463152,
+      "role": "code",
+      "semantic_domain": "code",
+      "contract_kind": "function",
+      "members": [
+        2012,
+        2015,
+        2022
+      ],
+      "name": "_fnv_undefined_326e22ce14bb18fa9dba4e148e7252782d6763ed12a062897a3aa28d8473f1bd"
+    }
+  ],
+  "runtime_eligible": false,
+  "provider_selected": false,
+  "ABI_verified": false,
+  "link_ready": false
+}

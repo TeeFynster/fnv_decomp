@@ -1,0 +1,31 @@
+{
+  "schema": "fnv-rtti-runtime-report",
+  "schema_version": 1,
+  "origin": "synthetic",
+  "fixture": "rtti_abi_fixture_v1",
+  "case_count_constant": 32,
+  "cycles_requested": 1,
+  "cycles": [
+    {
+      "cycle": 1,
+      "status": "create_failed",
+      "exception_kind": "none",
+      "exception_stage": "none",
+      "views_null_before_create": true,
+      "create_calls": 1,
+      "create_returned": false,
+      "views_all_set_after_create": false,
+      "run_calls": 0,
+      "run_capacity": 32,
+      "run_returned": -1,
+      "guard_intact": true,
+      "destroy_calls": 0,
+      "views_null_at_end": true,
+      "destructor_count": "unknown",
+      "cases": []
+    }
+  ],
+  "driver_status": "create_failed",
+  "driver_exit_code": 4,
+  "end_of_report": true
+}

@@ -1,0 +1,1284 @@
+{
+  "schema_version": 1,
+  "kind": "fnv-entry-relocation-proposal",
+  "policy": "entry-next-existing-identities-proposal-v1",
+  "proposal_only": true,
+  "compile_authorized": false,
+  "source_transformation_frozen": false,
+  "provider_selected": false,
+  "runtime_eligible": false,
+  "link_performed": false,
+  "game_execution": false,
+  "inputs": {
+    "build/units.json": "62f2c8da5f0daa912abdf4576328706711c6561eef7f01c93a89cb71ad46fb6c",
+    "build/rebuild/absolute-triage-evidence-v1.json": "4e06af226997152e1a7097e93f3b96d92804b229f97139dd21c89e249c6f5a28",
+    "build/rebuild/entry-dependencies-next-projects-v1.json": "eca726d106f800b023c831280c7f2ce7eb3d448a00a570f827dcd264d7dfc803",
+    "build/rebuild/function-selection-v2.json": "48ae62cdc5b1754b9c4af674ef4716d53afb554882e174a93acf860eaf1c6cb1"
+  },
+  "targets": [
+    {
+      "recipe_id": "0213-5eb62e0d0d64398e",
+      "source": "src/bssystem/archive.cpp",
+      "function": "?SetEndianSwap@ArchiveFile@@UAEX_N@Z",
+      "function_va": "0x00afbfa0",
+      "field_va": "0x00afbfc4",
+      "function_offset": 36,
+      "physical_field": {
+        "section": 6,
+        "offset": 36,
+        "width": 4
+      },
+      "target_va": "0x00afbf80",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 139,
+          "text": "m_pfnRead = reinterpret_cast<void*>(0x00afbf80);",
+          "token": "0x00afbf80"
+        }
+      ],
+      "source_sha256": "67d512d8860170928dc63bd1192c5f73f44c4311e7faa5ea5b2c331b25e5b013",
+      "object_sha256": "e6e3a2e346abc7e2ed3ef9d07c8c7edc07df18c3208cc2a3fc55e0c14632a764",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0213-5eb62e0d0d64398e",
+        "recipe_index": 213,
+        "runtime_eligible": false,
+        "section": 6,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 56,
+        "symbol": "?SetEndianSwap@ArchiveFile@@UAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::FUN_00afbf80",
+      "proposed_target_symbol": "?FUN_00afbf80@@YAHPAUDummy_00afbbf0@@HH@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00afbf80",
+        "symbol": "?FUN_00afbf80@@YAHPAUDummy_00afbbf0@@HH@Z",
+        "size": 21
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 35880,
+        "sha256": "ff63cb1b1064f6d4349aa112c13ded0c5170e35b5bd472355bedb650653fad2f",
+        "original_field_va": "0x00afbfc4",
+        "physical_section": 6,
+        "physical_offset": 36
+      }
+    },
+    {
+      "recipe_id": "0213-5eb62e0d0d64398e",
+      "source": "src/bssystem/archive.cpp",
+      "function": "?SetEndianSwap@CompressedArchiveFile@@UAEX_N@Z",
+      "function_va": "0x00afc620",
+      "field_va": "0x00afc644",
+      "function_offset": 36,
+      "physical_field": {
+        "section": 7,
+        "offset": 36,
+        "width": 4
+      },
+      "target_va": "0x00afc660",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 154,
+          "text": "m_pfnRead = reinterpret_cast<void*>(0x00afc660);",
+          "token": "0x00afc660"
+        }
+      ],
+      "source_sha256": "67d512d8860170928dc63bd1192c5f73f44c4311e7faa5ea5b2c331b25e5b013",
+      "object_sha256": "e6e3a2e346abc7e2ed3ef9d07c8c7edc07df18c3208cc2a3fc55e0c14632a764",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0213-5eb62e0d0d64398e",
+        "recipe_index": 213,
+        "runtime_eligible": false,
+        "section": 7,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 56,
+        "symbol": "?SetEndianSwap@CompressedArchiveFile@@UAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::FUN_00afc660",
+      "proposed_target_symbol": "?FUN_00afc660@@YAXPAXHH@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00afc660",
+        "symbol": "?FUN_00afc660@@YAXPAXHH@Z",
+        "size": 21
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 35916,
+        "sha256": "6b6a8d8c77181b10deab1fc45b1168814b0907aeafa5233e9534423390268fd1",
+        "original_field_va": "0x00afc644",
+        "physical_section": 7,
+        "physical_offset": 36
+      }
+    },
+    {
+      "recipe_id": "0214-ad3d653b946bde8e",
+      "source": "src/bssystem/bsfile.cpp",
+      "function": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+      "function_va": "0x00aff990",
+      "field_va": "0x00aff9a5",
+      "function_offset": 21,
+      "physical_field": {
+        "section": 22,
+        "offset": 21,
+        "width": 4
+      },
+      "target_va": "0x00affa10",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 50,
+          "text": "readHandler = reinterpret_cast<void*>(0x00affa10);",
+          "token": "0x00affa10"
+        }
+      ],
+      "source_sha256": "e92aa92b25dbbd1e44c8b26c295529c70fa2172d090bb3192e4b6f4047a33e12",
+      "object_sha256": "c27d8c794003d436a96e4197a2e2438dc71f016e6057a77d86ff5c877aea5263",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0214-ad3d653b946bde8e",
+        "recipe_index": 214,
+        "runtime_eligible": false,
+        "section": 22,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 63,
+        "symbol": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::FUN_00affa10",
+      "proposed_target_symbol": "?FUN_00affa10@@YAHPAUFUN_00affa10_V@@PAXI11@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00affa10",
+        "symbol": "?FUN_00affa10@@YAHPAUFUN_00affa10_V@@PAXI11@Z",
+        "size": 75
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 36071,
+        "sha256": "bdc3e19d811c90bf848f5771d6ab01b80c495908490d474087a31e8cc3aa5ee3",
+        "original_field_va": "0x00aff9a5",
+        "physical_section": 22,
+        "physical_offset": 21
+      }
+    },
+    {
+      "recipe_id": "0214-ad3d653b946bde8e",
+      "source": "src/bssystem/bsfile.cpp",
+      "function": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+      "function_va": "0x00aff990",
+      "field_va": "0x00aff9af",
+      "function_offset": 31,
+      "physical_field": {
+        "section": 22,
+        "offset": 31,
+        "width": 4
+      },
+      "target_va": "0x00affa60",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 51,
+          "text": "writeHandler = reinterpret_cast<void*>(0x00affa60);",
+          "token": "0x00affa60"
+        }
+      ],
+      "source_sha256": "e92aa92b25dbbd1e44c8b26c295529c70fa2172d090bb3192e4b6f4047a33e12",
+      "object_sha256": "c27d8c794003d436a96e4197a2e2438dc71f016e6057a77d86ff5c877aea5263",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0214-ad3d653b946bde8e",
+        "recipe_index": 214,
+        "runtime_eligible": false,
+        "section": 22,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 63,
+        "symbol": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::FUN_00affa60",
+      "proposed_target_symbol": "?FUN_00affa60@@YAHPAUVTableV18_b7074@@IIPAX1@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00affa60",
+        "symbol": "?FUN_00affa60@@YAHPAUVTableV18_b7074@@IIPAX1@Z",
+        "size": 140
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 36072,
+        "sha256": "fef3deb2e9757acb253aa80d7704d6f5b4ab66eca9a70bf4c6a90e8f07b7101e",
+        "original_field_va": "0x00aff9af",
+        "physical_section": 22,
+        "physical_offset": 31
+      }
+    },
+    {
+      "recipe_id": "0214-ad3d653b946bde8e",
+      "source": "src/bssystem/bsfile.cpp",
+      "function": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+      "function_va": "0x00aff990",
+      "field_va": "0x00aff9bb",
+      "function_offset": 43,
+      "physical_field": {
+        "section": 22,
+        "offset": 43,
+        "width": 4
+      },
+      "target_va": "0x00aff9d0",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 55,
+          "text": "readHandler = reinterpret_cast<void*>(0x00aff9d0);",
+          "token": "0x00aff9d0"
+        }
+      ],
+      "source_sha256": "e92aa92b25dbbd1e44c8b26c295529c70fa2172d090bb3192e4b6f4047a33e12",
+      "object_sha256": "c27d8c794003d436a96e4197a2e2438dc71f016e6057a77d86ff5c877aea5263",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?ForwardVTableCall@@YAHPAUDummyVTable_00aff9d0@@HH@Z"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0214-ad3d653b946bde8e",
+        "recipe_index": 214,
+        "runtime_eligible": false,
+        "section": 22,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 63,
+        "symbol": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::ForwardVTableCall",
+      "proposed_target_symbol": "?ForwardVTableCall@@YAHPAUDummyVTable_00aff9d0@@HH@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00aff9d0",
+        "symbol": "?ForwardVTableCall@@YAHPAUDummyVTable_00aff9d0@@HH@Z",
+        "size": 26
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 36073,
+        "sha256": "3eb0d814a11968204b5c51c983f26ab986b44747f6bcb74113f5c6e4887e3a29",
+        "original_field_va": "0x00aff9bb",
+        "physical_section": 22,
+        "physical_offset": 43
+      }
+    },
+    {
+      "recipe_id": "0214-ad3d653b946bde8e",
+      "source": "src/bssystem/bsfile.cpp",
+      "function": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+      "function_va": "0x00aff990",
+      "field_va": "0x00aff9c5",
+      "function_offset": 53,
+      "physical_field": {
+        "section": 22,
+        "offset": 53,
+        "width": 4
+      },
+      "target_va": "0x00aff9f0",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 56,
+          "text": "writeHandler = reinterpret_cast<void*>(0x00aff9f0);",
+          "token": "0x00aff9f0"
+        }
+      ],
+      "source_sha256": "e92aa92b25dbbd1e44c8b26c295529c70fa2172d090bb3192e4b6f4047a33e12",
+      "object_sha256": "c27d8c794003d436a96e4197a2e2438dc71f016e6057a77d86ff5c877aea5263",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?CallVirtualMethodAtOffset48@@YAXPAXHH@Z"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0214-ad3d653b946bde8e",
+        "recipe_index": 214,
+        "runtime_eligible": false,
+        "section": 22,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 63,
+        "symbol": "?SetEndianSwap@BSFile@@QAEX_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::CallVirtualMethodAtOffset48",
+      "proposed_target_symbol": "?CallVirtualMethodAtOffset48@@YAXPAXHH@Z",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x00aff9f0",
+        "symbol": "?CallVirtualMethodAtOffset48@@YAXPAXHH@Z",
+        "size": 26
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 36074,
+        "sha256": "6279c526c89bbe39efb3539f8e887a825130ce75063fce6840ddd73e645e7456",
+        "original_field_va": "0x00aff9c5",
+        "physical_section": 22,
+        "physical_offset": 53
+      }
+    },
+    {
+      "recipe_id": "0272-93b01dd5e3803ab3",
+      "source": "src/fallout/ai/ailineartaskthreadmanager.cpp",
+      "function": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+      "function_va": "0x008c7290",
+      "field_va": "0x008c7317",
+      "function_offset": 135,
+      "physical_field": {
+        "section": 6,
+        "offset": 135,
+        "width": 4
+      },
+      "target_va": "0x008c7da0",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 89,
+          "text": "(AIThreadFunction)0x008c7da0, \"AI Linear Task Thread 1\", (BSThread::StackSize)0x10000);",
+          "token": "0x008c7da0"
+        }
+      ],
+      "source_sha256": "c11e6ef09f06077a78f2533a6cffb1d91c13b4476da4c092214a05d6801c2019",
+      "object_sha256": "300ff8762898d99e7abef066e880a24d3b7c6a02436e3e77c7c941697812db3a",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0272-93b01dd5e3803ab3",
+        "recipe_index": 272,
+        "runtime_eligible": false,
+        "section": 6,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 259,
+        "symbol": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::fnv_008c7da0::FUN_008c7da0",
+      "proposed_target_symbol": "?FUN_008c7da0@fnv_008c7da0@@YAXXZ",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x008c7da0",
+        "symbol": "?FUN_008c7da0@fnv_008c7da0@@YAXXZ",
+        "size": 429
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 49467,
+        "sha256": "ff326a0feb50d45407819ab623f72d8a9fa22a57e074d23f0b296c3f1c16e56a",
+        "original_field_va": "0x008c7317",
+        "physical_section": 6,
+        "physical_offset": 135
+      }
+    },
+    {
+      "recipe_id": "0272-93b01dd5e3803ab3",
+      "source": "src/fallout/ai/ailineartaskthreadmanager.cpp",
+      "function": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+      "function_va": "0x008c7290",
+      "field_va": "0x008c733d",
+      "function_offset": 173,
+      "physical_field": {
+        "section": 6,
+        "offset": 173,
+        "width": 4
+      },
+      "target_va": "0x008c7f50",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 91,
+          "text": "(AIThreadFunction)0x008c7f50, \"AI Linear Task Thread 2\", (BSThread::StackSize)0x10000);",
+          "token": "0x008c7f50"
+        }
+      ],
+      "source_sha256": "c11e6ef09f06077a78f2533a6cffb1d91c13b4476da4c092214a05d6801c2019",
+      "object_sha256": "300ff8762898d99e7abef066e880a24d3b7c6a02436e3e77c7c941697812db3a",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0272-93b01dd5e3803ab3",
+        "recipe_index": 272,
+        "runtime_eligible": false,
+        "section": 6,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 259,
+        "symbol": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::fnv_008c7f50::FUN_008c7f50",
+      "proposed_target_symbol": "?FUN_008c7f50@fnv_008c7f50@@YAXXZ",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x008c7f50",
+        "symbol": "?FUN_008c7f50@fnv_008c7f50@@YAXXZ",
+        "size": 346
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 49469,
+        "sha256": "b2a9122936afd33769ea52b7f33cd3ac77b5559d604db8a09cc50c24de104f77",
+        "original_field_va": "0x008c733d",
+        "physical_section": 6,
+        "physical_offset": 173
+      }
+    },
+    {
+      "recipe_id": "0272-93b01dd5e3803ab3",
+      "source": "src/fallout/ai/ailineartaskthreadmanager.cpp",
+      "function": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+      "function_va": "0x008c7290",
+      "field_va": "0x008c7365",
+      "function_offset": 213,
+      "physical_field": {
+        "section": 6,
+        "offset": 213,
+        "width": 4
+      },
+      "target_va": "0x008c7bd0",
+      "target_section": ".text",
+      "target_executable": true,
+      "literal_hits": [
+        {
+          "line": 96,
+          "text": "(AIThreadFunction)0x008c7bd0, \"AI Linear Task Thread\", (BSThread::StackSize)0x10000);",
+          "token": "0x008c7bd0"
+        }
+      ],
+      "source_sha256": "c11e6ef09f06077a78f2533a6cffb1d91c13b4476da4c092214a05d6801c2019",
+      "object_sha256": "300ff8762898d99e7abef066e880a24d3b7c6a02436e3e77c7c941697812db3a",
+      "role": "code-address storage",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0272-93b01dd5e3803ab3",
+        "recipe_index": 272,
+        "runtime_eligible": false,
+        "section": 6,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 259,
+        "symbol": "?StartRenderingTaskThread@AIThreadManager@@QAEXXZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::fnv_008c7bd0::FUN_008c7bd0",
+      "proposed_target_symbol": "?FUN_008c7bd0@fnv_008c7bd0@@YAXXZ",
+      "target_identity_basis": "EXACT_OWN_RECIPE_FUNCTION_ROW",
+      "target_function": {
+        "address": "0x008c7bd0",
+        "symbol": "?FUN_008c7bd0@fnv_008c7bd0@@YAXXZ",
+        "size": 418
+      },
+      "target_storage_contract": "existing function signature; callback execution ABI remains unapproved",
+      "entry_binding_reference": {
+        "ordinal": 49471,
+        "sha256": "598450f72dd7d3c77d783bdf6d85e5ef1577074cfe0d2b8a806353ac8f7f6713",
+        "original_field_va": "0x008c7365",
+        "physical_section": 6,
+        "physical_offset": 213
+      }
+    },
+    {
+      "recipe_id": "0870-e833782173fb279c",
+      "source": "src/fallout_shared/pathfinding/pathinglocation.cpp",
+      "function": "?HasValidTriangle@PathingLocation@@QAE_NXZ",
+      "function_va": "0x004ff7e0",
+      "field_va": "0x004ff7ec",
+      "function_offset": 12,
+      "physical_field": {
+        "section": 4,
+        "offset": 12,
+        "width": 4
+      },
+      "target_va": "0x0102583c",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 8,
+          "text": "m_ppVirtualMethodTable = (void**)0x0102583c;",
+          "token": "0x0102583c"
+        }
+      ],
+      "source_sha256": "120138e3d225035fa9f4e07f7e4195d7a4ccd211736aafa5cd9ceaece9390445",
+      "object_sha256": "f0541c86988f1f2e05126ddc413d5082150599a7e35de0a1dbdbbcd799ae392b",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_0102583c@@3HA",
+        "?DAT_0102583c@fnv_006dcf20@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0870-e833782173fb279c",
+        "recipe_index": 870,
+        "runtime_eligible": false,
+        "section": 4,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 20,
+        "symbol": "?HasValidTriangle@PathingLocation@@QAE_NXZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_0102583c",
+      "proposed_target_symbol": "?DAT_0102583c@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 216896,
+        "sha256": "d7bc57f7261df8dddb098bae3434b1ca064c7cc3511bae81c74bb92373623dca",
+        "original_field_va": "0x004ff7ec",
+        "physical_section": 4,
+        "physical_offset": 12
+      }
+    },
+    {
+      "recipe_id": "0870-e833782173fb279c",
+      "source": "src/fallout_shared/pathfinding/pathinglocation.cpp",
+      "function": "??0PathingLocation@@QAE@ABVNiPoint3@@PAVTESObjectREFR@@@Z",
+      "function_va": "0x006dce10",
+      "field_va": "0x006dce1c",
+      "function_offset": 12,
+      "physical_field": {
+        "section": 5,
+        "offset": 12,
+        "width": 4
+      },
+      "target_va": "0x0102583c",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 15,
+          "text": "m_ppVirtualMethodTable = (void**)0x0102583c;",
+          "token": "0x0102583c"
+        }
+      ],
+      "source_sha256": "120138e3d225035fa9f4e07f7e4195d7a4ccd211736aafa5cd9ceaece9390445",
+      "object_sha256": "f0541c86988f1f2e05126ddc413d5082150599a7e35de0a1dbdbbcd799ae392b",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_0102583c@@3HA",
+        "?DAT_0102583c@fnv_006dcf20@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "0870-e833782173fb279c",
+        "recipe_index": 870,
+        "runtime_eligible": false,
+        "section": 5,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 66,
+        "symbol": "??0PathingLocation@@QAE@ABVNiPoint3@@PAVTESObjectREFR@@@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_0102583c",
+      "proposed_target_symbol": "?DAT_0102583c@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 216923,
+        "sha256": "0732673d0a9281c41562393bc0602cb243034d03478bb1e2c39f59ca6d44e2a2",
+        "original_field_va": "0x006dce1c",
+        "physical_section": 5,
+        "physical_offset": 12
+      }
+    },
+    {
+      "recipe_id": "2709-6e8ed1636467924a",
+      "source": "src/staging/blk_009a0000_od.cpp",
+      "function": "??0FUN_009b3160@@QAE@_N@Z",
+      "function_va": "0x009b3160",
+      "field_va": "0x009b319f",
+      "function_offset": 63,
+      "physical_field": {
+        "section": 58,
+        "offset": 63,
+        "width": 4
+      },
+      "target_va": "0x0108f2f4",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 1159,
+          "text": "*(void**)((char*)this + 0) = (void*)0x0108f2f4;",
+          "token": "0x0108f2f4"
+        }
+      ],
+      "source_sha256": "bc45d2ab7c781205fb7903a18fd8e7855d04375575a12e4b325aae13b612272d",
+      "object_sha256": "e78792df72caab2eeb5e434222149d36607508b4d1872ffc32dd486389b0c3d3",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_0108f2f4@@3PAXA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2709-6e8ed1636467924a",
+        "recipe_index": 2709,
+        "runtime_eligible": false,
+        "section": 58,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 136,
+        "symbol": "??0FUN_009b3160@@QAE@_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_0108f2f4",
+      "proposed_target_symbol": "?DAT_0108f2f4@@3PAXA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 444126,
+        "sha256": "04f6201893793c4022101335af851b8911bb973b66acbfdf11e22d82897ee8d4",
+        "original_field_va": "0x009b319f",
+        "physical_section": 58,
+        "physical_offset": 63
+      }
+    },
+    {
+      "recipe_id": "2709-6e8ed1636467924a",
+      "source": "src/staging/blk_009a0000_od.cpp",
+      "function": "??0FUN_009b3160@@QAE@_N@Z",
+      "function_va": "0x009b3160",
+      "field_va": "0x009b31a9",
+      "function_offset": 73,
+      "physical_field": {
+        "section": 58,
+        "offset": 73,
+        "width": 4
+      },
+      "target_va": "0x0108f2e8",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 1160,
+          "text": "*(void**)((char*)this + 0x18) = (void*)0x0108f2e8;",
+          "token": "0x0108f2e8"
+        }
+      ],
+      "source_sha256": "bc45d2ab7c781205fb7903a18fd8e7855d04375575a12e4b325aae13b612272d",
+      "object_sha256": "e78792df72caab2eeb5e434222149d36607508b4d1872ffc32dd486389b0c3d3",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_0108f2e8@@3PAXA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2709-6e8ed1636467924a",
+        "recipe_index": 2709,
+        "runtime_eligible": false,
+        "section": 58,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 136,
+        "symbol": "??0FUN_009b3160@@QAE@_N@Z",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_0108f2e8",
+      "proposed_target_symbol": "?DAT_0108f2e8@@3PAXA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 444127,
+        "sha256": "ac92fc52088512d75fefa129eba4282c08e8ed8ed151e5924325a1ccc9676593",
+        "original_field_va": "0x009b31a9",
+        "physical_section": 58,
+        "physical_offset": 73
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b8e020@fnv_00b8e020@@QAE@XZ",
+      "function_va": "0x00b8e020",
+      "field_va": "0x00b8e05f",
+      "function_offset": 63,
+      "physical_field": {
+        "section": 42,
+        "offset": 63,
+        "width": 4
+      },
+      "target_va": "0x010b1340",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 339,
+          "text": "m_vft = (void*)0x010b1340;",
+          "token": "0x010b1340"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b1340@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 42,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b8e020@fnv_00b8e020@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b1340",
+      "proposed_target_symbol": "?DAT_010b1340@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456212,
+        "sha256": "abe6e95dc56674c93e16e32ca1e449e6c4780e10437062a7ffae4ef6b07e6c74",
+        "original_field_va": "0x00b8e05f",
+        "physical_section": 42,
+        "physical_offset": 63
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b8e020@fnv_00b8e020@@QAE@XZ",
+      "function_va": "0x00b8e020",
+      "field_va": "0x00b8e066",
+      "function_offset": 70,
+      "physical_field": {
+        "section": 42,
+        "offset": 70,
+        "width": 4
+      },
+      "target_va": "0x010b1320",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 340,
+          "text": "((int*)this)[0x1b] = (int)0x010b1320;",
+          "token": "0x010b1320"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b1320@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 42,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b8e020@fnv_00b8e020@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b1320",
+      "proposed_target_symbol": "?DAT_010b1320@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456213,
+        "sha256": "8bdbb0a9dd0723e29797fa0bd7e0d9ad1a912492c410f1539c36a4ea1571d428",
+        "original_field_va": "0x00b8e066",
+        "physical_section": 42,
+        "physical_offset": 70
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b91680@fnv_00b91680@@QAE@XZ",
+      "function_va": "0x00b91680",
+      "field_va": "0x00b916bf",
+      "function_offset": 63,
+      "physical_field": {
+        "section": 112,
+        "offset": 63,
+        "width": 4
+      },
+      "target_va": "0x010b4c68",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 888,
+          "text": "*(void**)((char*)this + 0x0) = (void*)0x010b4c68;",
+          "token": "0x010b4c68"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b4c68@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 112,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b91680@fnv_00b91680@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b4c68",
+      "proposed_target_symbol": "?DAT_010b4c68@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456524,
+        "sha256": "316d1a48c83878184e346ae65d2290599744d5321729208c061828a99d6c2431",
+        "original_field_va": "0x00b916bf",
+        "physical_section": 112,
+        "physical_offset": 63
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b91680@fnv_00b91680@@QAE@XZ",
+      "function_va": "0x00b91680",
+      "field_va": "0x00b916c6",
+      "function_offset": 70,
+      "physical_field": {
+        "section": 112,
+        "offset": 70,
+        "width": 4
+      },
+      "target_va": "0x010b4c48",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 889,
+          "text": "*(void**)((char*)this + 0x6c) = (void*)0x010b4c48;",
+          "token": "0x010b4c48"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b4c48@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 112,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b91680@fnv_00b91680@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b4c48",
+      "proposed_target_symbol": "?DAT_010b4c48@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456525,
+        "sha256": "c89d0f3783efea0ef9ddc051e248e8483114d16a957ae0fa9378a619f9189f1b",
+        "original_field_va": "0x00b916c6",
+        "physical_section": 112,
+        "physical_offset": 70
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b93180@fnv_00b93180@@QAE@XZ",
+      "function_va": "0x00b93180",
+      "field_va": "0x00b931bf",
+      "function_offset": 63,
+      "physical_field": {
+        "section": 178,
+        "offset": 63,
+        "width": 4
+      },
+      "target_va": "0x010b6a40",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 1521,
+          "text": "vtbl = (void*)0x010b6a40;",
+          "token": "0x010b6a40"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b6a40@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 178,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b93180@fnv_00b93180@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b6a40",
+      "proposed_target_symbol": "?DAT_010b6a40@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456896,
+        "sha256": "9921a05a8e27d65e1b09d4358d7536c4e4070d295ab94786431a5c63db0ca260",
+        "original_field_va": "0x00b931bf",
+        "physical_section": 178,
+        "physical_offset": 63
+      }
+    },
+    {
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "function": "??0FUN_00b93180@fnv_00b93180@@QAE@XZ",
+      "function_va": "0x00b93180",
+      "field_va": "0x00b931c6",
+      "function_offset": 70,
+      "physical_field": {
+        "section": 178,
+        "offset": 70,
+        "width": 4
+      },
+      "target_va": "0x010b6a20",
+      "target_section": ".rdata",
+      "target_executable": false,
+      "literal_hits": [
+        {
+          "line": 1522,
+          "text": "((void**)((char*)this + 0x6c))[0] = (void*)0x010b6a20;",
+          "token": "0x010b6a20"
+        }
+      ],
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "object_sha256": "0a8e551e874af4b03633203867cddb502bd2e59373a664bb261cb9f832fd84f0",
+      "role": "object dispatch-header candidate",
+      "retained_field_value_verified": true,
+      "same_unit_target_names": [
+        "?DAT_010b6a20@@3HA"
+      ],
+      "expression_attribution": "unique target-valued literal in checked function",
+      "original_selected_owner": {
+        "link_ready": false,
+        "recipe_id": "2757-4f03e30ab313e7ad",
+        "recipe_index": 2757,
+        "runtime_eligible": false,
+        "section": 178,
+        "selection_status": "CODE_OWNERSHIP_SELECTED",
+        "size": 98,
+        "symbol": "??0FUN_00b93180@fnv_00b93180@@QAE@XZ",
+        "value": 0
+      },
+      "proposed_cpp_address_expression": "&::DAT_010b6a20",
+      "proposed_target_symbol": "?DAT_010b6a20@@3HA",
+      "target_identity_basis": "EXACT_OWN_RECIPE_DATA_SYMBOL",
+      "target_storage_contract": "existing declaration is address carrier only",
+      "entry_binding_reference": {
+        "ordinal": 456897,
+        "sha256": "18464e9c72983df9934bb43a7fcc6e3e4b9e05dd2910d37c87e5cf59380f3da3",
+        "original_field_va": "0x00b931c6",
+        "physical_section": 178,
+        "physical_offset": 70
+      }
+    }
+  ],
+  "units": [
+    {
+      "recipe_index": 213,
+      "recipe_id": "0213-5eb62e0d0d64398e",
+      "source": "src/bssystem/archive.cpp",
+      "source_sha256": "67d512d8860170928dc63bd1192c5f73f44c4311e7faa5ea5b2c331b25e5b013",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/Od",
+        "/Oy-",
+        "/GS",
+        "/EHsc",
+        "/Gy",
+        "/GF",
+        "/Ob1"
+      ],
+      "expected_complete_function_rows": 114,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "int __cdecl FUN_00afbf80(Dummy_00afbbf0* pTarget, int b, int c)",
+          "source_lines": [
+            654
+          ]
+        },
+        {
+          "exact_existing_text": "void __cdecl FUN_00afc660(void* pObject, int b, int c)",
+          "source_lines": [
+            732
+          ]
+        }
+      ]
+    },
+    {
+      "recipe_index": 214,
+      "recipe_id": "0214-ad3d653b946bde8e",
+      "source": "src/bssystem/bsfile.cpp",
+      "source_sha256": "e92aa92b25dbbd1e44c8b26c295529c70fa2172d090bb3192e4b6f4047a33e12",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/Od",
+        "/Oy-",
+        "/GS",
+        "/EHsc",
+        "/Gy",
+        "/GF"
+      ],
+      "expected_complete_function_rows": 21,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "int __cdecl ForwardVTableCall(DummyVTable_00aff9d0* apObject, int aiArg1, int aiArg2)",
+          "source_lines": [
+            172
+          ]
+        },
+        {
+          "exact_existing_text": "void __cdecl CallVirtualMethodAtOffset48(void* apObject, int aiArg1, int aiArg2)",
+          "source_lines": [
+            208
+          ]
+        },
+        {
+          "exact_existing_text": "int __cdecl FUN_00affa10(FUN_00affa10_V* p1, void* apData, unsigned int auiSize, void* apExtra, void* apExtraArg)",
+          "source_lines": [
+            239
+          ]
+        },
+        {
+          "exact_existing_text": "int __cdecl FUN_00affa60(VTableV18_b7074* self, unsigned int a1, unsigned int auiSize, void* apExtra, void* a4)",
+          "source_lines": [
+            363
+          ]
+        }
+      ]
+    },
+    {
+      "recipe_index": 272,
+      "recipe_id": "0272-93b01dd5e3803ab3",
+      "source": "src/fallout/ai/ailineartaskthreadmanager.cpp",
+      "source_sha256": "c11e6ef09f06077a78f2533a6cffb1d91c13b4476da4c092214a05d6801c2019",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/Od",
+        "/Oy-",
+        "/GS",
+        "/EHsc",
+        "/Gy",
+        "/GF"
+      ],
+      "expected_complete_function_rows": 21,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "void __cdecl FUN_008c7bd0()",
+          "source_lines": [
+            666
+          ]
+        },
+        {
+          "exact_existing_text": "void FUN_008c7f50()",
+          "source_lines": [
+            780
+          ]
+        },
+        {
+          "exact_existing_text": "void __cdecl FUN_008c7da0()",
+          "source_lines": [
+            900
+          ]
+        }
+      ]
+    },
+    {
+      "recipe_index": 870,
+      "recipe_id": "0870-e833782173fb279c",
+      "source": "src/fallout_shared/pathfinding/pathinglocation.cpp",
+      "source_sha256": "120138e3d225035fa9f4e07f7e4195d7a4ccd211736aafa5cd9ceaece9390445",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/Od",
+        "/Oy-",
+        "/GS",
+        "/EHsc",
+        "/Gy"
+      ],
+      "expected_complete_function_rows": 34,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "extern int DAT_0102583c;",
+          "source_lines": [
+            347,
+            381,
+            425,
+            483
+          ]
+        }
+      ]
+    },
+    {
+      "recipe_index": 2709,
+      "recipe_id": "2709-6e8ed1636467924a",
+      "source": "src/staging/blk_009a0000_od.cpp",
+      "source_sha256": "bc45d2ab7c781205fb7903a18fd8e7855d04375575a12e4b325aae13b612272d",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/Od",
+        "/Oy-",
+        "/GS",
+        "/EHsc",
+        "/Gy"
+      ],
+      "expected_complete_function_rows": 148,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "extern void* DAT_0108f2e8;",
+          "source_lines": [
+            1958
+          ]
+        },
+        {
+          "exact_existing_text": "extern void* DAT_0108f2f4;",
+          "source_lines": [
+            1959
+          ]
+        }
+      ]
+    },
+    {
+      "recipe_index": 2757,
+      "recipe_id": "2757-4f03e30ab313e7ad",
+      "source": "src/staging/blk_00b80000_o2.cpp",
+      "source_sha256": "5098098d9a5537c16fbf6814b3ccb1a84d25c0a29e48feaf44ecae14496f3fb2",
+      "compiler": "sp1",
+      "flags": [
+        "/MT",
+        "/O2",
+        "/GS",
+        "/EHsc",
+        "/Gy"
+      ],
+      "expected_complete_function_rows": 281,
+      "existing_declarations_or_definitions": [
+        {
+          "exact_existing_text": "extern int DAT_010b1340;",
+          "source_lines": [
+            345
+          ]
+        },
+        {
+          "exact_existing_text": "extern int DAT_010b1320;",
+          "source_lines": [
+            346
+          ]
+        },
+        {
+          "exact_existing_text": "extern int DAT_010b4c48;",
+          "source_lines": [
+            894
+          ]
+        },
+        {
+          "exact_existing_text": "extern int DAT_010b4c68;",
+          "source_lines": [
+            895
+          ]
+        },
+        {
+          "exact_existing_text": "extern int DAT_010b6a20;",
+          "source_lines": [
+            1527
+          ]
+        },
+        {
+          "exact_existing_text": "extern int DAT_010b6a40;",
+          "source_lines": [
+            1528
+          ]
+        }
+      ]
+    }
+  ]
+}

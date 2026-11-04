@@ -1,0 +1,844 @@
+{
+  "schema": "fnv-rtti-abi-metadata",
+  "schema_version": 1,
+  "fixture": "rtti_abi_fixture_v1",
+  "classes": [
+    {"id": "SiRoot", "polymorphic": true, "bases": []},
+    {
+      "id": "SiMid",
+      "polymorphic": true,
+      "bases": [{"class": "SiRoot", "virtual": false, "access": "public"}]
+    },
+    {
+      "id": "SiLeaf",
+      "polymorphic": true,
+      "bases": [{"class": "SiMid", "virtual": false, "access": "public"}]
+    },
+    {"id": "MiLeft", "polymorphic": true, "bases": []},
+    {"id": "MiRight", "polymorphic": true, "bases": []},
+    {
+      "id": "MiJoin",
+      "polymorphic": true,
+      "bases": [
+        {"class": "MiLeft", "virtual": false, "access": "public"},
+        {"class": "MiRight", "virtual": false, "access": "public"}
+      ]
+    },
+    {
+      "id": "MiSealed",
+      "polymorphic": true,
+      "bases": [
+        {"class": "MiLeft", "virtual": false, "access": "public"},
+        {"class": "MiRight", "virtual": false, "access": "private"}
+      ]
+    },
+    {"id": "ViBase", "polymorphic": true, "bases": []},
+    {
+      "id": "ViLeft",
+      "polymorphic": true,
+      "bases": [{"class": "ViBase", "virtual": true, "access": "public"}]
+    },
+    {
+      "id": "ViRight",
+      "polymorphic": true,
+      "bases": [{"class": "ViBase", "virtual": true, "access": "public"}]
+    },
+    {
+      "id": "ViJoin",
+      "polymorphic": true,
+      "bases": [
+        {"class": "ViLeft", "virtual": false, "access": "public"},
+        {"class": "ViRight", "virtual": false, "access": "public"}
+      ]
+    },
+    {"id": "AmBase", "polymorphic": true, "bases": []},
+    {
+      "id": "AmLeft",
+      "polymorphic": true,
+      "bases": [{"class": "AmBase", "virtual": false, "access": "public"}]
+    },
+    {
+      "id": "AmRight",
+      "polymorphic": true,
+      "bases": [{"class": "AmBase", "virtual": false, "access": "public"}]
+    },
+    {"id": "AmTag", "polymorphic": true, "bases": []},
+    {
+      "id": "AmJoin",
+      "polymorphic": true,
+      "bases": [
+        {"class": "AmLeft", "virtual": false, "access": "public"},
+        {"class": "AmRight", "virtual": false, "access": "public"},
+        {"class": "AmTag", "virtual": false, "access": "public"}
+      ]
+    }
+  ],
+  "objects": [
+    {"id": "si_leaf", "class": "SiLeaf"},
+    {"id": "si_mid", "class": "SiMid"},
+    {"id": "mi_join", "class": "MiJoin"},
+    {"id": "mi_left", "class": "MiLeft"},
+    {"id": "mi_sealed", "class": "MiSealed"},
+    {"id": "vi_join", "class": "ViJoin"},
+    {"id": "vi_left", "class": "ViLeft"},
+    {"id": "am_join", "class": "AmJoin"}
+  ],
+  "casts": [
+    {
+      "id": "S01",
+      "form": "pointer",
+      "input": {"object": "si_leaf", "path": ["SiLeaf", "SiMid", "SiRoot"]},
+      "target": "SiLeaf",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["SiLeaf"]
+    },
+    {
+      "id": "S02",
+      "form": "pointer",
+      "input": {"object": "si_mid", "path": ["SiMid", "SiRoot"]},
+      "target": "SiLeaf",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "S03",
+      "form": "pointer",
+      "input": {"object": "si_leaf", "path": ["SiLeaf", "SiMid", "SiRoot"]},
+      "target": "SiMid",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["SiLeaf", "SiMid"]
+    },
+    {
+      "id": "S04",
+      "form": "reference",
+      "input": {"object": "si_mid", "path": ["SiMid", "SiRoot"]},
+      "target": "SiLeaf",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "S05",
+      "form": "reference",
+      "input": {"object": "si_leaf", "path": ["SiLeaf", "SiMid", "SiRoot"]},
+      "target": "SiMid",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["SiLeaf", "SiMid"]
+    },
+    {
+      "id": "S06",
+      "form": "pointer",
+      "input": {"null_of": "SiRoot"},
+      "target": "SiLeaf",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "S07",
+      "form": "void_pointer",
+      "input": {"object": "si_leaf", "path": ["SiLeaf", "SiMid", "SiRoot"]},
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["SiLeaf"]
+    },
+    {
+      "id": "S08",
+      "form": "pointer",
+      "input": {"object": "si_leaf", "path": ["SiLeaf"]},
+      "target": "SiRoot",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["SiLeaf", "SiMid", "SiRoot"]
+    },
+    {
+      "id": "M01",
+      "form": "pointer",
+      "input": {"object": "mi_join", "path": ["MiJoin", "MiLeft"]},
+      "target": "MiRight",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["MiJoin", "MiRight"]
+    },
+    {
+      "id": "M02",
+      "form": "pointer",
+      "input": {"object": "mi_join", "path": ["MiJoin", "MiRight"]},
+      "target": "MiLeft",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["MiJoin", "MiLeft"]
+    },
+    {
+      "id": "M03",
+      "form": "pointer",
+      "input": {"object": "mi_join", "path": ["MiJoin", "MiRight"]},
+      "target": "MiJoin",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["MiJoin"]
+    },
+    {
+      "id": "M04",
+      "form": "pointer",
+      "input": {"object": "mi_left", "path": ["MiLeft"]},
+      "target": "MiRight",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "M05",
+      "form": "reference",
+      "input": {"object": "mi_left", "path": ["MiLeft"]},
+      "target": "MiRight",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "M06",
+      "form": "reference",
+      "input": {"object": "mi_join", "path": ["MiJoin", "MiRight"]},
+      "target": "MiLeft",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["MiJoin", "MiLeft"]
+    },
+    {
+      "id": "M07",
+      "form": "pointer",
+      "input": {"null_of": "MiRight"},
+      "target": "MiLeft",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "M08",
+      "form": "void_pointer",
+      "input": {"object": "mi_join", "path": ["MiJoin", "MiRight"]},
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["MiJoin"]
+    },
+    {
+      "id": "M09",
+      "form": "pointer",
+      "input": {"object": "mi_sealed", "path": ["MiSealed", "MiLeft"]},
+      "target": "MiRight",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "M10",
+      "form": "pointer",
+      "input": {"object": "mi_sealed", "path": ["MiSealed", "MiLeft"]},
+      "target": "MiSealed",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["MiSealed"]
+    },
+    {
+      "id": "V01",
+      "form": "pointer",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViLeft", "ViBase"]},
+      "target": "ViJoin",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["ViJoin"]
+    },
+    {
+      "id": "V02",
+      "form": "pointer",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViLeft"]},
+      "target": "ViRight",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["ViJoin", "ViRight"]
+    },
+    {
+      "id": "V03",
+      "form": "pointer",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViLeft", "ViBase"]},
+      "target": "ViRight",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["ViJoin", "ViRight"]
+    },
+    {
+      "id": "V04",
+      "form": "pointer",
+      "input": {"object": "vi_left", "path": ["ViLeft", "ViBase"]},
+      "target": "ViRight",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "V05",
+      "form": "reference",
+      "input": {"object": "vi_left", "path": ["ViLeft", "ViBase"]},
+      "target": "ViRight",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "V06",
+      "form": "reference",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViLeft"]},
+      "target": "ViRight",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["ViJoin", "ViRight"]
+    },
+    {
+      "id": "V07",
+      "form": "pointer",
+      "input": {"null_of": "ViBase"},
+      "target": "ViJoin",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "V08",
+      "form": "pointer",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViRight", "ViBase"]},
+      "target": "ViJoin",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["ViJoin"],
+      "same_result_as": "V01"
+    },
+    {
+      "id": "V09",
+      "form": "void_pointer",
+      "input": {"object": "vi_join", "path": ["ViJoin", "ViRight", "ViBase"]},
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["ViJoin"],
+      "same_result_as": "V01"
+    },
+    {
+      "id": "A01",
+      "form": "pointer",
+      "input": {"object": "am_join", "path": ["AmJoin", "AmTag"]},
+      "target": "AmBase",
+      "expect": "null",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "A02",
+      "form": "reference",
+      "input": {"object": "am_join", "path": ["AmJoin", "AmTag"]},
+      "target": "AmBase",
+      "expect": "bad_cast",
+      "adjustment": "not_applicable"
+    },
+    {
+      "id": "A03",
+      "form": "pointer",
+      "input": {"object": "am_join", "path": ["AmJoin", "AmLeft", "AmBase"]},
+      "target": "AmJoin",
+      "expect": "success",
+      "adjustment": "layout_dependent",
+      "result_path": ["AmJoin"]
+    },
+    {
+      "id": "A04",
+      "form": "pointer",
+      "input": {"object": "am_join", "path": ["AmJoin", "AmRight", "AmBase"]},
+      "target": "AmLeft",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["AmJoin", "AmLeft"]
+    },
+    {
+      "id": "A05",
+      "form": "pointer",
+      "input": {"object": "am_join", "path": ["AmJoin", "AmTag"]},
+      "target": "AmLeft",
+      "expect": "success",
+      "adjustment": "nonzero",
+      "result_path": ["AmJoin", "AmLeft"]
+    }
+  ],
+  "layout_claims": [
+    {
+      "id": "L01",
+      "record": "type_descriptor",
+      "class": "SiRoot",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L02",
+      "record": "type_descriptor",
+      "class": "SiRoot",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L03",
+      "record": "type_descriptor",
+      "class": "SiMid",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L04",
+      "record": "type_descriptor",
+      "class": "SiMid",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L05",
+      "record": "type_descriptor",
+      "class": "SiLeaf",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L06",
+      "record": "type_descriptor",
+      "class": "SiLeaf",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L07",
+      "record": "type_descriptor",
+      "class": "MiLeft",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L08",
+      "record": "type_descriptor",
+      "class": "MiLeft",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L09",
+      "record": "type_descriptor",
+      "class": "MiRight",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L10",
+      "record": "type_descriptor",
+      "class": "MiRight",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L11",
+      "record": "type_descriptor",
+      "class": "MiJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L12",
+      "record": "type_descriptor",
+      "class": "MiJoin",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L13",
+      "record": "type_descriptor",
+      "class": "MiSealed",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L14",
+      "record": "type_descriptor",
+      "class": "MiSealed",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L15",
+      "record": "type_descriptor",
+      "class": "ViBase",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L16",
+      "record": "type_descriptor",
+      "class": "ViBase",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L17",
+      "record": "type_descriptor",
+      "class": "ViLeft",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L18",
+      "record": "type_descriptor",
+      "class": "ViLeft",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L19",
+      "record": "type_descriptor",
+      "class": "ViRight",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L20",
+      "record": "type_descriptor",
+      "class": "ViRight",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L21",
+      "record": "type_descriptor",
+      "class": "ViJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L22",
+      "record": "type_descriptor",
+      "class": "ViJoin",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L23",
+      "record": "type_descriptor",
+      "class": "AmBase",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L24",
+      "record": "type_descriptor",
+      "class": "AmBase",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L25",
+      "record": "type_descriptor",
+      "class": "AmLeft",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L26",
+      "record": "type_descriptor",
+      "class": "AmLeft",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L27",
+      "record": "type_descriptor",
+      "class": "AmRight",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L28",
+      "record": "type_descriptor",
+      "class": "AmRight",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L29",
+      "record": "type_descriptor",
+      "class": "AmTag",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L30",
+      "record": "type_descriptor",
+      "class": "AmTag",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L31",
+      "record": "type_descriptor",
+      "class": "AmJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L32",
+      "record": "type_descriptor",
+      "class": "AmJoin",
+      "property": "name_string",
+      "status": "unknown"
+    },
+    {
+      "id": "L33",
+      "record": "complete_object_locator",
+      "class": "SiLeaf",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L34",
+      "record": "complete_object_locator",
+      "class": "SiLeaf",
+      "property": "cd_offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L35",
+      "record": "complete_object_locator",
+      "class": "MiJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L36",
+      "record": "complete_object_locator",
+      "class": "MiJoin",
+      "property": "cd_offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L37",
+      "record": "complete_object_locator",
+      "class": "MiSealed",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L38",
+      "record": "complete_object_locator",
+      "class": "MiSealed",
+      "property": "cd_offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L39",
+      "record": "complete_object_locator",
+      "class": "ViJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L40",
+      "record": "complete_object_locator",
+      "class": "ViJoin",
+      "property": "cd_offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L41",
+      "record": "complete_object_locator",
+      "class": "AmJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L42",
+      "record": "complete_object_locator",
+      "class": "AmJoin",
+      "property": "cd_offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L43",
+      "record": "complete_object_locator",
+      "class": "MiJoin",
+      "property": "offset_field",
+      "status": "hypothesis",
+      "expect": "zero"
+    },
+    {
+      "id": "L44",
+      "record": "complete_object_locator",
+      "class": "MiJoin",
+      "base_path": ["MiJoin", "MiRight"],
+      "property": "offset_field",
+      "status": "hypothesis",
+      "expect": "nonzero"
+    },
+    {
+      "id": "L45",
+      "record": "complete_object_locator",
+      "class": "ViJoin",
+      "base_path": ["ViJoin", "ViLeft", "ViBase"],
+      "property": "offset_field",
+      "status": "unknown"
+    },
+    {
+      "id": "L46",
+      "record": "vftable",
+      "class": "MiJoin",
+      "base_path": ["MiJoin", "MiRight"],
+      "property": "locator_reference",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L47",
+      "record": "class_hierarchy_descriptor",
+      "class": "MiJoin",
+      "property": "virtual_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "clear"
+    },
+    {
+      "id": "L48",
+      "record": "class_hierarchy_descriptor",
+      "class": "ViLeft",
+      "property": "virtual_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "set"
+    },
+    {
+      "id": "L49",
+      "record": "class_hierarchy_descriptor",
+      "class": "ViJoin",
+      "property": "virtual_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "set"
+    },
+    {
+      "id": "L50",
+      "record": "class_hierarchy_descriptor",
+      "class": "AmJoin",
+      "property": "virtual_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "clear"
+    },
+    {
+      "id": "L51",
+      "record": "class_hierarchy_descriptor",
+      "class": "MiJoin",
+      "property": "multiple_inheritance_flag",
+      "status": "hypothesis",
+      "expect": "set"
+    },
+    {
+      "id": "L52",
+      "record": "class_hierarchy_descriptor",
+      "class": "ViJoin",
+      "property": "base_count",
+      "status": "unknown"
+    },
+    {
+      "id": "L53",
+      "record": "base_class_descriptor",
+      "class": "MiJoin",
+      "base_path": ["MiJoin"],
+      "property": "mdisp",
+      "status": "hypothesis",
+      "expect": "zero"
+    },
+    {
+      "id": "L54",
+      "record": "base_class_descriptor",
+      "class": "MiJoin",
+      "base_path": ["MiJoin", "MiRight"],
+      "property": "mdisp",
+      "status": "hypothesis",
+      "expect": "nonzero"
+    },
+    {
+      "id": "L55",
+      "record": "base_class_descriptor",
+      "class": "MiJoin",
+      "base_path": ["MiJoin", "MiRight"],
+      "property": "pdisp",
+      "status": "unknown"
+    },
+    {
+      "id": "L56",
+      "record": "base_class_descriptor",
+      "class": "MiSealed",
+      "base_path": ["MiSealed", "MiRight"],
+      "property": "attributes",
+      "status": "unknown"
+    },
+    {
+      "id": "L57",
+      "record": "base_class_descriptor",
+      "class": "ViJoin",
+      "base_path": ["ViJoin", "ViLeft", "ViBase"],
+      "property": "pdisp",
+      "status": "unknown"
+    },
+    {
+      "id": "L58",
+      "record": "base_class_descriptor",
+      "class": "ViJoin",
+      "base_path": ["ViJoin", "ViLeft", "ViBase"],
+      "property": "vdisp",
+      "status": "unknown"
+    },
+    {
+      "id": "L59",
+      "record": "base_class_descriptor",
+      "class": "AmJoin",
+      "base_path": ["AmJoin", "AmLeft", "AmBase"],
+      "property": "attributes",
+      "status": "unknown"
+    },
+    {
+      "id": "L60",
+      "record": "vbtable",
+      "class": "ViLeft",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L61",
+      "record": "vbtable",
+      "class": "ViRight",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    },
+    {
+      "id": "L62",
+      "record": "vbtable",
+      "class": "ViJoin",
+      "property": "emitted",
+      "status": "hypothesis",
+      "expect": "present"
+    }
+  ],
+  "measurements": [{"id": "N01", "kind": "compile_only", "variant": "od_mt", "result": "NOT_RUN"}]
+}
